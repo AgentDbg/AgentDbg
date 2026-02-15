@@ -3,7 +3,7 @@ Tracing context, @trace decorator, and manual recorders for AgentDbg.
 
 Uses contextvars for run_id, counts, and config. Recorders no-op when no active run,
 or create an implicit run when AGENTDBG_IMPLICIT_RUN=1.
-Dependencies: stdlib + agentdbg.config + agentdbg.events + agentdbg.storage.
+Dependencies: stdlib + agentdbg.config + agentdbg.constants + agentdbg.events + agentdbg.storage.
 """
 import os
 import sys
@@ -14,6 +14,7 @@ from functools import wraps
 from typing import Any, Callable, TypeVar
 
 from agentdbg.config import AgentDbgConfig, load_config
+from agentdbg.constants import REDACTED_MARKER, TRUNCATED_MARKER
 from agentdbg.events import EventType, new_event, utc_now_iso_ms_z
 from agentdbg.storage import append_event, create_run, finalize_run
 
@@ -41,21 +42,18 @@ def _key_matches_redact(key: str, redact_keys: list[str]) -> bool:
     return any(rk.lower() in k for rk in redact_keys)
 
 
-_TRUNCATED_MARKER = "__TRUNCATED__"
-
-
 def _truncate_string(s: str, max_bytes: int) -> str:
-    """Truncate string so result (including __TRUNCATED__ marker) fits in max_bytes. O(n), single encode/decode."""
+    """Truncate string so result (including TRUNCATED_MARKER) fits in max_bytes. O(n), single encode/decode."""
     if max_bytes <= 0:
         return s
     enc = "utf-8"
     b = s.encode(enc)
     if len(b) <= max_bytes:
         return s
-    marker_bytes = len(_TRUNCATED_MARKER.encode(enc))
+    marker_bytes = len(TRUNCATED_MARKER.encode(enc))
     limit = max(0, max_bytes - marker_bytes)
     b_trunc = b[:limit]
-    return b_trunc.decode(enc, errors="ignore") + _TRUNCATED_MARKER
+    return b_trunc.decode(enc, errors="ignore") + TRUNCATED_MARKER
 
 
 def _redact_and_truncate(
@@ -68,7 +66,7 @@ def _redact_and_truncate(
     Limit recursion to _RECURSION_LIMIT. Returns a new structure; does not mutate input.
     """
     if depth > _RECURSION_LIMIT:
-        return "__TRUNCATED__"
+        return TRUNCATED_MARKER
     if obj is None or isinstance(obj, (bool, int, float)):
         return obj
     if isinstance(obj, str):
@@ -78,7 +76,7 @@ def _redact_and_truncate(
         for k, v in obj.items():
             key_str = str(k)
             if config.redact and _key_matches_redact(key_str, config.redact_keys):
-                out[key_str] = "__REDACTED__"
+                out[key_str] = REDACTED_MARKER
             else:
                 out[key_str] = _redact_and_truncate(v, config, depth + 1)
         return out
