@@ -37,6 +37,7 @@ AgentDbg/
 │   ├── __init__.py
 │   ├── version.py
 │   ├── config.py
+│   ├── constants.py
 │   ├── tracing.py
 │   ├── events.py
 │   ├── storage.py

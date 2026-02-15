@@ -5,6 +5,7 @@ Uses contextvars for run_id, counts, and config. Recorders no-op when no active 
 or create an implicit run when AGENTDBG_IMPLICIT_RUN=1.
 Dependencies: stdlib + agentdbg.config + agentdbg.constants + agentdbg.events + agentdbg.storage.
 """
+import atexit
 import os
 import sys
 import traceback
@@ -23,6 +24,12 @@ _RECURSION_LIMIT = 10
 _run_id_var: ContextVar[str | None] = ContextVar("agentdbg_run_id", default=None)
 _counts_var: ContextVar[dict | None] = ContextVar("agentdbg_counts", default=None)
 _config_var: ContextVar[AgentDbgConfig | None] = ContextVar("agentdbg_config", default=None)
+
+# Implicit run: stored so atexit can finalize (RUN_END + run.json status).
+_implicit_run_id: str | None = None
+_implicit_counts: dict | None = None
+_implicit_config: AgentDbgConfig | None = None
+_implicit_started_at: str | None = None
 
 
 def _default_counts() -> dict[str, int]:
@@ -112,11 +119,39 @@ def _apply_redaction_truncation(payload: Any, meta: Any, config: AgentDbgConfig)
     )
 
 
+def _finalize_implicit_run() -> None:
+    """Atexit hook: write RUN_END and finalize run.json for the implicit run, if any."""
+    global _implicit_run_id, _implicit_counts, _implicit_config, _implicit_started_at
+    if _implicit_run_id is None or _implicit_config is None or _implicit_started_at is None:
+        return
+    run_id = _implicit_run_id
+    counts = _implicit_counts or _default_counts()
+    config = _implicit_config
+    started_at = _implicit_started_at
+    _implicit_run_id = None
+    _implicit_counts = None
+    _implicit_config = None
+    _implicit_started_at = None
+    try:
+        payload = _run_end_payload("ok", counts, started_at)
+        ev = new_event(EventType.RUN_END, run_id, "run_end", payload)
+        append_event(run_id, ev, config)
+        finalize_run(run_id, "ok", counts, config)
+    except Exception:
+        pass
+
+
+atexit.register(_finalize_implicit_run)
+
+
 def _ensure_run() -> tuple[str, dict, AgentDbgConfig] | None:
     """
     Return (run_id, counts, config) for the current run, or None if no run.
-    If AGENTDBG_IMPLICIT_RUN=1 and no run is active, create an implicit run and return it.
+    If AGENTDBG_IMPLICIT_RUN=1 and no run is active, create an implicit run (once per process)
+    and return it. Implicit run never sets contextvars, so it does not hijack subsequent
+    traced runs or leave a "current run" for the rest of the process.
     """
+    global _implicit_run_id, _implicit_counts, _implicit_config, _implicit_started_at
     run_id = _run_id_var.get()
     if run_id is not None:
         counts = _counts_var.get()
@@ -124,13 +159,17 @@ def _ensure_run() -> tuple[str, dict, AgentDbgConfig] | None:
         if counts is not None and config is not None:
             return (run_id, counts, config)
     if os.environ.get("AGENTDBG_IMPLICIT_RUN", "").strip() == "1":
+        if _implicit_run_id is not None and _implicit_counts is not None and _implicit_config is not None:
+            return (_implicit_run_id, _implicit_counts, _implicit_config)
         config = load_config()
         meta = create_run("implicit", config)
         run_id = meta["run_id"]
         counts = _default_counts()
-        _run_id_var.set(run_id)
-        _counts_var.set(counts)
-        _config_var.set(config)
+        started_at = meta["started_at"]
+        _implicit_run_id = run_id
+        _implicit_counts = counts
+        _implicit_config = config
+        _implicit_started_at = started_at
         payload = {
             "run_name": "implicit",
             "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
