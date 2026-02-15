@@ -45,19 +45,17 @@ _TRUNCATED_MARKER = "__TRUNCATED__"
 
 
 def _truncate_string(s: str, max_bytes: int) -> str:
-    """Truncate string so result (including __TRUNCATED__ marker) fits in max_bytes. max_bytes <= 0 means no truncation."""
+    """Truncate string so result (including __TRUNCATED__ marker) fits in max_bytes. O(n), single encode/decode."""
     if max_bytes <= 0:
         return s
     enc = "utf-8"
-    marker_bytes = len(_TRUNCATED_MARKER.encode(enc))
-    if len(s.encode(enc)) <= max_bytes:
-        return s
-    limit = max(0, max_bytes - marker_bytes)
     b = s.encode(enc)
-    while len(b) > limit and len(s) > 0:
-        s = s[: len(s) - 1]
-        b = s.encode(enc)
-    return (s or "") + _TRUNCATED_MARKER
+    if len(b) <= max_bytes:
+        return s
+    marker_bytes = len(_TRUNCATED_MARKER.encode(enc))
+    limit = max(0, max_bytes - marker_bytes)
+    b_trunc = b[:limit]
+    return b_trunc.decode(enc, errors="ignore") + _TRUNCATED_MARKER
 
 
 def _redact_and_truncate(
