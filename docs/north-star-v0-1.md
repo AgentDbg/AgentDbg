@@ -49,7 +49,7 @@ Build a company with:
 * Strong developer love
 * Clear reliability narrative
 * Expansion path into CI / eval / production monitoring
-* Realistic acquisition path in 2–4 years
+* Realistic acquisition path in 2-4 years
 
 We are not building security infrastructure.
 We are not building a control plane.
@@ -368,7 +368,7 @@ Metrics that matter:
 * GitHub stars
 * Twitter engagement
 * Founders DMing you
-* 5–10 active users
+* 5-10 active users
 * At least 2 saying:
   “This helped us debug X”
 
@@ -379,7 +379,7 @@ Metrics that matter:
 1. It becomes “just tracing.”
 2. OpenAI ships a built-in debugger.
 3. Framework fragmentation makes integration painful.
-4. It doesn’t feel magical enough.
+4. It doesn't feel magical enough.
 
 Mitigation:
 
