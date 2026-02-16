@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AgentDbg</title>
+  <style>
+    :root {
+      --bg: #1a1b1e;
+      --surface: #25262b;
+      --border: #373a40;
+      --text: #e9ecef;
+      --muted: #868e96;
+      --accent: #4dabf7;
+      --warning-bg: #3d2a1a;
+      --warning-border: #e67700;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Monaco, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text);
+      background: var(--bg);
+      margin: 0;
+      padding: 1rem;
+    }
+    h1 { font-size: 1.25rem; margin: 0 0 1rem 0; color: var(--accent); }
+    .layout { display: flex; gap: 1rem; min-height: 80vh; }
+    .sidebar {
+      width: 280px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem;
+      overflow: auto;
+    }
+    .sidebar h2 { font-size: 0.85rem; margin: 0 0 0.5rem 0; color: var(--muted); }
+    .run-item {
+      padding: 0.5rem 0.6rem;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    .run-item:hover { background: var(--border); }
+    .run-item.selected { background: var(--border); border-color: var(--accent); }
+    .run-item .run-name { font-weight: 600; }
+    .run-item .run-meta { font-size: 0.75rem; color: var(--muted); }
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      min-width: 0;
+    }
+    .run-header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+    }
+    .run-header h2 { margin: 0 0 0.5rem 0; font-size: 1rem; }
+    .run-header .meta { font-size: 0.8rem; color: var(--muted); }
+    .timeline-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.5rem;
+    }
+    .timeline-toolbar .event-count { font-size: 0.85rem; color: var(--muted); }
+    .timeline-toolbar .filters { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+    .filter-chip {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .filter-chip:hover { background: var(--border); }
+    .filter-chip.active { border-color: var(--accent); background: rgba(77, 171, 247, 0.15); }
+    .timeline { flex: 1; overflow: auto; }
+    .event {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      overflow: hidden;
+    }
+    .event.loop-warning {
+      border-color: var(--warning-border);
+      background: var(--warning-bg);
+    }
+    .event-summary {
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .event-summary:hover { background: rgba(255,255,255,0.04); }
+    .event-summary .toggle { color: var(--muted); font-size: 0.7rem; }
+    .event-summary .type { font-weight: 600; min-width: 6rem; }
+    .event-summary .name { color: var(--muted); flex: 0 1 auto; min-width: 0; }
+    .event-summary .duration { font-size: 0.75rem; color: var(--muted); }
+    .event-summary .ts { margin-left: auto; font-size: 0.75rem; color: var(--muted); flex-shrink: 0; }
+    .event-details {
+      padding: 0.75rem 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .event-details .row { margin-bottom: 0.5rem; }
+    .event-details .label { color: var(--muted); }
+    .event-details pre { margin: 0.25rem 0 0 0; background: var(--bg); padding: 0.5rem; border-radius: 4px; overflow: auto; }
+    .empty { color: var(--muted); padding: 1rem; }
+    .error { color: #ff6b6b; padding: 0.5rem; }
+  </style>
+</head>
+<body>
+  <h1>AgentDbg</h1>
+  <div class="layout">
+    <aside class="sidebar">
+      <h2>Runs</h2>
+      <div id="run-list"></div>
+      <div id="run-list-error" class="error" style="display:none;"></div>
+    </aside>
+    <main class="main">
+      <div id="run-header" class="run-header" style="display:none;"></div>
+      <div id="timeline" class="timeline">
+        <div id="timeline-toolbar" class="timeline-toolbar" style="display:none;">
+          <span id="event-count" class="event-count"></span>
+          <div id="filter-chips" class="filters"></div>
+        </div>
+        <div id="timeline-empty" class="empty">Select a run to view events.</div>
+        <div id="timeline-error" class="error" style="display:none;"></div>
+        <div id="timeline-events"></div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const runListEl = document.getElementById('run-list');
+    const runListErrorEl = document.getElementById('run-list-error');
+    const runHeaderEl = document.getElementById('run-header');
+    const timelineToolbarEl = document.getElementById('timeline-toolbar');
+    const eventCountEl = document.getElementById('event-count');
+    const filterChipsEl = document.getElementById('filter-chips');
+    const timelineEmptyEl = document.getElementById('timeline-empty');
+    const timelineErrorEl = document.getElementById('timeline-error');
+    const timelineEventsEl = document.getElementById('timeline-events');
+
+    let currentEvents = [];
+    let currentFilter = 'all';
+
+    function showRunListError(msg) {
+      runListErrorEl.textContent = msg;
+      runListErrorEl.style.display = 'block';
+    }
+    function hideRunListError() {
+      runListErrorEl.style.display = 'none';
+    }
+    function showTimelineError(msg) {
+      timelineEmptyEl.style.display = 'none';
+      timelineEventsEl.innerHTML = '';
+      timelineErrorEl.textContent = msg;
+      timelineErrorEl.style.display = 'block';
+    }
+    function hideTimelineError() {
+      timelineErrorEl.style.display = 'none';
+    }
+
+    async function loadRuns() {
+      hideRunListError();
+      try {
+        const r = await fetch('/api/runs');
+        if (!r.ok) throw new Error(r.statusText || 'Failed to load runs');
+        const data = await r.json();
+        const runs = data.runs || [];
+        runListEl.innerHTML = '';
+        runs.forEach((run) => {
+          const div = document.createElement('div');
+          div.className = 'run-item';
+          div.dataset.runId = run.run_id;
+          const name = run.run_name || run.run_id?.slice(0, 8) || '—';
+          const meta = [run.started_at || '', run.status || '', run.duration_ms != null ? run.duration_ms + ' ms' : ''].filter(Boolean).join(' · ');
+          div.innerHTML = '<span class="run-name">' + escapeHtml(name) + '</span><br><span class="run-meta">' + escapeHtml(meta) + '</span>';
+          div.addEventListener('click', () => selectRun(run.run_id));
+          runListEl.appendChild(div);
+        });
+        if (runs.length === 0) runListEl.innerHTML = '<div class="empty">No runs yet.</div>';
+        else selectRun(runs[0].run_id);
+      } catch (e) {
+        showRunListError(e.message || 'Failed to load runs');
+      }
+    }
+
+    function escapeHtml(s) {
+      if (s == null) return '';
+      const div = document.createElement('div');
+      div.textContent = s;
+      return div.innerHTML;
+    }
+
+    function selectRun(runId) {
+      document.querySelectorAll('.run-item').forEach((el) => {
+        el.classList.toggle('selected', el.dataset.runId === runId);
+      });
+      loadRunMeta(runId);
+      loadEvents(runId);
+    }
+
+    async function loadRunMeta(runId) {
+      try {
+        const r = await fetch('/api/runs/' + encodeURIComponent(runId));
+        if (r.status === 404) {
+          runHeaderEl.style.display = 'none';
+          return;
+        }
+        if (!r.ok) throw new Error(r.statusText || 'Failed to load run');
+        const run = await r.json();
+        const counts = run.counts || {};
+        const parts = [
+          run.run_name ? 'Run: ' + run.run_name : '',
+          'Status: ' + (run.status || '—'),
+          'Started: ' + (run.started_at || '—'),
+          run.duration_ms != null ? 'Duration: ' + run.duration_ms + ' ms' : '',
+          Object.keys(counts).length ? 'Counts: ' + JSON.stringify(counts) : ''
+        ].filter(Boolean);
+        runHeaderEl.innerHTML = '<h2>' + escapeHtml(run.run_name || runId.slice(0, 8)) + '</h2><div class="meta">' + escapeHtml(parts.join(' · ')) + '</div>';
+        runHeaderEl.style.display = 'block';
+      } catch (e) {
+        runHeaderEl.style.display = 'none';
+      }
+    }
+
+    function durationLabel(ms) {
+      return ms != null ? ms + ' ms' : '—';
+    }
+
+    function buildEventEl(ev) {
+      const isLoop = ev.event_type === 'LOOP_WARNING';
+      const div = document.createElement('div');
+      div.className = 'event' + (isLoop ? ' loop-warning' : '');
+      div.dataset.eventType = ev.event_type || '';
+      const summary = document.createElement('div');
+      summary.className = 'event-summary';
+      summary.innerHTML = '<span class="toggle">▶</span><span class="type">' + escapeHtml(ev.event_type || '') + '</span><span class="name">' + escapeHtml(ev.name || '') + '</span><span class="duration">' + escapeHtml(durationLabel(ev.duration_ms)) + '</span><span class="ts">' + escapeHtml(ev.ts || '') + '</span>';
+      const details = document.createElement('div');
+      details.className = 'event-details';
+      details.style.display = 'none';
+      const payloadStr = JSON.stringify(ev.payload != null ? ev.payload : {}, null, 2);
+      const metaStr = JSON.stringify(ev.meta != null ? ev.meta : {}, null, 2);
+      details.innerHTML =
+        '<div class="row"><span class="label">event_type:</span><pre>' + escapeHtml(ev.event_type || '') + '</pre></div>' +
+        '<div class="row"><span class="label">ts:</span><pre>' + escapeHtml(ev.ts || '') + '</pre></div>' +
+        '<div class="row"><span class="label">name:</span><pre>' + escapeHtml(ev.name || '') + '</pre></div>' +
+        '<div class="row"><span class="label">duration_ms:</span><pre>' + escapeHtml(ev.duration_ms != null ? String(ev.duration_ms) : 'null') + '</pre></div>' +
+        '<div class="row"><span class="label">payload:</span><pre>' + escapeHtml(payloadStr) + '</pre></div>' +
+        '<div class="row"><span class="label">meta:</span><pre>' + escapeHtml(metaStr) + '</pre></div>';
+      summary.addEventListener('click', () => {
+        const open = details.style.display !== 'none';
+        details.style.display = open ? 'none' : 'block';
+        summary.querySelector('.toggle').textContent = open ? '▶' : '▼';
+      });
+      div.appendChild(summary);
+      div.appendChild(details);
+      return div;
+    }
+
+    function renderToolbar(events) {
+      const n = events.length;
+      eventCountEl.textContent = n + ' event' + (n === 1 ? '' : 's');
+      const types = [];
+      const seen = new Set();
+      events.forEach((ev) => {
+        const t = ev.event_type || '';
+        if (t && !seen.has(t)) { seen.add(t); types.push(t); }
+      });
+      types.sort();
+      filterChipsEl.innerHTML = '';
+      const allChip = document.createElement('button');
+      allChip.type = 'button';
+      allChip.className = 'filter-chip' + (currentFilter === 'all' ? ' active' : '');
+      allChip.textContent = 'All';
+      allChip.addEventListener('click', () => { currentFilter = 'all'; setFilterActive(); renderEvents(); });
+      filterChipsEl.appendChild(allChip);
+      types.forEach((t) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'filter-chip' + (currentFilter === t ? ' active' : '');
+        btn.textContent = t;
+        btn.addEventListener('click', () => { currentFilter = t; setFilterActive(); renderEvents(); });
+        filterChipsEl.appendChild(btn);
+      });
+      timelineToolbarEl.style.display = 'flex';
+    }
+
+    function setFilterActive() {
+      filterChipsEl.querySelectorAll('.filter-chip').forEach((el) => {
+        const isAll = el.textContent === 'All';
+        el.classList.toggle('active', isAll ? currentFilter === 'all' : el.textContent === currentFilter);
+      });
+    }
+
+    function renderEvents() {
+      timelineEventsEl.innerHTML = '';
+      const toShow = currentFilter === 'all' ? currentEvents : currentEvents.filter((ev) => (ev.event_type || '') === currentFilter);
+      toShow.forEach((ev) => timelineEventsEl.appendChild(buildEventEl(ev)));
+    }
+
+    async function loadEvents(runId) {
+      hideTimelineError();
+      timelineEmptyEl.style.display = 'none';
+      timelineEventsEl.innerHTML = '<div class="empty">Loading…</div>';
+      timelineToolbarEl.style.display = 'none';
+      try {
+        const r = await fetch('/api/runs/' + encodeURIComponent(runId) + '/events');
+        if (r.status === 404) {
+          showTimelineError('Run not found.');
+          return;
+        }
+        if (!r.ok) throw new Error(r.statusText || 'Failed to load events');
+        const data = await r.json();
+        const events = data.events || [];
+        currentEvents = events;
+        currentFilter = 'all';
+        timelineEventsEl.innerHTML = '';
+        if (events.length === 0) {
+          timelineEmptyEl.textContent = 'No events for this run.';
+          timelineEmptyEl.style.display = 'block';
+          return;
+        }
+        renderToolbar(events);
+        renderEvents();
+      } catch (e) {
+        showTimelineError(e.message || 'Failed to load events');
+      }
+    }
+
+    loadRuns();
+  </script>
+</body>
+</html>
