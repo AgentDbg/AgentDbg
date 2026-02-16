@@ -159,13 +159,58 @@ def _atomic_write_json(path: Path, data: dict) -> None:
         raise
 
 
+def resolve_run_id(prefix: str, config: AgentDbgConfig) -> str:
+    """
+    Resolve a run_id prefix (e.g. short "33be9ab2") to the full run_id (UUID).
+    If prefix already matches a run directory name exactly, returns it.
+    Otherwise finds run directories whose name starts with prefix; if exactly one
+    match returns it, if multiple returns the most recent by started_at.
+    Raises FileNotFoundError if no run matches.
+    """
+    if not prefix or not prefix.strip():
+        raise FileNotFoundError("Run ID is required")
+    prefix = prefix.strip()
+    runs_base = _runs_dir(config)
+    if not runs_base.is_dir():
+        raise FileNotFoundError(f"No runs directory at {runs_base}")
+
+    candidates: list[tuple[datetime | None, str]] = []
+    for entry in runs_base.iterdir():
+        if not entry.is_dir():
+            continue
+        rid = entry.name
+        if rid != prefix and not rid.startswith(prefix):
+            continue
+        run_json = entry / RUN_JSON
+        if not run_json.is_file():
+            continue
+        try:
+            with open(run_json, "r", encoding="utf-8") as f:
+                meta = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            continue
+        started_str = meta.get("started_at")
+        started_dt = _parse_iso8601_utc(started_str) if started_str else None
+        candidates.append((started_dt, rid))
+
+    if not candidates:
+        raise FileNotFoundError(f"No run found matching '{prefix}'")
+
+    def sort_key(item: tuple[datetime | None, str]) -> tuple[bool, datetime]:
+        dt, _ = item
+        return (dt is None, dt or datetime.min.replace(tzinfo=timezone.utc))
+
+    candidates.sort(key=sort_key, reverse=True)
+    return candidates[0][1]
+
+
 def load_run_meta(run_id: str, config: AgentDbgConfig) -> dict:
     """
     Load run metadata from run.json. Raises FileNotFoundError if run or run.json missing.
     """
     path = _run_json_path(run_id, config)
     if not path.is_file():
-        raise FileNotFoundError(f"run.json not found for run_id={run_id}")
+        raise FileNotFoundError(f"No run found for run_id '{run_id}'")
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 

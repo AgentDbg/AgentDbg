@@ -202,7 +202,13 @@
         if (runs.length === 0) runListEl.innerHTML = '<div class="empty">No runs yet.</div>';
         else {
           const urlRunId = getRunIdFromUrl();
-          const toSelect = (urlRunId && runs.some((r) => r.run_id === urlRunId)) ? urlRunId : runs[0].run_id;
+          let toSelect = runs[0].run_id;
+          if (urlRunId) {
+            const exact = runs.find((r) => r.run_id === urlRunId);
+            const byPrefix = runs.find((r) => r.run_id && r.run_id.startsWith(urlRunId));
+            if (exact) toSelect = exact.run_id;
+            else if (byPrefix) toSelect = byPrefix.run_id;
+          }
           selectRun(toSelect);
         }
       } catch (e) {

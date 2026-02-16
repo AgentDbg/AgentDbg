@@ -115,13 +115,25 @@ def view_cmd(
         if run_id is None:
             runs = storage.list_runs(limit=1, config=config)
             if not runs:
+                if not json_out:
+                    typer.echo("No runs found. Record a traced run first.", err=True)
                 raise Exit(EXIT_NOT_FOUND)
             run_id = runs[0].get("run_id") or ""
         if not run_id:
+            if not json_out:
+                typer.echo("Run ID is required.", err=True)
+            raise Exit(EXIT_NOT_FOUND)
+        try:
+            run_id = storage.resolve_run_id(run_id, config)
+        except FileNotFoundError as e:
+            if not json_out:
+                typer.echo(f"Run not found: {e}", err=True)
             raise Exit(EXIT_NOT_FOUND)
         try:
             storage.load_run_meta(run_id, config)
-        except FileNotFoundError:
+        except FileNotFoundError as e:
+            if not json_out:
+                typer.echo(f"Run not found: {e}", err=True)
             raise Exit(EXIT_NOT_FOUND)
 
         url = f"http://{host}:{port}/?run_id={run_id}"
