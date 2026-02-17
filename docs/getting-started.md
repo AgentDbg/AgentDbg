@@ -62,8 +62,8 @@ The viewer starts a local server (default `127.0.0.1:8712`) and opens the latest
 ## Where data is stored
 
 - **Default:** `~/.agentdbg/runs/<run_id>/`
-  - `run.json` — run metadata (status, counts, started_at, ended_at)
-  - `events.jsonl` — one JSON object per line (append-only)
+  - `run.json` - run metadata (status, counts, started_at, ended_at)
+  - `events.jsonl` - one JSON object per line (append-only)
 
 ---
 

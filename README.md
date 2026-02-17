@@ -1,8 +1,8 @@
-# AgentDbg — local-first debugger for AI agents
+# AgentDbg - local-first debugger for AI agents
 
 AgentDbg is a **local-only** developer tool that captures structured traces of agent runs (LLM calls, tool calls, state updates, errors) and provides a **minimal timeline UI** to inspect what happened.
 
-**Positioning:** *Debugger for AI agents* (not “observability”).
+**Positioning:** *Debugger for AI agents* (not "observability").
 **Scope:** Python SDK + local viewer. No cloud, no accounts.
 
 
@@ -12,7 +12,7 @@ When agents misbehave, logs aren't enough. AgentDbg gives you a timeline with:
 - LLM prompts/responses (redacted by default)
 - tool calls + results
 - errors + stack traces
-- loop warnings (v0.1: detection module exists; integration may vary by version)
+- loop warnings (you may see `LOOP_WARNING` events when repetition is detected)
 
 **Goal:** instrument an agent in <10 minutes and immediately see a full run timeline.
 
@@ -152,14 +152,53 @@ agentdbg view
 ```
 
 
-## Roadmap (v0.2+)
+## Status
 
-* deterministic replay / tool mocking
-* framework adapters (LangChain/LangGraph/OpenAI Agents SDK)
-* eval + regression CI support
-* optional hosted trace store
+**Works today (v0.1):**
 
-**Framework Integrations (OSS)**: optional adapters for LangGraph/LangChain, Agno, OpenAI Agents SDK, etc. Implemented as thin translation layers that emit AgentDbg events without locking users into any framework.
+- `@trace` decorator + `record_llm_call` / `record_tool_call` / `record_state`
+- Local JSONL storage under `~/.agentdbg/` with automatic redaction
+- `agentdbg list`, `agentdbg view` (timeline UI), `agentdbg export`
+- Loop detection (`LOOP_WARNING` events when repetitive patterns detected)
+- LangChain/LangGraph callback handler (optional; requires `langchain-core`)
+
+**Planned (v0.2+):**
+
+- Deterministic replay / tool mocking
+- OpenAI Agents SDK adapter
+- Eval + regression CI support
+- Optional hosted trace store
+
+
+## Integrations
+
+AgentDbg is **framework-agnostic** at its core. The SDK works with any Python code.
+
+### Available in v0.1
+
+**LangChain / LangGraph** - optional callback handler that records LLM and tool events automatically. Requires `langchain-core` (install with `pip install agentdbg[langchain]`).
+
+```python
+from agentdbg import trace
+from agentdbg.integrations import AgentDbgLangChainCallbackHandler
+
+@trace
+def run_agent():
+    handler = AgentDbgLangChainCallbackHandler()
+    # pass handler to your chain/agent via config={"callbacks": [handler]}
+    ...
+```
+
+See `examples/langchain_minimal/` for a runnable example.
+
+### Planned
+
+- **OpenAI Agents SDK** adapter
+- **Agno** adapter
+- Others as needed (AutoGen, CrewAI, custom loops)
+
+These are not implemented yet. Until then, use the core SDK: wrap your entrypoint with `@trace` and call `record_llm_call` / `record_tool_call` from your own callbacks.
+
 
 ## License
 

@@ -19,7 +19,7 @@ agentdbg list [--limit N] [--json]
 | Option | Default | Description |
 |--------|---------|-------------|
 | `--limit`, `-n` | 20 | Maximum number of runs to list |
-| `--json` | — | Output machine-readable JSON |
+| `--json` | - | Output machine-readable JSON |
 
 **Examples:**
 
@@ -52,8 +52,8 @@ agentdbg view [RUN_ID] [--host HOST] [--port PORT] [--no-browser] [--json]
 | `RUN_ID` | (latest) | Run to view; can be a short prefix (e.g. first 8 chars of UUID) |
 | `--host`, `-H` | 127.0.0.1 | Bind host |
 | `--port`, `-p` | 8712 | Bind port |
-| `--no-browser` | — | Do not open the browser; only start the server |
-| `--json` | — | Print run_id, url, status as JSON, then start server |
+| `--no-browser` | - | Do not open the browser; only start the server |
+| `--json` | - | Print run_id, url, status as JSON, then start server |
 
 **Examples:**
 

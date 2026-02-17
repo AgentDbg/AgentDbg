@@ -21,8 +21,8 @@ Events are written as one JSON object per line (JSONL) and flushed after each wr
 
 - **Base directory:** `~/.agentdbg/` (or `AGENTDBG_DATA_DIR`).
 - **Per run:** `runs/<run_id>/`
-  - **run.json** — Run metadata: `run_id`, `run_name`, `started_at`, `ended_at`, `duration_ms`, `status`, `counts` (llm_calls, tool_calls, errors, loop_warnings), `last_event_ts`.
-  - **events.jsonl** — Append-only; one event per line.
+  - **run.json** - Run metadata: `run_id`, `run_name`, `started_at`, `ended_at`, `duration_ms`, `status`, `counts` (llm_calls, tool_calls, errors, loop_warnings), `last_event_ts`.
+  - **events.jsonl** - Append-only; one event per line.
 
 `run.json` is created at run start (status `running`) and updated at run end (status `ok` or `error`, counts, ended_at, duration_ms).
 
@@ -55,7 +55,7 @@ Default bind: `127.0.0.1:8712`. The UI fetches runs and events from these endpoi
 ## Loop detection
 
 - **Input:** A sliding window of the last N events (default N=12; `AGENTDBG_LOOP_WINDOW`).
-- **Signature:** Each event is reduced to a string: for `LLM_CALL` → `"LLM_CALL:"+model`, for `TOOL_CALL` → `"TOOL_CALL:"+tool_name`, else `event_type`.
+- **Signature:** Each event is reduced to a string: for `LLM_CALL` -> `"LLM_CALL:"+model`, for `TOOL_CALL` -> `"TOOL_CALL:"+tool_name`, else `event_type`.
 - **Rule:** Look for a contiguous block of signatures that repeats K times (default K=3; `AGENTDBG_LOOP_REPETITIONS`) at the end of the window. If found, emit one `LOOP_WARNING` per distinct pattern per run (deduplicated by pattern + repetitions).
 - **Payload:** `pattern` (e.g. "LLM_CALL:gpt-4 -> TOOL_CALL:search"), `repetitions`, `window_size`, `evidence_event_ids`.
 

@@ -4,8 +4,14 @@ name: Fast unittests
 on:
   push:
     branches: [main]
+    paths:
+      - agentdbg/**
+      - tests/**
   pull_request:
     branches: [main]
+    paths:
+      - agentdbg/**
+      - tests/**
 
 jobs:
   unittest-fast:
@@ -13,22 +19,17 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10", "3.12", "3.14"]
-
     steps:
       - uses: actions/checkout@v6
-
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
           version: "latest"
-
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-
       - name: Install dependencies
         run: uv sync --all-extras --dev
-
       - name: Run tests
         run: uv run pytest -vm "not slow and not long and not longrunning"

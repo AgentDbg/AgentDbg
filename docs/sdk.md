@@ -104,7 +104,7 @@ If you set:
 export AGENTDBG_IMPLICIT_RUN=1
 ```
 
-then the first recorder call in the process with no active run will create a single **implicit run**. All subsequent recorder calls in that process (until that implicit run is finalized) attach to it. The run is finalized at process exit (atexit). Use this for scripts that don’t have a single top-level `@trace` function.
+then the first recorder call in the process with no active run will create a single **implicit run**. All subsequent recorder calls in that process (until that implicit run is finalized) attach to it. The run is finalized at process exit (atexit). Use this for scripts that don't have a single top-level `@trace` function.
 
 ---
 
