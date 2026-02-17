@@ -76,3 +76,77 @@ def test_loop_warning_emitted_once_for_repeated_pattern(temp_data_dir):
     assert "TOOL_CALL:foo" in payload.get("pattern", "")
     assert "LLM_CALL:gpt" in payload.get("pattern", "")
     assert payload.get("repetitions") == 3
+
+
+def test_tool_call_records_error_status_and_error_object_on_exception(temp_data_dir):
+    """Tool that raises records TOOL_CALL with status=error and error object (type, message)."""
+    @trace
+    def _run():
+        try:
+            def failing_tool():
+                raise ValueError("boom")
+            failing_tool()
+        except ValueError as e:
+            record_tool_call("failing_tool", args={}, result=None, status="error", error=e)
+
+    _run()
+    config = load_config()
+    run_id = get_latest_run_id(config)
+    events = load_events(run_id, config)
+    tool_events = [e for e in events if e.get("event_type") == EventType.TOOL_CALL.value]
+    assert len(tool_events) >= 1
+    payload = tool_events[0].get("payload", {})
+    assert payload.get("status") == "error"
+    err = payload.get("error")
+    assert err is not None and isinstance(err, dict)
+    assert err.get("type") == "ValueError"
+    assert err.get("message") == "boom"
+
+
+def test_llm_call_records_error_status_and_error_object_on_exception(temp_data_dir):
+    """LLM call recorded with status=error and error=exception yields error object in payload."""
+    @trace
+    def _run():
+        record_llm_call(
+            model="gpt-4",
+            prompt="test",
+            response=None,
+            status="error",
+            error=RuntimeError("llm api failed"),
+        )
+
+    _run()
+    config = load_config()
+    run_id = get_latest_run_id(config)
+    events = load_events(run_id, config)
+    llm_events = [e for e in events if e.get("event_type") == EventType.LLM_CALL.value]
+    assert len(llm_events) >= 1
+    payload = llm_events[0].get("payload", {})
+    assert payload.get("status") == "error"
+    err = payload.get("error")
+    assert err is not None and isinstance(err, dict)
+    assert err.get("type") == "RuntimeError"
+    assert "llm api failed" in str(err.get("message", ""))
+
+
+def test_success_calls_have_status_ok_and_no_error(temp_data_dir):
+    """TOOL_CALL and LLM_CALL success paths have status=ok and error null/absent."""
+    @trace
+    def _run():
+        record_tool_call("ok_tool", args={"x": 1}, result="done")
+        record_llm_call("gpt", prompt="p", response="r")
+
+    _run()
+    config = load_config()
+    run_id = get_latest_run_id(config)
+    events = load_events(run_id, config)
+    tool_events = [e for e in events if e.get("event_type") == EventType.TOOL_CALL.value]
+    llm_events = [e for e in events if e.get("event_type") == EventType.LLM_CALL.value]
+    assert len(tool_events) >= 1
+    assert len(llm_events) >= 1
+    tool_payload = tool_events[0].get("payload", {})
+    llm_payload = llm_events[0].get("payload", {})
+    assert tool_payload.get("status") == "ok"
+    assert llm_payload.get("status") == "ok"
+    assert tool_payload.get("error") is None
+    assert llm_payload.get("error") is None

@@ -174,7 +174,18 @@ if BaseCallbackHandler is not None:
             **kwargs: Any,
         ) -> None:
             key = self._key(run_id=run_id, parent_run_id=parent_run_id, **kwargs)
-            self._pending_llm.pop(key, None)
+            pending = self._pending_llm.pop(key, None)
+            model = (pending or {}).get("model") or "unknown"
+            prompt = (pending or {}).get("prompt") if pending else None
+            record_llm_call(
+                model=model,
+                prompt=prompt,
+                response=None,
+                usage=None,
+                status="error",
+                error=error,
+                provider="langchain",
+            )
 
         def on_tool_start(
             self,
@@ -220,7 +231,7 @@ if BaseCallbackHandler is not None:
             pending = self._pending_tool.pop(key, None)
             name = (pending or {}).get("name", "unknown")
             args = (pending or {}).get("args") if pending else None
-            record_tool_call(name=name, args=args, result=None, status="error", error=str(error))
+            record_tool_call(name=name, args=args, result=None, status="error", error=error)
 
 else:
     AgentDbgLangChainCallbackHandler = None  # type: ignore[misc, assignment]

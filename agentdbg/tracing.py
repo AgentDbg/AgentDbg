@@ -129,6 +129,44 @@ def _apply_redaction_truncation(payload: Any, meta: Any, config: AgentDbgConfig)
     )
 
 
+def _build_error_payload(
+    exc_or_message: BaseException | str | dict[str, Any] | None,
+    config: AgentDbgConfig,
+    include_stack: bool = True,
+) -> dict[str, Any] | None:
+    """
+    Build a consistent error object for TOOL_CALL/LLM_CALL payloads.
+    Returns None if exc_or_message is None; otherwise dict with type, message, optional details, optional stack.
+    Result is redacted/truncated per config.
+    """
+    if exc_or_message is None:
+        return None
+    if isinstance(exc_or_message, BaseException):
+        err = {
+            "type": type(exc_or_message).__name__,
+            "message": str(exc_or_message),
+            "details": None,
+            "stack": traceback.format_exc() if include_stack else None,
+        }
+    elif isinstance(exc_or_message, str):
+        err = {
+            "type": "Error",
+            "message": exc_or_message,
+            "details": None,
+            "stack": None,
+        }
+    elif isinstance(exc_or_message, dict):
+        err = {
+            "type": exc_or_message.get("type", "Error"),
+            "message": exc_or_message.get("message", ""),
+            "details": exc_or_message.get("details"),
+            "stack": exc_or_message.get("stack") if include_stack else None,
+        }
+    else:
+        err = {"type": "Error", "message": str(exc_or_message), "details": None, "stack": None}
+    return _redact_and_truncate(err, config)
+
+
 def _finalize_implicit_run() -> None:
     """Atexit hook: write RUN_END and finalize run.json for the implicit run, if any."""
     global _implicit_run_id, _implicit_counts, _implicit_config, _implicit_started_at
@@ -337,15 +375,22 @@ def record_llm_call(
     provider: str = "unknown",
     temperature: Any = None,
     stop_reason: str | None = None,
+    status: str = "ok",
+    error: str | BaseException | dict[str, Any] | None = None,
 ) -> None:
     """
     Record an LLM call event. No-op if no active run (unless AGENTDBG_IMPLICIT_RUN=1).
     Applies redaction and truncation from config, appends event, increments llm_calls.
+    When status is "error", error may be an exception, string, or dict (type, message, details?, stack?).
     """
     ctx = _ensure_run()
     if ctx is None:
         return
     run_id, counts, config, window, emitted = ctx
+    status_val = "ok" if status not in ("ok", "error") else status
+    error_obj: dict[str, Any] | None = None
+    if status_val == "error" and error is not None:
+        error_obj = _build_error_payload(error, config, include_stack=True)
     payload = {
         "model": model,
         "prompt": prompt,
@@ -354,6 +399,8 @@ def record_llm_call(
         "provider": provider,
         "temperature": temperature,
         "stop_reason": stop_reason,
+        "status": status_val,
+        "error": error_obj,
     }
     payload, safe_meta = _apply_redaction_truncation(payload, meta or {}, config)
     ev = new_event(EventType.LLM_CALL, run_id, model, payload, meta=safe_meta)
@@ -371,22 +418,27 @@ def record_tool_call(
     result: Any = None,
     meta: dict[str, Any] | None = None,
     status: str = "ok",
-    error: str | None = None,
+    error: str | BaseException | dict[str, Any] | None = None,
 ) -> None:
     """
     Record a tool call event. No-op if no active run (unless AGENTDBG_IMPLICIT_RUN=1).
     Applies redaction and truncation, appends event, increments tool_calls.
+    When status is "error", error may be an exception, string, or dict (type, message, details?, stack?).
     """
     ctx = _ensure_run()
     if ctx is None:
         return
     run_id, counts, config, window, emitted = ctx
+    status_val = "ok" if status not in ("ok", "error") else status
+    error_obj: dict[str, Any] | None = None
+    if status_val == "error" and error is not None:
+        error_obj = _build_error_payload(error, config, include_stack=True)
     payload = {
         "tool_name": name,
         "args": args,
         "result": result,
-        "status": status,
-        "error": error,
+        "status": status_val,
+        "error": error_obj,
     }
     payload, safe_meta = _apply_redaction_truncation(payload, meta or {}, config)
     ev = new_event(EventType.TOOL_CALL, run_id, name, payload, meta=safe_meta)

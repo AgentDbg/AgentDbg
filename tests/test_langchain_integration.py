@@ -83,4 +83,7 @@ def test_langchain_handler_tool_error_emits_error_status(temp_data_dir):
     ]
 
     assert len(error_tools) >= 1, "expected at least one TOOL_CALL with status=error"
-    assert "simulated failure" in str(error_tools[0].get("payload", {}).get("error", ""))
+    err = error_tools[0].get("payload", {}).get("error")
+    assert err is not None and isinstance(err, dict), "error should be structured object"
+    assert err.get("type") == "ValueError"
+    assert "simulated failure" in str(err.get("message", ""))
