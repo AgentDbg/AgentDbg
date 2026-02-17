@@ -33,6 +33,8 @@ def create_app() -> FastAPI:
         config = load_config()
         try:
             return storage.load_run_meta(run_id, config)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="invalid run_id")
         except FileNotFoundError:
             raise HTTPException(status_code=404, detail="run not found")
 
@@ -42,9 +44,14 @@ def create_app() -> FastAPI:
         config = load_config()
         try:
             storage.load_run_meta(run_id, config)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="invalid run_id")
         except FileNotFoundError:
             raise HTTPException(status_code=404, detail="run not found")
-        events = storage.load_events(run_id, config)
+        try:
+            events = storage.load_events(run_id, config)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="invalid run_id")
         return {
             "spec_version": SPEC_VERSION,
             "run_id": run_id,

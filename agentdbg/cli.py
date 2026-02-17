@@ -108,7 +108,7 @@ def export_cmd(
         config = load_config()
         try:
             run_meta = storage.load_run_meta(run_id, config)
-        except FileNotFoundError:
+        except (ValueError, FileNotFoundError):
             raise Exit(EXIT_NOT_FOUND)
         events = storage.load_events(run_id, config)
         payload = {"spec_version": SPEC_VERSION, "run": run_meta, "events": events}
@@ -152,7 +152,7 @@ def view_cmd(
             raise Exit(EXIT_NOT_FOUND)
         try:
             storage.load_run_meta(run_id, config)
-        except FileNotFoundError as e:
+        except (ValueError, FileNotFoundError) as e:
             if not json_out:
                 typer.echo(f"Run not found: {e}", err=True)
             raise Exit(EXIT_NOT_FOUND)

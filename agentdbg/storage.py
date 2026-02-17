@@ -19,6 +19,30 @@ SPEC_VERSION = "0.1"
 RUN_JSON = "run.json"
 EVENTS_JSONL = "events.jsonl"
 
+# SPEC §5.1: run_id MUST be UUIDv4. We enforce canonical form (lowercase with hyphens).
+_RUN_ID_MAX_LEN = 36
+
+
+def validate_run_id_format(run_id: str) -> str:
+    """
+    Validate that run_id is a canonical UUIDv4 string (no path segments, no traversal).
+    Returns run_id unchanged. Raises ValueError("invalid run_id") otherwise.
+    """
+    if not run_id or not isinstance(run_id, str):
+        raise ValueError("invalid run_id")
+    run_id = run_id.strip()
+    if len(run_id) > _RUN_ID_MAX_LEN or ".." in run_id or "/" in run_id or "\\" in run_id:
+        raise ValueError("invalid run_id")
+    try:
+        u = uuid.UUID(run_id)
+    except (ValueError, TypeError, AttributeError):
+        raise ValueError("invalid run_id")
+    if u.version != 4:
+        raise ValueError("invalid run_id")
+    if str(u) != run_id:
+        raise ValueError("invalid run_id")
+    return run_id
+
 
 def _runs_dir(config: AgentDbgConfig) -> Path:
     """Return the runs base directory: <data_dir>/runs."""
@@ -26,8 +50,21 @@ def _runs_dir(config: AgentDbgConfig) -> Path:
 
 
 def _run_dir(run_id: str, config: AgentDbgConfig) -> Path:
-    """Return the run directory: <data_dir>/runs/<run_id>/."""
-    return _runs_dir(config) / run_id
+    """
+    Return the run directory: <data_dir>/runs/<run_id>/.
+    Validates run_id format and ensures resolved path is under runs base (defense-in-depth).
+    """
+    validate_run_id_format(run_id)
+    base = _runs_dir(config)
+    path = base / run_id
+    try:
+        resolved = path.resolve()
+        base_resolved = base.resolve()
+        if not resolved.is_relative_to(base_resolved):
+            raise ValueError("invalid run_id")
+    except (ValueError, OSError):
+        raise ValueError("invalid run_id")
+    return path
 
 
 def _run_json_path(run_id: str, config: AgentDbgConfig) -> Path:
@@ -165,11 +202,13 @@ def resolve_run_id(prefix: str, config: AgentDbgConfig) -> str:
     If prefix already matches a run directory name exactly, returns it.
     Otherwise finds run directories whose name starts with prefix; if exactly one
     match returns it, if multiple returns the most recent by started_at.
-    Raises FileNotFoundError if no run matches.
+    Raises FileNotFoundError if no run matches. Rejects prefix with path traversal.
     """
     if not prefix or not prefix.strip():
         raise FileNotFoundError("Run ID is required")
     prefix = prefix.strip()
+    if ".." in prefix or "/" in prefix or "\\" in prefix:
+        raise FileNotFoundError("Run ID is required")
     runs_base = _runs_dir(config)
     if not runs_base.is_dir():
         raise FileNotFoundError(f"No runs directory at {runs_base}")
@@ -179,6 +218,10 @@ def resolve_run_id(prefix: str, config: AgentDbgConfig) -> str:
         if not entry.is_dir():
             continue
         rid = entry.name
+        try:
+            validate_run_id_format(rid)
+        except ValueError:
+            continue
         if rid != prefix and not rid.startswith(prefix):
             continue
         run_json = entry / RUN_JSON

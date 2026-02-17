@@ -111,15 +111,17 @@ def test_view_opens_browser_only_after_wait_succeeds(monkeypatch, empty_data_dir
     monkeypatch.setattr("uvicorn.run", fake_uvicorn_run)
 
     # Create a minimal run so the view command doesn't exit with "not found".
+    # Use a valid UUIDv4 (SPEC §5.1) so run_id validation accepts it.
     import agentdbg.storage as storage
     from agentdbg.config import load_config
 
     config = load_config()
-    run_dir = config.data_dir / "runs" / "00000000-0000-0000-0000-000000000000"
+    run_id = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+    run_dir = config.data_dir / "runs" / run_id
     run_dir.mkdir(parents=True)
     (run_dir / "run.json").write_text(json.dumps({
         "spec_version": "0.1",
-        "run_id": "00000000-0000-0000-0000-000000000000",
+        "run_id": run_id,
         "run_name": "test",
         "started_at": "2026-01-01T00:00:00.000Z",
         "ended_at": None,
@@ -130,6 +132,6 @@ def test_view_opens_browser_only_after_wait_succeeds(monkeypatch, empty_data_dir
     }))
     (run_dir / "events.jsonl").write_text("")
 
-    result = runner.invoke(app, ["view", "00000000-0000-0000-0000-000000000000"])
+    result = runner.invoke(app, ["view", run_id])
     assert result.exit_code == 0
     assert call_log == ["wait", "browser"]
