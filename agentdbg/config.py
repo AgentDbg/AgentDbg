@@ -130,38 +130,36 @@ def load_config(project_root: Path | None = None) -> AgentDbgConfig:
         loop_repetitions = _apply_yaml(proj_cfg, "loop_repetitions", loop_repetitions)
         data_dir = _apply_yaml(proj_cfg, "data_dir", data_dir)
 
-    # 1. Env (overrides all)
-    env_redact = os.environ.get("AGENTDBG_REDACT", "1")
-    redact = env_redact.strip().lower() in ("1", "true", "yes")
+    # 1. Env overrides (only when the key is explicitly set in the environment)
+    if "AGENTDBG_REDACT" in os.environ:
+        redact = os.environ["AGENTDBG_REDACT"].strip().lower() in ("1", "true", "yes")
 
-    env_keys = os.environ.get(
-        "AGENTDBG_REDACT_KEYS",
-        "api_key,token,authorization,cookie,secret,password",
-    )
-    redact_keys = [k.strip() for k in env_keys.split(",") if k.strip()]
+    if "AGENTDBG_REDACT_KEYS" in os.environ:
+        env_keys = os.environ["AGENTDBG_REDACT_KEYS"]
+        redact_keys = [k.strip() for k in env_keys.split(",") if k.strip()]
 
-    env_max = os.environ.get("AGENTDBG_MAX_FIELD_BYTES", "20000")
-    try:
-        max_field_bytes = max(_MIN_MAX_FIELD_BYTES, int(env_max))
-    except ValueError:
-        pass
+    if "AGENTDBG_MAX_FIELD_BYTES" in os.environ:
+        try:
+            max_field_bytes = max(_MIN_MAX_FIELD_BYTES, int(os.environ["AGENTDBG_MAX_FIELD_BYTES"]))
+        except ValueError:
+            pass
 
-    env_window = os.environ.get("AGENTDBG_LOOP_WINDOW", "12")
-    try:
-        loop_window = max(_MIN_LOOP_WINDOW, int(env_window))
-    except ValueError:
-        pass
+    if "AGENTDBG_LOOP_WINDOW" in os.environ:
+        try:
+            loop_window = max(_MIN_LOOP_WINDOW, int(os.environ["AGENTDBG_LOOP_WINDOW"]))
+        except ValueError:
+            pass
 
-    env_reps = os.environ.get("AGENTDBG_LOOP_REPETITIONS", "3")
-    try:
-        loop_repetitions = max(_MIN_LOOP_REPETITIONS, int(env_reps))
-    except ValueError:
-        pass
+    if "AGENTDBG_LOOP_REPETITIONS" in os.environ:
+        try:
+            loop_repetitions = max(_MIN_LOOP_REPETITIONS, int(os.environ["AGENTDBG_LOOP_REPETITIONS"]))
+        except ValueError:
+            pass
 
-    env_data = os.environ.get("AGENTDBG_DATA_DIR")
-    if env_data and env_data.strip():
-        # TODO: .resolve()? We can normalize the path later.
-        data_dir = Path(env_data.strip()).expanduser()
+    if "AGENTDBG_DATA_DIR" in os.environ:
+        env_data = os.environ["AGENTDBG_DATA_DIR"].strip()
+        if env_data:
+            data_dir = Path(env_data).expanduser()
 
     return AgentDbgConfig(
         redact=redact,
