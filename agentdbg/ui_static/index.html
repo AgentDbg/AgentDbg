@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AgentDbg</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <style>
     :root {
       --bg: #1a1b1e;
@@ -121,13 +122,53 @@
     .event-details pre { margin: 0.25rem 0 0 0; background: var(--bg); padding: 0.5rem; border-radius: 4px; overflow: auto; }
     .empty { color: var(--muted); padding: 1rem; }
     .error { color: #ff6b6b; padding: 0.5rem; }
+    .run-list-loading {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .run-list-loading .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .sidebar-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .sidebar-header h2 { margin: 0; }
+    .btn-refresh {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-refresh:hover { background: var(--border); color: var(--text); }
+    .btn-refresh:disabled { opacity: 0.5; cursor: not-allowed; }
   </style>
 </head>
 <body>
   <h1>AgentDbg</h1>
   <div class="layout">
     <aside class="sidebar">
-      <h2>Runs</h2>
+      <div class="sidebar-header">
+        <h2>Runs</h2>
+        <button type="button" id="btn-refresh" class="btn-refresh" title="Refresh run list" aria-label="Refresh run list">↻</button>
+      </div>
       <div id="run-list"></div>
       <div id="run-list-error" class="error" style="display:none;"></div>
     </aside>
@@ -148,6 +189,7 @@
   <script>
     const runListEl = document.getElementById('run-list');
     const runListErrorEl = document.getElementById('run-list-error');
+    const btnRefreshEl = document.getElementById('btn-refresh');
     const runHeaderEl = document.getElementById('run-header');
     const timelineToolbarEl = document.getElementById('timeline-toolbar');
     const eventCountEl = document.getElementById('event-count');
@@ -171,6 +213,14 @@
     function hideRunListError() {
       runListErrorEl.style.display = 'none';
     }
+    function setRunListLoading(loading) {
+      if (loading) {
+        runListEl.innerHTML = '<div class="run-list-loading"><span class="spinner"></span><span>Loading…</span></div>';
+        if (btnRefreshEl) btnRefreshEl.disabled = true;
+      } else {
+        if (btnRefreshEl) btnRefreshEl.disabled = false;
+      }
+    }
     function showTimelineError(msg) {
       timelineEmptyEl.style.display = 'none';
       timelineEventsEl.innerHTML = '';
@@ -183,6 +233,7 @@
 
     async function loadRuns() {
       hideRunListError();
+      setRunListLoading(true);
       try {
         const r = await fetch('/api/runs');
         if (!r.ok) throw new Error(r.statusText || 'Failed to load runs');
@@ -213,6 +264,8 @@
         }
       } catch (e) {
         showRunListError(e.message || 'Failed to load runs');
+      } finally {
+        setRunListLoading(false);
       }
     }
 
@@ -359,6 +412,7 @@
       }
     }
 
+    if (btnRefreshEl) btnRefreshEl.addEventListener('click', () => loadRuns());
     loadRuns();
   </script>
 </body>
