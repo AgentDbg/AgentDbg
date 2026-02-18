@@ -33,7 +33,7 @@ def redact_token_env():
 
 
 def test_record_tool_call_redacts_args_with_token_key(temp_data_dir, redact_token_env):
-    """record_tool_call with args containing 'token' key → value is __REDACTED__."""
+    """record_tool_call with args containing 'token' key -> value is __REDACTED__."""
     @trace
     def run_with_tool():
         record_tool_call("my_tool", args={"token": "secret-api-key", "query": "hello"})

@@ -1,4 +1,4 @@
-# AgentDebugger — SPEC v0.1
+# AgentDebugger - SPEC v0.1
 
 Status: Implementable (v0.1)
 Language: Python 3.10+

@@ -115,7 +115,7 @@ def test_loop_warning_triggers_on_single_event_repetition():
 
 
 def test_loop_warning_does_not_trigger_when_below_repetitions():
-    """Only 2 repeats when repetitions=3 → no LOOP_WARNING."""
+    """Only 2 repeats when repetitions=3 -> no LOOP_WARNING."""
     events = [
         _make_event("e-0", "TOOL_CALL", {"tool_name": "search_db"}),
         _make_event("e-1", "TOOL_CALL", {"tool_name": "search_db"}),
