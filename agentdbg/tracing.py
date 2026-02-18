@@ -15,10 +15,11 @@ import atexit
 import os
 import sys
 import traceback
+from contextlib import contextmanager
 from contextvars import ContextVar
 from datetime import datetime
 from functools import wraps
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, Generator, TypeVar
 
 from agentdbg.config import AgentDbgConfig, load_config
 from agentdbg.constants import REDACTED_MARKER, TRUNCATED_MARKER
@@ -338,6 +339,60 @@ def trace(f: F) -> F:
             _loop_emitted_var.reset(token_emitted)
 
     return inner  # type: ignore[return-value]
+
+
+@contextmanager
+def traced_run(name: str | None = None) -> Generator[None, None, None]:
+    """
+    Context manager that starts a new run (RUN_START / RUN_END, ERROR on exception)
+    when no run is active; otherwise runs the block in the existing run without
+    creating a new run.
+    """
+    existing_run_id = _run_id_var.get()
+    if existing_run_id is not None:
+        yield
+        return
+
+    config = load_config()
+    run_name = name
+    meta = create_run(run_name, config)
+    run_id = meta["run_id"]
+    started_at = meta["started_at"]
+    counts = _default_counts()
+
+    token_run = _run_id_var.set(run_id)
+    token_counts = _counts_var.set(counts)
+    token_config = _config_var.set(config)
+    token_window = _event_window_var.set([])
+    token_emitted = _loop_emitted_var.set(set())
+    try:
+        payload = _run_start_payload(run_name)
+        ev = new_event(EventType.RUN_START, run_id, run_name or "run", payload)
+        append_event(run_id, ev, config)
+
+        yield
+    except BaseException as e:
+        err_payload = _error_payload(e)
+        err_ev = new_event(EventType.ERROR, run_id, type(e).__name__, err_payload)
+        append_event(run_id, err_ev, config)
+        counts["errors"] = counts.get("errors", 0) + 1
+
+        payload_end = _run_end_payload("error", counts, started_at)
+        ev_end = new_event(EventType.RUN_END, run_id, "run_end", payload_end)
+        append_event(run_id, ev_end, config)
+        finalize_run(run_id, "error", counts, config)
+        raise
+    else:
+        payload_end = _run_end_payload("ok", counts, started_at)
+        ev_end = new_event(EventType.RUN_END, run_id, "run_end", payload_end)
+        append_event(run_id, ev_end, config)
+        finalize_run(run_id, "ok", counts, config)
+    finally:
+        _run_id_var.reset(token_run)
+        _counts_var.reset(token_counts)
+        _config_var.reset(token_config)
+        _event_window_var.reset(token_window)
+        _loop_emitted_var.reset(token_emitted)
 
 
 def _maybe_emit_loop_warning(

@@ -5,7 +5,7 @@ Uses temp dir via AGENTDBG_DATA_DIR; env restored by fixture.
 """
 import pytest
 
-from agentdbg import record_llm_call, record_tool_call, trace
+from agentdbg import record_llm_call, record_tool_call, trace, traced_run
 from agentdbg.config import load_config
 from agentdbg.events import EventType
 from agentdbg.storage import load_events, load_run_meta
@@ -150,3 +150,61 @@ def test_success_calls_have_status_ok_and_no_error(temp_data_dir):
     assert llm_payload.get("status") == "ok"
     assert tool_payload.get("error") is None
     assert llm_payload.get("error") is None
+
+
+def test_traced_run_success_one_run_start_one_run_end(temp_data_dir):
+    """traced_run(name=...) writes exactly one RUN_START and one RUN_END; run.json status == 'ok'."""
+    with traced_run(name="my_agent_run"):
+        pass
+
+    config = load_config()
+    run_id = get_latest_run_id(config)
+    events = load_events(run_id, config)
+    run_meta = load_run_meta(run_id, config)
+
+    run_starts = [e for e in events if e.get("event_type") == EventType.RUN_START.value]
+    run_ends = [e for e in events if e.get("event_type") == EventType.RUN_END.value]
+    assert len(run_starts) == 1
+    assert len(run_ends) == 1
+    assert run_meta.get("status") == "ok"
+    assert run_meta.get("run_name") == "my_agent_run"
+    assert run_starts[0].get("payload", {}).get("run_name") == "my_agent_run"
+
+
+def test_traced_run_error_one_error_run_json_error(temp_data_dir):
+    """traced_run with raised exception writes ERROR, RUN_END status=error, and re-raises."""
+    with pytest.raises(ValueError, match="traced_run error"):
+        with traced_run(name="failing_run"):
+            raise ValueError("traced_run error")
+
+    config = load_config()
+    run_id = get_latest_run_id(config)
+    events = load_events(run_id, config)
+    run_meta = load_run_meta(run_id, config)
+
+    errors = [e for e in events if e.get("event_type") == EventType.ERROR.value]
+    run_ends = [e for e in events if e.get("event_type") == EventType.RUN_END.value]
+    assert len(errors) == 1
+    assert len(run_ends) == 1
+    assert run_meta.get("status") == "error"
+    assert run_meta.get("counts", {}).get("errors") == 1
+
+
+def test_traced_run_nested_does_not_create_new_run(temp_data_dir):
+    """Nested traced_run uses the outer run; only one RUN_START and one RUN_END."""
+    with traced_run(name="outer"):
+        with traced_run(name="inner"):
+            record_tool_call("nested_tool", args={}, result="ok")
+
+    config = load_config()
+    run_id = get_latest_run_id(config)
+    events = load_events(run_id, config)
+    run_starts = [e for e in events if e.get("event_type") == EventType.RUN_START.value]
+    run_ends = [e for e in events if e.get("event_type") == EventType.RUN_END.value]
+    tool_events = [e for e in events if e.get("event_type") == EventType.TOOL_CALL.value]
+
+    assert len(run_starts) == 1
+    assert len(run_ends) == 1
+    assert run_starts[0].get("payload", {}).get("run_name") == "outer"
+    assert len(tool_events) == 1
+    assert tool_events[0].get("payload", {}).get("tool_name") == "nested_tool"
