@@ -13,7 +13,9 @@ import agentdbg.storage as storage
 from agentdbg.config import load_config
 
 SPEC_VERSION = "0.1"
-UI_INDEX_PATH = Path(__file__).resolve().parent / "ui_static" / "index.html"
+UI_STATIC_DIR = Path(__file__).resolve().parent / "ui_static"
+UI_INDEX_PATH = UI_STATIC_DIR / "index.html"
+FAVICON_PATH = UI_STATIC_DIR / "favicon.svg"
 
 
 def create_app() -> FastAPI:
@@ -57,6 +59,13 @@ def create_app() -> FastAPI:
             "run_id": run_id,
             "events": events,
         }
+
+    @app.get("/favicon.svg")
+    def serve_favicon() -> FileResponse:
+        """Serve favicon to avoid 404 and improve polish."""
+        if not FAVICON_PATH.is_file():
+            raise HTTPException(status_code=404, detail="favicon not found")
+        return FileResponse(FAVICON_PATH, media_type="image/svg+xml")
 
     @app.get("/")
     def serve_ui() -> FileResponse:
