@@ -1,100 +1,135 @@
-# AgentDbg - local-first debugger for AI agents
+# AgentDbg
 
-AgentDbg is a **local-only** developer tool that captures structured traces of agent runs (LLM calls, tool calls, state updates, errors) and provides a **minimal timeline UI** to inspect what happened.
+**A debugger for AI agents. Not observability - just debugging.**
 
-**Positioning:** *Debugger for AI agents* (not "observability").
-**Scope:** Python SDK + local viewer. No cloud, no accounts.
+AgentDbg captures structured traces of your agent runs - LLM calls, tool calls, errors, state - and gives you a local timeline UI to see exactly what happened.
 
+Everything stays on your machine. No cloud, no accounts, no telemetry.
 
-## Why AgentDbg
+---
 
-When agents misbehave, logs aren't enough. AgentDbg gives you a timeline with:
-- LLM prompts/responses (redacted by default)
-- tool calls + results
-- errors + stack traces
-- loop warnings (you may see `LOOP_WARNING` events when repetition is detected)
+## What AgentDbg is
 
-**Goal:** instrument an agent in <10 minutes and immediately see a full run timeline.
+- A **debugger**: instrument your agent, run it, inspect a timeline of every LLM call, tool call, and error.
+- **Local-first**: traces are written to `~/.agentdbg/` as plain JSONL files. Nothing leaves your machine.
+- **Redacted by default**: API keys, tokens, and secrets are scrubbed before they hit disk. You never accidentally commit credentials to a trace.
+- **Framework-agnostic**: works with any Python code. Optional integrations (LangChain, etc.) are just convenience.
 
+## What AgentDbg is NOT
 
-## Install (local dev)
+- Not an observability platform (no dashboards, no metrics, no alerting).
+- Not a hosted service (no cloud, no accounts, no SSO).
+- Not tied to any framework (no LangChain/OpenAI lock-in).
 
-This repo is `uv`-managed.
+---
+
+## Get running in 5 minutes
+
+Three commands. No config files, no API keys, no sign-up:
+
+1. [Install (one-time)](#step-1-install)
+2. [Run example](#step-2-run-the-example-agent)
+3. [`agentdbg view`](#step-3-open-the-timeline)
+
+### Step 1: Install
 
 ```bash
-uv venv
-uv sync
-uv pip install -e .
+git clone https://github.com/z-a-f/AgentDbg.git
+cd AgentDbg
+uv venv && uv sync && uv pip install -e .
 ```
 
-(If you don't use `uv`, a standard editable install works too.)
+<details>
+<summary>No uv? Use pip instead.</summary>
 
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -e .
+```
 
-## Quickstart
+</details>
 
-Get a full run timeline in a few minutes: instrument one function, run it, then open the viewer.
+### Step 2: Run the example agent
 
-### 1. Instrument your agent
+```bash
+python examples/minimal_agent/main.py
+```
 
-Wrap your agent entrypoint with `@trace` and record LLM and tool activity:
+This simulates a tiny agent that makes one tool call and one LLM call. Trace data lands in `~/.agentdbg/runs/`.
+
+### Step 3: Open the timeline
+
+```bash
+agentdbg view
+```
+
+A browser tab opens at `http://127.0.0.1:8712` showing the full run timeline - every event, with inputs, outputs, and timing.
+
+<!-- TODO: add screenshot/GIF of the timeline UI here -->
+<!-- ![Timeline UI](docs/assets/timeline.png) -->
+
+That's it. You're debugging.
+
+---
+
+## Instrument your own agent
+
+Add three lines to any Python agent:
 
 ```python
-from agentdbg import trace, record_tool_call, record_llm_call
+from agentdbg import trace, record_llm_call, record_tool_call
 
 @trace
 def run_agent():
+    # ... your existing agent code ...
+
     record_tool_call(
         name="search_db",
-        args={"query": "find users"},
-        result={"count": 2},
+        args={"query": "active users"},
+        result={"count": 42},
     )
+
     record_llm_call(
         model="gpt-4",
-        prompt="Summarize the results.",
-        response="Found 2 users.",
-        usage={"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
+        prompt="Summarize the search results.",
+        response="There are 42 active users.",
+        usage={"prompt_tokens": 12, "completion_tokens": 8, "total_tokens": 20},
     )
 
 run_agent()
 ```
 
-Traces are written under `~/.agentdbg/runs/<run_id>/` (or `AGENTDBG_DATA_DIR`).
+Then `agentdbg view` to see the timeline.
 
-### 2. View the timeline
+### What gets captured
+
+| Event | Recorded by | What you see |
+|---|---|---|
+| Run start/end | `@trace` (automatic) | Duration, status, error if any |
+| LLM calls | `record_llm_call()` | Model, prompt, response, token usage |
+| Tool calls | `record_tool_call()` | Tool name, args, result, status |
+| State updates | `record_state()` | Arbitrary state snapshots |
+| Errors | `@trace` (automatic) | Exception type, message, stack trace |
+| Loop warnings | Automatic detection | Repetitive pattern + evidence |
+
+---
+
+## CLI reference
+
+### List recent runs
 
 ```bash
-agentdbg view
+agentdbg list              # last 20 runs
+agentdbg list --limit 50   # more runs
+agentdbg list --json       # machine-readable output
 ```
 
-Starts a local server (default `127.0.0.1:8712`) and opens the UI. Use **List runs** and **View a specific run** below to pick a run.
-
-### Try the example
-
-From the repo root (after `uv sync` and `uv pip install -e .`):
+### View a run timeline
 
 ```bash
-python examples/minimal_agent/main.py
-agentdbg view
-```
-
-
-## CLI
-
-### List runs
-
-```bash
-agentdbg list
-agentdbg list --limit 50
-agentdbg list --json
-```
-
-### View a specific run
-
-```bash
-agentdbg view <RUN_ID>
-agentdbg view --host 127.0.0.1 --port 8712
-agentdbg view --no-browser
-agentdbg view --json
+agentdbg view              # opens latest run
+agentdbg view <RUN_ID>     # specific run
+agentdbg view --no-browser # just print the URL
 ```
 
 ### Export a run
@@ -103,80 +138,56 @@ agentdbg view --json
 agentdbg export <RUN_ID> --out run.json
 ```
 
+---
 
-## Storage layout
+## Redaction & privacy
 
-AgentDbg writes traces locally:
+**Redaction is ON by default.** AgentDbg scrubs values for keys matching sensitive patterns (case-insensitive) before writing to disk. Large fields are truncated (marked with `__TRUNCATED__` marker).
 
-* Default data dir: `~/.agentdbg/`
-* Runs live under: `~/.agentdbg/runs/<run_id>/`
+Default redacted keys: `api_key`, `token`, `authorization`, `cookie`, `secret`, `password`.
 
-  * `run.json` (metadata)
-  * `events.jsonl` (append-only events)
+```bash
+# Override defaults via environment variables
+export AGENTDBG_REDACT=1                    # on by default
+export AGENTDBG_REDACT_KEYS="api_key,token,authorization,cookie,secret,password"
+export AGENTDBG_MAX_FIELD_BYTES=20000       # truncation limit
+```
+
+You can also configure redaction in `.agentdbg/config.yaml` (project root) or `~/.agentdbg/config.yaml`.
+
+---
+
+## Storage
+
+All data is local. Plain files, easy to inspect or delete.
+
+```
+~/.agentdbg/
+└── runs/
+    └── <run_id>/
+        ├── run.json        # run metadata (status, counts, timing)
+        └── events.jsonl    # append-only event log
+```
 
 Override the location:
 
 ```bash
-export AGENTDBG_DATA_DIR=/path/to/agentdbg-data
+export AGENTDBG_DATA_DIR=/path/to/traces
 ```
 
-
-## Redaction & privacy
-
-Redaction is **ON by default** (`AGENTDBG_REDACT=1`).
-
-AgentDbg redacts values for payload keys that match configured substrings (case-insensitive) and truncates very large fields.
-
-Key env vars:
-
-```bash
-export AGENTDBG_REDACT=1
-export AGENTDBG_REDACT_KEYS="api_key,token,authorization,cookie,secret,password"
-export AGENTDBG_MAX_FIELD_BYTES=20000
-```
-
-
-## Development
-
-Run tests:
-
-```bash
-uv run pytest
-```
-
-Run the example:
-
-```bash
-python examples/minimal_agent/main.py
-agentdbg view
-```
-
-
-## Status
-
-**Works today (v0.1):**
-
-- `@trace` decorator + `record_llm_call` / `record_tool_call` / `record_state`
-- Local JSONL storage under `~/.agentdbg/` with automatic redaction
-- `agentdbg list`, `agentdbg view` (timeline UI), `agentdbg export`
-- Loop detection (`LOOP_WARNING` events when repetitive patterns detected)
-- LangChain/LangGraph callback handler (optional; requires `langchain-core`)
-
-**Planned (v0.2+):**
-
-- Deterministic replay / tool mocking
-- OpenAI Agents SDK adapter
-- Eval + regression CI support
-- Optional hosted trace store
-
+---
 
 ## Integrations
 
-AgentDbg is **framework-agnostic** at its core. The SDK works with any Python code.
+AgentDbg is framework-agnostic at its core. The SDK works with any Python code.
 
-### Available in v0.1
+### LangChain / LangGraph (v0.1)
 
-**LangChain / LangGraph** - optional callback handler that records LLM and tool events automatically. Requires `langchain-core` (install with `pip install agentdbg[langchain]`).
+Optional callback handler that auto-records LLM and tool events. Requires `langchain-core`:
+
+```bash
+pip install -e ".[langchain]"
+```
 
 ```python
 from agentdbg import trace
@@ -185,21 +196,48 @@ from agentdbg.integrations import AgentDbgLangChainCallbackHandler
 @trace
 def run_agent():
     handler = AgentDbgLangChainCallbackHandler()
-    # pass handler to your chain/agent via config={"callbacks": [handler]}
+    # pass to your chain: config={"callbacks": [handler]}
     ...
 ```
 
 See `examples/langchain_minimal/` for a runnable example.
 
-### Planned
+### Planned adapters
 
-- **OpenAI Agents SDK** adapter
-- **Agno** adapter
-- Others as needed (AutoGen, CrewAI, custom loops)
+- OpenAI Agents SDK
+- Agno
+- Others (AutoGen, CrewAI, custom loops)
 
-These are not implemented yet. Until then, use the core SDK: wrap your entrypoint with `@trace` and call `record_llm_call` / `record_tool_call` from your own callbacks.
+Until an adapter exists for your framework, use the core SDK: `@trace` + `record_llm_call` / `record_tool_call`.
 
+---
+
+## Development
+
+```bash
+uv venv && uv sync && uv pip install -e ".[langchain]"
+uv run pytest
+```
+
+---
+
+## Roadmap
+
+**Works today (v0.1):**
+- `@trace` decorator + `record_llm_call` / `record_tool_call` / `record_state`
+- Local JSONL storage with automatic redaction
+- `agentdbg list`, `agentdbg view` (timeline UI), `agentdbg export`
+- Loop detection (`LOOP_WARNING` events)
+- LangChain/LangGraph callback handler
+
+**Planned (v0.2+):**
+- Deterministic replay / tool mocking
+- OpenAI Agents SDK adapter
+- Eval + regression CI
+- Optional hosted trace store
+
+---
 
 ## License
 
-TBD
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE).

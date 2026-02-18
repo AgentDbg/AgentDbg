@@ -1,8 +1,7 @@
 [project]
 name = "agentdbg"
-# version = "0.1.0"
 dynamic = ["version"]
-description = "Add your description here"
+description = "Local-first debugger for AI agents (traces, timeline UI, loop warnings)."
 readme = "README.md"
 authors = [
     { name = "Zafar", email = "z.tahirov@gmail.com" }
@@ -30,8 +29,6 @@ langchain = ["langchain>=1.2.10"]
 agentdbg = "agentdbg.cli:main"
 
 [build-system]
-# requires = ["uv_build>=0.10.2,<0.11.0"]
-# build-backend = "uv_build"
 requires = ["hatchling>=1.28.0,<1.29.0"]
 build-backend = "hatchling.build"
 

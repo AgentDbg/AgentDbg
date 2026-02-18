@@ -359,7 +359,7 @@ def _maybe_emit_loop_warning(
         return
     pattern = payload.get("pattern", "loop_warning")
     max_name_len = 80
-    name = pattern if len(pattern) <= max_name_len else pattern[: max_name_len - 1] + "…"
+    name = pattern if len(pattern) <= max_name_len else pattern[: max_name_len - 1] + "..."
     ev = new_event(EventType.LOOP_WARNING, run_id, name, payload)
     append_event(run_id, ev, config)
     counts["loop_warnings"] = counts.get("loop_warnings", 0) + 1
