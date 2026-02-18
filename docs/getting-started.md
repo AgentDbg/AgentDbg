@@ -2,25 +2,24 @@
 
 ## Installation
 
+Requires Python 3.10+.
+
 **With uv (recommended):**
 
 ```bash
-uv pip install -e /path/to/AgentDbg
+git clone https://github.com/zt-9/AgentDbg.git
+cd AgentDbg
+uv venv && uv sync && uv pip install -e .
 ```
 
 **With pip:**
 
 ```bash
-pip install -e /path/to/AgentDbg
+git clone https://github.com/zt-9/AgentDbg.git
+cd AgentDbg
+python -m venv .venv && source .venv/bin/activate
+pip install -e .
 ```
-
-From PyPI (when published):
-
-```bash
-pip install agentdbg
-```
-
-Requires Python 3.10+.
 
 ---
 
@@ -75,7 +74,7 @@ Set the data directory so runs are stored somewhere else (e.g. project-local):
 export AGENTDBG_DATA_DIR=/path/to/my/data
 ```
 
-Config can also be set in `~/.agentdbg/config.yaml` or `.agentdbg/config.yaml` in the project root; environment variables take precedence. See [SDK](sdk.md) for redaction and loop-detection options.
+Config can also be set in `~/.agentdbg/config.yaml` or `.agentdbg/config.yaml` in the project root; environment variables take precedence. See the [configuration reference](reference/config.md) for the full list of options and precedence.
 
 ---
 
@@ -97,3 +96,5 @@ Example: disable redaction (e.g. for local debugging):
 ```bash
 export AGENTDBG_REDACT=0
 ```
+
+For full details (precedence, YAML keys, redaction/truncation behavior), see the [configuration reference](reference/config.md).

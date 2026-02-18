@@ -1,17 +1,37 @@
 # Architecture
 
-Short overview of how AgentDbg works: event schema, storage, viewer API, UI, and loop detection.
+How AgentDbg works: event schema, storage, viewer API, UI, and loop detection. For the full public contract (envelope, event types, payload schemas, run.json), see the [Trace format](reference/trace-format.md) reference.
 
 ---
 
-## Event schema (high-level)
+## Event schema
 
-Events are JSON objects with a common shape:
+Every event is a JSON object with a common set of top-level fields:
 
-- **Required fields:** `spec_version` ("0.1"), `event_id` (UUID), `run_id`, `parent_id`, `event_type`, `ts` (ISO8601 UTC), `duration_ms`, `name`, `payload`, `meta`.
-- **Event types:** `RUN_START`, `RUN_END`, `LLM_CALL`, `TOOL_CALL`, `STATE_UPDATE`, `ERROR`, `LOOP_WARNING`.
+| Field | Type | Description |
+|---|---|---|
+| `spec_version` | `"0.1"` | Schema version |
+| `event_id` | UUID string | Unique event identifier |
+| `run_id` | UUID string | Run this event belongs to |
+| `parent_id` | UUID string or `null` | Parent event (for nesting) |
+| `event_type` | string | One of the types below |
+| `ts` | ISO8601 UTC (`2026-02-15T20:31:05.123Z`) | Timestamp with milliseconds |
+| `duration_ms` | integer or `null` | Duration if applicable |
+| `name` | string | Label (tool name, model name, etc.) |
+| `payload` | object | Event-type-specific data |
+| `meta` | object | Freeform user-defined metadata |
 
-Payloads are type-specific (e.g. `LLM_CALL` has `model`, `prompt`, `response`, `usage`; `TOOL_CALL` has `tool_name`, `args`, `result`, `status`). Full schema is in SPEC §5.
+### Event types
+
+| Type | Emitted by | Payload highlights |
+|---|---|---|
+| `RUN_START` | `@trace` / `traced_run` | `run_name`, `python_version`, `platform`, `cwd`, `argv` |
+| `RUN_END` | `@trace` / `traced_run` | `status` (`ok` / `error`), `summary` (counts + duration) |
+| `LLM_CALL` | `record_llm_call()` | `model`, `prompt`, `response`, `usage`, `provider`, `status`, `error` |
+| `TOOL_CALL` | `record_tool_call()` | `tool_name`, `args`, `result`, `status`, `error` |
+| `STATE_UPDATE` | `record_state()` | `state`, `diff` |
+| `ERROR` | `@trace` (on exception) | `error_type`, `message`, `stack` |
+| `LOOP_WARNING` | Automatic detection | `pattern`, `repetitions`, `window_size`, `evidence_event_ids` |
 
 Events are written as one JSON object per line (JSONL) and flushed after each write.
 

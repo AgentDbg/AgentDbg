@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/zt-9/AgentDbg/schemas/run.schema.json",
+  "title": "AgentDbg run.json",
+  "description": "Run metadata file (run.json) for AgentDbg v0.1. Best-effort schema for tooling; canonical reference is docs/reference/trace-format.md.",
+  "type": "object",
+  "required": ["spec_version", "run_id", "run_name", "started_at", "ended_at", "duration_ms", "status", "counts", "last_event_ts"],
+  "properties": {
+    "spec_version": { "const": "0.1" },
+    "run_id": { "type": "string", "format": "uuid" },
+    "run_name": { "type": ["string", "null"] },
+    "started_at": { "type": "string", "format": "date-time" },
+    "ended_at": { "type": ["string", "null"], "format": "date-time" },
+    "duration_ms": { "type": ["integer", "null"], "minimum": 0 },
+    "status": { "enum": ["running", "ok", "error"] },
+    "counts": {
+      "type": "object",
+      "required": ["llm_calls", "tool_calls", "errors", "loop_warnings"],
+      "properties": {
+        "llm_calls": { "type": "integer", "minimum": 0 },
+        "tool_calls": { "type": "integer", "minimum": 0 },
+        "errors": { "type": "integer", "minimum": 0 },
+        "loop_warnings": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "last_event_ts": { "type": ["string", "null"], "format": "date-time" }
+  },
+  "additionalProperties": false
+}
