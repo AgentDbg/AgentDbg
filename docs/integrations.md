@@ -17,10 +17,10 @@ AgentDbg is **framework-agnostic** at the core. The SDK is a thin layer: you cal
 **Requirements:** `langchain-core` must be installed. Install the optional dependency group:
 
 ```bash
-pip install agentdbg[langchain]
+pip install -e ".[langchain]"
 ```
 
-If `langchain-core` is not installed, importing the integration (e.g. `from agentdbg.integrations import AgentDbgLangChainCallbackHandler`) raises a clear `ImportError` with instructions to install `pip install "agentdbg[langchain]"` or `pip install langchain`. The integration is optional; the core package does not depend on it.
+If `langchain-core` is not installed, importing the integration raises a clear `ImportError` with install instructions. The integration is optional; the core package does not depend on it.
 
 **Usage:**
 
@@ -52,9 +52,9 @@ agentdbg view
 
 **Notes:**
 
-- The handler requires an active AgentDbg run (wrap your entrypoint with `@trace` or use `AGENTDBG_IMPLICIT_RUN=1`).
-- Error events from LLM calls are currently discarded (the pending state is cleared but no error event is recorded); tool errors are recorded with `status="error"`.
-- The handler uses in-memory maps to correlate start/end callbacks. In long-running sessions these maps are not automatically pruned.
+- The handler requires an active AgentDbg run - wrap your entrypoint with `@trace` or set `AGENTDBG_IMPLICIT_RUN=1`.
+- Tool errors are recorded as `TOOL_CALL` events with `status="error"` and include the error message.
+- LLM errors are recorded as `LLM_CALL` events with `status="error"` (not as separate `ERROR` events).
 
 ---
 
@@ -69,3 +69,5 @@ Planned framework adapters (not yet implemented):
 When an adapter is added, it will be documented here with usage and installation notes.
 
 Until then, use the core SDK: wrap your entrypoint with `@trace` and call `record_llm_call` / `record_tool_call` (and optionally `record_state`) from your own callbacks or run loop.
+
+For guidance on adding new integrations (optional deps, mapping callbacks to `record_*`, tests), see [CONTRIBUTING.md](../CONTRIBUTING.md#adding-integrations--adapters) in the repo root.

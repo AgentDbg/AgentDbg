@@ -10,33 +10,27 @@
 
 ## In 60 seconds
 
-**1. Install (editable from repo):**
+**1. Install:**
 
 ```bash
-cd /path/to/AgentDbg
-uv pip install -e .
-# or: pip install -e .
+git clone https://github.com/z-a-f/AgentDbg.git
+cd AgentDbg
+uv venv && uv sync && uv pip install -e .
 ```
 
-**2. Add tracing and recorders to your code:**
-
-```python
-from agentdbg import trace, record_llm_call, record_tool_call
-
-@trace
-def run_agent():
-    record_tool_call(name="search", args={"q": "x"}, result={"count": 1})
-    record_llm_call(model="gpt-4", prompt="Summarize", response="Done.", usage={})
-```
-
-**3. Run your agent, then open the viewer:**
+**2. Run the example agent:**
 
 ```bash
-python your_agent_script.py
+python examples/minimal_agent/main.py
+```
+
+**3. Open the timeline viewer:**
+
+```bash
 agentdbg view
 ```
 
-The browser opens on the latest run. Data is stored under `~/.agentdbg/runs/<run_id>/`.
+A browser tab opens showing every event in the run - tool calls, LLM calls, timing. Data is stored locally under `~/.agentdbg/runs/<run_id>/`.
 
 ---
 
@@ -46,6 +40,9 @@ The browser opens on the latest run. Data is stored under `~/.agentdbg/runs/<run
 |------|-------------|
 | [Getting started](getting-started.md) | Installation (uv/pip), quickstart, data dir, redaction |
 | [CLI](cli.md) | `list`, `view`, `export` with options and exit codes |
-| [SDK](sdk.md) | `@trace`, `record_llm_call`, `record_tool_call`, `record_state`, implicit runs |
+| [SDK](sdk.md) | `@trace`, `traced_run`, `record_llm_call`, `record_tool_call`, `record_state` |
 | [Integrations](integrations.md) | LangChain handler (available) and planned adapters |
 | [Architecture](architecture.md) | Event schema, storage layout, viewer API, loop detection |
+| **Reference** | |
+| [Trace format](reference/trace-format.md) | Event envelope, event types, payload schemas, run.json (public contract) |
+| [Configuration](reference/config.md) | Env vars, YAML precedence, redaction, truncation, loop detection |

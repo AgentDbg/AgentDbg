@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/z-a-f/AgentDbg/schemas/event.schema.json",
+  "title": "AgentDbg event (envelope)",
+  "description": "Event envelope for AgentDbg v0.1. One event per line in events.jsonl. Best-effort schema for tooling; canonical reference is docs/reference/trace-format.md.",
+  "type": "object",
+  "required": ["spec_version", "event_id", "run_id", "parent_id", "event_type", "ts", "duration_ms", "name", "payload", "meta"],
+  "properties": {
+    "spec_version": { "const": "0.1" },
+    "event_id": { "type": "string", "format": "uuid" },
+    "run_id": { "type": "string", "format": "uuid" },
+    "parent_id": { "type": ["string", "null"], "format": "uuid" },
+    "event_type": {
+      "enum": ["RUN_START", "RUN_END", "LLM_CALL", "TOOL_CALL", "STATE_UPDATE", "ERROR", "LOOP_WARNING"]
+    },
+    "ts": { "type": "string", "format": "date-time" },
+    "duration_ms": { "type": ["integer", "null"] },
+    "name": { "type": "string" },
+    "payload": { "type": "object", "description": "Event-type-specific; see trace-format.md" },
+    "meta": { "type": "object", "description": "Freeform metadata" }
+  },
+  "additionalProperties": false
+}

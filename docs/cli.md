@@ -1,6 +1,6 @@
 # CLI
 
-The `agentdbg` CLI lists runs, starts the local viewer, and exports runs to JSON. Storage is under `~/.agentdbg/` by default (overridable with `AGENTDBG_DATA_DIR`).
+The `agentdbg` CLI lists runs, starts the local viewer, and exports runs to JSON. Storage is under `~/.agentdbg/` by default (overridable with `AGENTDBG_DATA_DIR`). For all configuration options and precedence, see the [configuration reference](reference/config.md).
 
 ---
 
@@ -80,10 +80,11 @@ Exports one run to a single JSON file (run metadata + events array).
 agentdbg export RUN_ID --out FILE
 ```
 
-**Options:**
+**Arguments / options:**
 
-| Option | Description |
-|--------|-------------|
+| Argument/Option | Description |
+|---|---|
+| `RUN_ID` | Run to export; can be a short prefix (e.g. first 8 chars of UUID) |
 | `--out`, `-o` | Output file path (JSON) |
 
 **Examples:**
