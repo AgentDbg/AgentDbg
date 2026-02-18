@@ -1,0 +1,9 @@
+From https://github.com/langchain-ai/langgraph/blob/23961cff61a42b52525f3b20b4094d8d2fba1744/docs/docs/tutorials/customer-support/customer-support.ipynb
+
+
+```
+export ANTHROPIC_API_KEY=...
+export OPENAI_API_KEY=...
+export TAVILY_API_KEY=...
+uv run --extra langchain-examples -m examples.langchain.customer_support.main
+```
