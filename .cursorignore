@@ -1,0 +1,17 @@
+# Environment variables
+**/env
+**/env.*
+
+# Credentials
+**/credentials.*.json
+**/credentials.json
+**/*.key
+**/*.pem
+
+# Database files
+**/*.sqlite
+**/*.db*
+
+# Logs and artifacts
+**/dist/
+**/*.log
