@@ -370,7 +370,7 @@ def trace(
                 finalize_run(run_id, "ok", counts, config)
                 return result
             except BaseException as e:
-                err_payload = _error_payload(e)
+                err_payload = _redact_and_truncate(_error_payload(e), config)
                 err_ev = new_event(EventType.ERROR, run_id, type(e).__name__, err_payload)
                 append_event(run_id, err_ev, config)
                 counts["errors"] = counts.get("errors", 0) + 1
@@ -428,7 +428,7 @@ def traced_run(name: str | None = None) -> Generator[None, None, None]:
 
         yield
     except BaseException as e:
-        err_payload = _error_payload(e)
+        err_payload = _redact_and_truncate(_error_payload(e), config)
         err_ev = new_event(EventType.ERROR, run_id, type(e).__name__, err_payload)
         append_event(run_id, err_ev, config)
         counts["errors"] = counts.get("errors", 0) + 1
