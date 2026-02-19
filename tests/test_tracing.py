@@ -99,7 +99,7 @@ def test_tool_call_records_error_status_and_error_object_on_exception(temp_data_
     assert payload.get("status") == "error"
     err = payload.get("error")
     assert err is not None and isinstance(err, dict)
-    assert err.get("type") == "ValueError"
+    assert err.get("error_type") == "ValueError"
     assert err.get("message") == "boom"
 
 
@@ -125,7 +125,7 @@ def test_llm_call_records_error_status_and_error_object_on_exception(temp_data_d
     assert payload.get("status") == "error"
     err = payload.get("error")
     assert err is not None and isinstance(err, dict)
-    assert err.get("type") == "RuntimeError"
+    assert err.get("error_type") == "RuntimeError"
     assert "llm api failed" in str(err.get("message", ""))
 
 

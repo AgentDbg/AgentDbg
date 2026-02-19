@@ -98,12 +98,13 @@ Every event is a single JSON object with these **required top-level fields**:
   "temperature": 0.0,
   "stop_reason": "string | null",
   "status": "ok | error",
-  "error": "string | null"
+  "error": "object | null"
 }
 ```
 
 - `usage` fields may be `null` if unknown.
 - `prompt` and `response` may be redacted or truncated by config.
+- When `status` is `"error"`, `error` is an object with `error_type`, `message`, optional `details`, optional `stack` (same shape as ERROR event payload).
 
 ### TOOL_CALL
 
@@ -113,9 +114,11 @@ Every event is a single JSON object with these **required top-level fields**:
   "args": "object | string | null",
   "result": "object | string | null",
   "status": "ok | error",
-  "error": "string | null"
+  "error": "object | null"
 }
 ```
+
+- When `status` is `"error"`, `error` is an object with `error_type`, `message`, optional `details`, optional `stack` (same shape as ERROR event payload).
 
 ### STATE_UPDATE
 

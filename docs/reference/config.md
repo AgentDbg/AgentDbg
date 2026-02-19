@@ -102,6 +102,20 @@ loop_repetitions: 4
 
 ---
 
+### Run name (env only)
+
+| Env | YAML | Default | Description |
+|-----|------|---------|-------------|
+| `AGENTDBG_RUN_NAME` | *(not in YAML)* | *(derived)* | Override the run name for the current process. Used when starting a run via `@trace`, `traced_run()`, or implicit run. If unset, run name is the explicit name argument, or a default like `path/to/script.py:main - 2026-02-18 14:12`. |
+
+**Example:**
+
+```bash
+export AGENTDBG_RUN_NAME="my-experiment-v1"
+```
+
+---
+
 ### Implicit run (env only)
 
 | Env | YAML | Default | Description |

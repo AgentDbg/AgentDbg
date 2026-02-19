@@ -12,9 +12,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from agentdbg.config import AgentDbgConfig
+from agentdbg.constants import SPEC_VERSION, default_counts
 from agentdbg.events import utc_now_iso_ms_z
-
-SPEC_VERSION = "0.1"
 
 RUN_JSON = "run.json"
 EVENTS_JSONL = "events.jsonl"
@@ -77,16 +76,6 @@ def _events_path(run_id: str, config: AgentDbgConfig) -> Path:
     return _run_dir(run_id, config) / EVENTS_JSONL
 
 
-def _default_counts() -> dict:
-    """Default counts per SPEC run.json schema."""
-    return {
-        "llm_calls": 0,
-        "tool_calls": 0,
-        "errors": 0,
-        "loop_warnings": 0,
-    }
-
-
 def create_run(run_name: str | None, config: AgentDbgConfig) -> dict:
     """
     Create a new run: generate run_id, create run dir, write initial run.json (status=running).
@@ -106,7 +95,7 @@ def create_run(run_name: str | None, config: AgentDbgConfig) -> dict:
         "ended_at": None,
         "duration_ms": None,
         "status": "running",
-        "counts": _default_counts(),
+        "counts": default_counts(),
         "last_event_ts": None,
     }
 
@@ -161,7 +150,7 @@ def finalize_run(
     end_dt = datetime.fromisoformat(ended_at.replace("Z", "+00:00"))
     duration_ms = max(0, int((end_dt - start_dt).total_seconds() * 1000))
 
-    merged_counts = _default_counts()
+    merged_counts = default_counts()
     for k in merged_counts:
         if k in counts and isinstance(counts[k], (int, float)):
             merged_counts[k] = int(counts[k])

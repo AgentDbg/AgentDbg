@@ -1,7 +1,7 @@
 """
 Event types and factory for AgentDebugger trace events.
 
-All events are JSON-serializable dicts conforming to SPEC v0.1.
+All events are JSON-serializable dicts.
 Pure functions, stdlib only, unit-testable.
 """
 import uuid
@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
-SPEC_VERSION = "0.1"
+from agentdbg.constants import SPEC_VERSION
 
 # TODO: This is a serialization guardrail, not a security feature
 # We should decide what to do:
