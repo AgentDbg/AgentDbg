@@ -15,6 +15,8 @@ from agentdbg.config import load_config
 SPEC_VERSION = "0.1"
 UI_STATIC_DIR = Path(__file__).resolve().parent / "ui_static"
 UI_INDEX_PATH = UI_STATIC_DIR / "index.html"
+UI_STYLES_PATH = UI_STATIC_DIR / "styles.css"
+UI_APP_JS_PATH = UI_STATIC_DIR / "app.js"
 FAVICON_PATH = UI_STATIC_DIR / "favicon.svg"
 
 
@@ -66,6 +68,20 @@ def create_app() -> FastAPI:
         if not FAVICON_PATH.is_file():
             raise HTTPException(status_code=404, detail="favicon not found")
         return FileResponse(FAVICON_PATH, media_type="image/svg+xml")
+
+    @app.get("/styles.css")
+    def serve_styles() -> FileResponse:
+        """Serve UI stylesheet."""
+        if not UI_STYLES_PATH.is_file():
+            raise HTTPException(status_code=404, detail="styles not found")
+        return FileResponse(UI_STYLES_PATH, media_type="text/css")
+
+    @app.get("/app.js")
+    def serve_app_js() -> FileResponse:
+        """Serve UI application script."""
+        if not UI_APP_JS_PATH.is_file():
+            raise HTTPException(status_code=404, detail="app.js not found")
+        return FileResponse(UI_APP_JS_PATH, media_type="application/javascript")
 
     @app.get("/")
     def serve_ui() -> FileResponse:
