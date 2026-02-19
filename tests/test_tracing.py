@@ -210,6 +210,34 @@ def test_traced_run_nested_does_not_create_new_run(temp_data_dir):
     assert tool_events[0].get("payload", {}).get("tool_name") == "nested_tool"
 
 
+def test_trace_nested_decorated_uses_outer_run(temp_data_dir):
+    """Nested @trace (inner decorated function called from outer) uses the outer run; only one RUN_START and one RUN_END."""
+    @trace(name="outer_trace")
+    def outer():
+        record_tool_call("outer_tool", args={}, result="a")
+        inner()
+        record_tool_call("after_inner", args={}, result="b")
+
+    @trace(name="inner_trace")
+    def inner():
+        record_tool_call("inner_tool", args={}, result="ok")
+
+    outer()
+
+    config = load_config()
+    run_id = get_latest_run_id(config)
+    events = load_events(run_id, config)
+    run_starts = [e for e in events if e.get("event_type") == EventType.RUN_START.value]
+    run_ends = [e for e in events if e.get("event_type") == EventType.RUN_END.value]
+    tool_events = [e for e in events if e.get("event_type") == EventType.TOOL_CALL.value]
+    tool_names = [e.get("payload", {}).get("tool_name") for e in tool_events]
+
+    assert len(run_starts) == 1
+    assert len(run_ends) == 1
+    assert run_starts[0].get("payload", {}).get("run_name") == "outer_trace"
+    assert tool_names == ["outer_tool", "inner_tool", "after_inner"]
+
+
 def test_record_state_inside_trace_writes_state_update_event(temp_data_dir):
     """record_state inside @trace writes one STATE_UPDATE with state and meta to storage."""
     @trace
