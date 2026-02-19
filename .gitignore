@@ -1,3 +1,11 @@
+# Local traces
+# We ignore all JSON and JSONL files except under `schemas`
+# This behavior might change in the future.
+**/.agentdbg/
+*.json
+*.jsonl
+!schemas/*.json
+!schemas/*.jsonl
 
 # Instruction sets for AI to follow -- these constantly change
 ai/
