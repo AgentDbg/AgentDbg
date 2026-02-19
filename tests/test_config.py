@@ -87,7 +87,7 @@ def test_env_overrides_yaml_when_present(tmp_path, monkeypatch):
 # ------------------------------------------------------------------
 
 def test_defaults_only_when_no_yaml_no_env(tmp_path, monkeypatch):
-    """With no YAML and no env, SPEC defaults apply."""
+    """With no YAML and no env, defaults apply."""
     fake_home = tmp_path / "fakehome"
     fake_home.mkdir()
     monkeypatch.setattr(Path, "home", staticmethod(lambda: fake_home))

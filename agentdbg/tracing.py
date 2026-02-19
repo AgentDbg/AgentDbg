@@ -23,7 +23,7 @@ from functools import wraps
 from typing import Any, Callable, Generator, TypeVar
 
 from agentdbg.config import AgentDbgConfig, load_config
-from agentdbg.constants import REDACTED_MARKER, TRUNCATED_MARKER
+from agentdbg.constants import REDACTED_MARKER, TRUNCATED_MARKER, default_counts
 from agentdbg.events import EventType, new_event, utc_now_iso_ms_z
 from agentdbg.loopdetect import detect_loop, pattern_key as loop_pattern_key
 from agentdbg.storage import append_event, create_run, finalize_run
@@ -81,16 +81,6 @@ def _resolve_run_name(
     if func is not None:
         return f"{_entrypoint(func)} - {_default_run_name_timestamp()}"
     return f"run - {_default_run_name_timestamp()}"
-
-
-def _default_counts() -> dict[str, int]:
-    """Default counts dict; keys match SPEC run.json and RUN_END summary."""
-    return {
-        "llm_calls": 0,
-        "tool_calls": 0,
-        "errors": 0,
-        "loop_warnings": 0,
-    }
 
 
 def _key_matches_redact(key: str, redact_keys: list[str]) -> bool:
@@ -169,7 +159,7 @@ def _redact_and_truncate(
 
 
 def _normalize_usage(usage: Any) -> dict[str, int | None] | None:
-    """Normalize LLM usage to SPEC shape: prompt_tokens, completion_tokens, total_tokens (null if unknown)."""
+    """Normalize LLM usage to shape: prompt_tokens, completion_tokens, total_tokens (null if unknown)."""
     if usage is None:
         return None
     if not isinstance(usage, dict):
@@ -201,34 +191,36 @@ def _build_error_payload(
 ) -> dict[str, Any] | None:
     """
     Build a consistent error object for TOOL_CALL/LLM_CALL payloads.
-    Returns None if exc_or_message is None; otherwise dict with type, message, optional details, optional stack.
+    Returns None if exc_or_message is None; otherwise dict with error_type, message, optional details, optional stack.
+    Uses error_type (same as ERROR event payload per SPEC) for consumer consistency.
     Result is redacted/truncated per config.
     """
     if exc_or_message is None:
         return None
     if isinstance(exc_or_message, BaseException):
         err = {
-            "type": type(exc_or_message).__name__,
+            "error_type": type(exc_or_message).__name__,
             "message": str(exc_or_message),
             "details": None,
             "stack": traceback.format_exc() if include_stack else None,
         }
     elif isinstance(exc_or_message, str):
         err = {
-            "type": "Error",
+            "error_type": "Error",
             "message": exc_or_message,
             "details": None,
             "stack": None,
         }
     elif isinstance(exc_or_message, dict):
+        # Accept both error_type and type for backward compatibility when building from dict
         err = {
-            "type": exc_or_message.get("type", "Error"),
+            "error_type": exc_or_message.get("error_type") or exc_or_message.get("type", "Error"),
             "message": exc_or_message.get("message", ""),
             "details": exc_or_message.get("details"),
             "stack": exc_or_message.get("stack") if include_stack else None,
         }
     else:
-        err = {"type": "Error", "message": str(exc_or_message), "details": None, "stack": None}
+        err = {"error_type": "Error", "message": str(exc_or_message), "details": None, "stack": None}
     return _redact_and_truncate(err, config)
 
 
@@ -239,7 +231,7 @@ def _finalize_implicit_run() -> None:
     if _implicit_run_id is None or _implicit_config is None or _implicit_started_at is None:
         return
     run_id = _implicit_run_id
-    counts = _implicit_counts or _default_counts()
+    counts = _implicit_counts or default_counts()
     config = _implicit_config
     started_at = _implicit_started_at
     _implicit_run_id = None
@@ -284,7 +276,7 @@ def _ensure_run() -> tuple[str, dict, AgentDbgConfig, list[dict], set[str]] | No
         run_name = _resolve_run_name("implicit", None)
         meta = create_run(run_name, config)
         run_id = meta["run_id"]
-        counts = _default_counts()
+        counts = default_counts()
         started_at = meta["started_at"]
         _implicit_run_id = run_id
         _implicit_counts = counts
@@ -377,7 +369,7 @@ def trace(
             meta = create_run(run_name, config)
             run_id = meta["run_id"]
             started_at = meta["started_at"]
-            counts = _default_counts()
+            counts = default_counts()
 
             token_run = _run_id_var.set(run_id)
             token_counts = _counts_var.set(counts)
@@ -441,7 +433,7 @@ def traced_run(name: str | None = None) -> Generator[None, None, None]:
     meta = create_run(run_name, config)
     run_id = meta["run_id"]
     started_at = meta["started_at"]
-    counts = _default_counts()
+    counts = default_counts()
 
     token_run = _run_id_var.set(run_id)
     token_counts = _counts_var.set(counts)

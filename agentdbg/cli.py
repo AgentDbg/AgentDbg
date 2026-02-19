@@ -15,9 +15,9 @@ from typer import Exit
 
 import agentdbg.storage as storage
 from agentdbg.config import load_config
+from agentdbg.constants import SPEC_VERSION
 from agentdbg.server import create_app
 
-SPEC_VERSION = "0.1"
 EXIT_NOT_FOUND = 2
 EXIT_INTERNAL = 10
 
