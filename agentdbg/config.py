@@ -14,11 +14,11 @@ except ImportError:
 _DEFAULT_REDACT = True
 _DEFAULT_REDACT_KEYS = [
     "api_key",
-    "token",
     "authorization",
     "cookie",
-    "secret",
     "password",
+    "secret",
+    "token",
 ]
 _DEFAULT_MAX_FIELD_BYTES = 20000
 _DEFAULT_LOOP_WINDOW = 12

@@ -13,6 +13,7 @@ appends) with a well-defined ordering rule so loop detection remains meaningful.
 """
 import atexit
 import os
+import re
 import sys
 import traceback
 from contextlib import contextmanager
@@ -96,6 +97,31 @@ def _key_matches_redact(key: str, redact_keys: list[str]) -> bool:
     """True if key matches any redact key (case-insensitive substring)."""
     k = key.lower()
     return any(rk.lower() in k for rk in redact_keys)
+
+
+# Matches --option=value or -o=value (option name can have letters, digits, hyphens, underscores).
+_ARGV_OPTION_VALUE = re.compile(r"^(-{1,2})([a-zA-Z0-9_-]+)=(.*)$")
+
+
+def _redact_argv(argv: list[str], config: AgentDbgConfig) -> list[str]:
+    """
+    Redact only sensitive option values in argv. E.g. --api-key=sk-secret -> --api-key=__REDACTED__.
+    Option name is matched against config.redact_keys (with hyphens normalized to underscores).
+    Returns a new list; does not mutate input.
+    """
+    if not argv or not config.redact:
+        return list(argv)
+    out: list[str] = []
+    for item in argv:
+        match = _ARGV_OPTION_VALUE.match(item)
+        if match:
+            prefix, key, _value = match.groups()
+            key_normalized = key.replace("-", "_")
+            if _key_matches_redact(key_normalized, config.redact_keys):
+                out.append(f"{prefix}{key}={REDACTED_MARKER}")
+                continue
+        out.append(item)
+    return out
 
 
 def _truncate_string(s: str, max_bytes: int) -> str:
@@ -266,13 +292,7 @@ def _ensure_run() -> tuple[str, dict, AgentDbgConfig, list[dict], set[str]] | No
         _implicit_started_at = started_at
         _implicit_event_window = []
         _implicit_loop_emitted = set()
-        payload = {
-            "run_name": run_name,
-            "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
-            "platform": sys.platform,
-            "cwd": os.getcwd(),
-            "argv": list(sys.argv),
-        }
+        payload = _run_start_payload_for_event(run_name, config)
         ev = new_event(EventType.RUN_START, run_id, run_name, payload)
         append_event(run_id, ev, config)
         return (run_id, counts, config, _implicit_event_window, _implicit_loop_emitted)
@@ -280,7 +300,7 @@ def _ensure_run() -> tuple[str, dict, AgentDbgConfig, list[dict], set[str]] | No
 
 
 def _run_start_payload(run_name: str | None) -> dict[str, Any]:
-    """Build RUN_START payload."""
+    """Build RUN_START payload (argv not yet redacted)."""
     return {
         "run_name": run_name,
         "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
@@ -288,6 +308,13 @@ def _run_start_payload(run_name: str | None) -> dict[str, Any]:
         "cwd": os.getcwd(),
         "argv": list(sys.argv),
     }
+
+
+def _run_start_payload_for_event(run_name: str | None, config: AgentDbgConfig) -> dict[str, Any]:
+    """Build RUN_START payload with argv values redacted per redact_keys, then apply full redaction/truncation."""
+    payload = _run_start_payload(run_name)
+    payload["argv"] = _redact_argv(payload["argv"], config)
+    return _redact_and_truncate(payload, config)
 
 
 def _run_end_payload(status: str, counts: dict, started_at: str) -> dict[str, Any]:
@@ -358,7 +385,7 @@ def trace(
             token_window = _event_window_var.set([])
             token_emitted = _loop_emitted_var.set(set())
             try:
-                payload = _run_start_payload(run_name)
+                payload = _run_start_payload_for_event(run_name, config)
                 ev = new_event(EventType.RUN_START, run_id, run_name, payload)
                 append_event(run_id, ev, config)
 
@@ -422,7 +449,7 @@ def traced_run(name: str | None = None) -> Generator[None, None, None]:
     token_window = _event_window_var.set([])
     token_emitted = _loop_emitted_var.set(set())
     try:
-        payload = _run_start_payload(run_name)
+        payload = _run_start_payload_for_event(run_name, config)
         ev = new_event(EventType.RUN_START, run_id, run_name, payload)
         append_event(run_id, ev, config)
 

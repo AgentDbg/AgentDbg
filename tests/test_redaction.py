@@ -3,6 +3,8 @@ Tests for redaction: sensitive keys in payloads are replaced with __REDACTED__.
 Uses AGENTDBG_REDACT_KEYS and temp dir via AGENTDBG_DATA_DIR.
 """
 import os
+from unittest.mock import patch
+
 import pytest
 
 from agentdbg.constants import REDACTED_MARKER, TRUNCATED_MARKER
@@ -109,3 +111,26 @@ def test_error_event_payload_redacted_context_manager(temp_data_dir, redact_mess
     payload = error_events[0]["payload"]
     assert payload.get("message") == REDACTED_MARKER
     assert payload.get("stack") == REDACTED_MARKER
+
+
+def test_run_start_argv_redacted(temp_data_dir):
+    """RUN_START keeps argv but redacts only sensitive option values, e.g. --api-key=secret -> --api-key=__REDACTED__."""
+    with patch("sys.argv", ["test_script.py", "--api-key=sk-secret-1234", "--verbose"]):
+        @trace
+        def run_quiet():
+            pass
+
+        run_quiet()
+
+    config = load_config()
+    runs = list_runs(limit=1, config=config)
+    assert runs
+    run_id = runs[0]["run_id"]
+    events = load_events(run_id, config)
+
+    run_start_events = [e for e in events if e.get("event_type") == EventType.RUN_START.value]
+    assert len(run_start_events) == 1
+    payload = run_start_events[0]["payload"]
+    argv = payload.get("argv")
+    assert isinstance(argv, list)
+    assert argv == ["test_script.py", f"--api-key={REDACTED_MARKER}", "--verbose"]
