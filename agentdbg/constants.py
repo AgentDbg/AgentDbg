@@ -6,6 +6,10 @@ TRUNCATED_MARKER = "__TRUNCATED__"
 # SPEC version for run.json and event payloads (single source of truth).
 SPEC_VERSION = "0.1"
 
+# Recursion limit and depth of redaction/truncation
+# This smells like the same thing, but might change in the future
+DEPTH_LIMIT = 10
+
 
 def default_counts() -> dict[str, int]:
     """Default counts per SPEC run.json schema. Keys: llm_calls, tool_calls, errors, loop_warnings."""

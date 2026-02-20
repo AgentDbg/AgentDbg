@@ -23,12 +23,13 @@ from functools import wraps
 from typing import Any, Callable, Generator, TypeVar
 
 from agentdbg.config import AgentDbgConfig, load_config
-from agentdbg.constants import REDACTED_MARKER, TRUNCATED_MARKER, default_counts
+from agentdbg.constants import DEPTH_LIMIT, REDACTED_MARKER, TRUNCATED_MARKER, default_counts
 from agentdbg.events import EventType, new_event, utc_now_iso_ms_z
 from agentdbg.loopdetect import detect_loop, pattern_key as loop_pattern_key
 from agentdbg.storage import append_event, create_run, finalize_run
 
-_RECURSION_LIMIT = 10
+# TODO: Remove the _RECURSION_LIMIT and use DEPTH_LIMIT instead
+_RECURSION_LIMIT = DEPTH_LIMIT
 
 _run_id_var: ContextVar[str | None] = ContextVar("agentdbg_run_id", default=None)
 _counts_var: ContextVar[dict | None] = ContextVar("agentdbg_counts", default=None)

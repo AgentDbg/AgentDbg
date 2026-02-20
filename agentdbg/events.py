@@ -9,14 +9,15 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
-from agentdbg.constants import SPEC_VERSION
+from agentdbg.constants import DEPTH_LIMIT, SPEC_VERSION
 
 # TODO: This is a serialization guardrail, not a security feature
 # We should decide what to do:
 # - Option A: keep it as is, but export as a constant
 # - Option B: remove max depth here and enforce it in redaction
 #             logic instead
-_MAX_JSON_DEPTH = 10
+# TODO: Remove the _RECURSION_LIMIT and use DEPTH_LIMIT instead
+_MAX_JSON_DEPTH = DEPTH_LIMIT
 
 
 class EventType(str, Enum):
