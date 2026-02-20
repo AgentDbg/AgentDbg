@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
-from agentdbg.constants import DEPTH_LIMIT, SPEC_VERSION
+from agentdbg.constants import DEPTH_LIMIT, SPEC_VERSION, TRUNCATED_MARKER
 
 # TODO: This is a serialization guardrail, not a security feature
 # We should decide what to do:
@@ -40,9 +40,10 @@ def utc_now_iso_ms_z() -> str:
 
 
 def _json_safe_value(value: Any, depth: int) -> Any:
-    """Convert value to a JSON-serializable form; non-serializable types become str."""
+    """Convert value to a JSON-serializable form; non-serializable types become str.
+    When depth is exceeded, returns TRUNCATED_MARKER (consistent with redaction)."""
     if depth > _MAX_JSON_DEPTH:
-        return str(value)
+        return TRUNCATED_MARKER
     if value is None or isinstance(value, (bool, int, float, str)):
         return value
     if isinstance(value, dict):
