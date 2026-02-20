@@ -1,5 +1,7 @@
 # AgentDbg
 
+![Dashboard Brag](docs/assets/dashboard.png)
+
 **A debugger for AI agents. Not observability - just debugging.**
 
 AgentDbg captures structured traces of your agent runs - LLM calls, tool calls, errors, state - and gives you a local timeline UI to see exactly what happened.
@@ -52,7 +54,7 @@ pip install -e .
 ### Step 2: Run the example agent
 
 ```bash
-python examples/minimal/simple_agent.py
+python examples/demo/pure_python.py
 ```
 
 This simulates a tiny agent that makes one tool call and one LLM call. Trace data lands in `~/.agentdbg/runs/`.
@@ -65,8 +67,7 @@ agentdbg view
 
 A browser tab opens at `http://127.0.0.1:8712` showing the full run timeline - every event, with inputs, outputs, and timing.
 
-<!-- TODO: add screenshot/GIF of the timeline UI here -->
-<!-- ![Timeline UI](docs/assets/timeline.png) -->
+![Pure Pythonic Agent Timeline UI](docs/assets/timeline-pure-python.gif)
 
 That's it. You're debugging.
 
