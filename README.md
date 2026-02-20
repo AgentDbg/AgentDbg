@@ -57,7 +57,7 @@ pip install -e .
 python examples/demo/pure_python.py
 ```
 
-This simulates a tiny agent that makes one tool call and one LLM call. Trace data lands in `~/.agentdbg/runs/`.
+This simulates a tiny agent that makes several tool and LLM calls and includes loop warnings and errors. Trace data lands in `~/.agentdbg/runs/`.
 
 ### Step 3: Open the timeline
 
