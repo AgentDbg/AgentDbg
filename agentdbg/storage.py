@@ -5,6 +5,7 @@ Local storage for AgentDbg runs: run metadata (run.json) and append-only events 
 Uses config.data_dir (default ~/.agentdbg). Stdlib only.
 """
 import json
+import logging
 import os
 import tempfile
 import uuid
@@ -17,6 +18,8 @@ from agentdbg.events import utc_now_iso_ms_z
 
 RUN_JSON = "run.json"
 EVENTS_JSONL = "events.jsonl"
+
+logger = logging.getLogger(__name__)
 
 # run_id MUST be UUIDv4. We enforce canonical form (lowercase with hyphens).
 _RUN_ID_MAX_LEN = 36
@@ -310,12 +313,18 @@ def load_events(run_id: str, config: AgentDbgConfig) -> list[dict]:
         return []
     events: list[dict] = []
     with open(path, "r", encoding="utf-8") as f:
-        for line in f:
+        for line_no, line in enumerate(f, start=1):
             line = line.strip()
             if not line:
                 continue
             try:
                 events.append(json.loads(line))
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as e:
+                logger.warning(
+                    "load_events: skipping corrupt JSONL line run_id=%s line=%s: %s",
+                    run_id,
+                    line_no,
+                    e,
+                )
                 continue
     return events

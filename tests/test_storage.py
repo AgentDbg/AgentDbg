@@ -3,6 +3,7 @@ Storage tests: create_run, append_event/load_events, finalize_run.
 Uses temp dir via AGENTDBG_DATA_DIR; env restored by fixture.
 """
 import json
+from unittest.mock import patch
 
 import pytest
 
@@ -187,3 +188,32 @@ def test_load_events_skips_invalid_json_lines(temp_data_dir):
     assert len(loaded) == 2
     assert loaded[0].get("event_type") == "RUN_START"
     assert loaded[1].get("event_type") == "RUN_END"
+
+
+def test_load_events_logs_warning_for_corrupt_jsonl_lines(temp_data_dir):
+    """load_events logs a warning for each skipped corrupt JSONL line."""
+    config = load_config()
+    meta = create_run("corrupt_warn_test", config)
+    run_id = meta["run_id"]
+    events_path = config.data_dir / "runs" / run_id / "events.jsonl"
+    # Line 1: valid, line 2: invalid, line 3: invalid
+    events_path.write_text(
+        '{"event_type": "RUN_START"}\nnot json\n{unclosed\n',
+        encoding="utf-8",
+    )
+    with patch("agentdbg.storage.logger") as mock_logger:
+        loaded = load_events(run_id, config)
+    assert len(loaded) == 1
+    assert loaded[0].get("event_type") == "RUN_START"
+    assert mock_logger.warning.call_count == 2
+    # First corrupt line at line_no 2
+    call1 = mock_logger.warning.call_args_list[0]
+    assert call1[0][0] == "load_events: skipping corrupt JSONL line run_id=%s line=%s: %s"
+    assert call1[0][1] == run_id
+    assert call1[0][2] == 2
+    assert isinstance(call1[0][3], json.JSONDecodeError)
+    # Second corrupt line at line_no 3
+    call2 = mock_logger.warning.call_args_list[1]
+    assert call2[0][1] == run_id
+    assert call2[0][2] == 3
+    assert isinstance(call2[0][3], json.JSONDecodeError)
