@@ -7,11 +7,11 @@ Config is loaded once at app creation and cached on app.state.
 """
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.responses import FileResponse
 
 import agentdbg.storage as storage
-from agentdbg.config import load_config
+from agentdbg.config import AgentDbgConfig, load_config
 from agentdbg.constants import SPEC_VERSION
 
 UI_STATIC_DIR = Path(__file__).resolve().parent / "ui_static"
@@ -21,22 +21,25 @@ UI_APP_JS_PATH = UI_STATIC_DIR / "app.js"
 FAVICON_PATH = UI_STATIC_DIR / "favicon.svg"
 
 
+def _get_config(request: Request) -> AgentDbgConfig:
+    """Return config cached on app state (set at app creation)."""
+    return request.app.state.config
+
+
 def create_app() -> FastAPI:
     """Create and return the FastAPI application for the local viewer."""
     app = FastAPI(title="AgentDbg Viewer")
     app.state.config = load_config()
 
     @app.get("/api/runs")
-    def get_runs(request: Request) -> dict:
+    def get_runs(config: AgentDbgConfig = Depends(_get_config)) -> dict:
         """List recent runs. Response: { spec_version, runs }."""
-        config = request.app.state.config
         runs = storage.list_runs(limit=50, config=config)
         return {"spec_version": SPEC_VERSION, "runs": runs}
 
     @app.get("/api/runs/{run_id}")
-    def get_run_meta(request: Request, run_id: str) -> dict:
+    def get_run_meta(run_id: str, config: AgentDbgConfig = Depends(_get_config)) -> dict:
         """Return run.json metadata for the given run_id."""
-        config = request.app.state.config
         try:
             return storage.load_run_meta(run_id, config)
         except ValueError:
@@ -45,9 +48,8 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail="run not found")
 
     @app.get("/api/runs/{run_id}/events")
-    def get_run_events(request: Request, run_id: str) -> dict:
+    def get_run_events(run_id: str, config: AgentDbgConfig = Depends(_get_config)) -> dict:
         """Return events array for the run. 404 if run not found."""
-        config = request.app.state.config
         try:
             storage.load_run_meta(run_id, config)
         except ValueError:
