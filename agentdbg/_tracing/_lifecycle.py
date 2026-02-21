@@ -77,7 +77,7 @@ def _run_context(
     )
 
     def _finish_run(status: str) -> None:
-        _invoke_run_exit(*exc_info)
+        _invoke_run_exit(run_id, *exc_info)
         payload_end = _run_end_payload(status, counts, started_at)
         ev_end = new_event(EventType.RUN_END, run_id, "run_end", payload_end)
         append_event(run_id, ev_end, config)

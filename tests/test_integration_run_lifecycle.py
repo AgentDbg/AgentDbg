@@ -34,7 +34,7 @@ def test_enter_and_exit_called_once_for_nested_runs(temp_data_dir):
     def on_enter():
         enter_count.append(1)
 
-    def on_exit(_et, _ev, _tb):
+    def on_exit(_run_id, _et, _ev, _tb):
         exit_count.append(1)
 
     register_run_enter(on_enter)
@@ -52,10 +52,10 @@ def test_enter_and_exit_called_once_for_nested_runs(temp_data_dir):
 
 
 def test_exit_receives_exception_info_when_run_raises(temp_data_dir):
-    """When the run raises, run_exit is called with exc_type, exc_value, and traceback set."""
+    """When the run raises, run_exit is called with run_id, exc_type, exc_value, and traceback set."""
     exit_info = []
 
-    def on_exit(exc_type, exc_value, tb):
+    def on_exit(_run_id, exc_type, exc_value, tb):
         exit_info.append((exc_type, exc_value, tb))
 
     register_run_exit(on_exit)
@@ -75,7 +75,7 @@ def test_exit_receives_none_when_run_succeeds(temp_data_dir):
     """When the run completes normally, run_exit is called with (None, None, None)."""
     exit_info = []
 
-    def on_exit(exc_type, exc_value, tb):
+    def on_exit(_run_id, exc_type, exc_value, tb):
         exit_info.append((exc_type, exc_value, tb))
 
     register_run_exit(on_exit)
@@ -91,7 +91,7 @@ def test_run_exit_callback_event_before_run_end_and_exc_when_raises(temp_data_di
     """run_exit callback that records an event: event is written before RUN_END; exc_type is set when run raises."""
     exit_exc_type = []
 
-    def on_exit(exc_type, exc_value, tb):
+    def on_exit(_run_id, exc_type, exc_value, tb):
         exit_exc_type.append(exc_type)
         record_tool_call("run_exit_flush", args={}, result=None, meta={"from": "run_exit"})
 

@@ -25,6 +25,7 @@ dev = [
 
 [project.optional-dependencies]
 langchain = ["langchain>=1.2.10"]
+crewai = ["crewai[tools]>=1.6.1"]
 examples = [
     "langchain-examples @ {root:uri}/examples/langchain",
     "minimal-examples @ {root:uri}/examples/minimal",

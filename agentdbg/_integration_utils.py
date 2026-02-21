@@ -8,11 +8,12 @@ No plugin discovery or auto-loading; registration is explicit on integration imp
 from types import TracebackType
 from typing import Callable
 
-# Callbacks: run_enter() takes no args; run_exit(exc_type, exc_value, traceback).
+# Callbacks: run_enter() takes no args; run_exit(run_id, exc_type, exc_value, traceback).
 _run_enter_callbacks: list[Callable[[], None]] = []
 _run_exit_callbacks: list[
     Callable[
         [
+            str,
             type[BaseException] | None,
             BaseException | None,
             TracebackType | None,
@@ -31,6 +32,7 @@ def register_run_enter(fn: Callable[[], None]) -> None:
 def register_run_exit(
     fn: Callable[
         [
+            str,
             type[BaseException] | None,
             BaseException | None,
             TracebackType | None,
@@ -38,7 +40,7 @@ def register_run_exit(
         None,
     ],
 ) -> None:
-    """Register a callback to run at outermost run exit (finally). Receives exc_type, exc_value, traceback. Idempotent."""
+    """Register a callback to run at outermost run exit (finally). Receives run_id, exc_type, exc_value, traceback. Idempotent."""
     if fn not in _run_exit_callbacks:
         _run_exit_callbacks.append(fn)
 
@@ -53,14 +55,15 @@ def _invoke_run_enter() -> None:
 
 
 def _invoke_run_exit(
+    run_id: str,
     exc_type: type[BaseException] | None,
     exc_value: BaseException | None,
     traceback: TracebackType | None,
 ) -> None:
-    """Invoke all registered run_exit callbacks with exception info. One failure does not stop others."""
+    """Invoke all registered run_exit callbacks with run_id and exception info. One failure does not stop others."""
     for cb in _run_exit_callbacks:
         try:
-            cb(exc_type, exc_value, traceback)
+            cb(run_id, exc_type, exc_value, traceback)
         except Exception:
             pass
 
