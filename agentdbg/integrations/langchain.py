@@ -6,10 +6,7 @@ Uses only AgentDbg SDK: record_llm_call, record_tool_call. No CLI or server impo
 from typing import Any
 
 from agentdbg.tracing import record_llm_call, record_tool_call
-
-
-class MissingOptionalDependencyError(ImportError):
-    """Raised when the LangChain/LangGraph integration is used without optional deps installed."""
+from agentdbg.integrations._error import MissingOptionalDependencyError
 
 
 try:
