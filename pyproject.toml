@@ -23,14 +23,6 @@ dev = [
     "ruff>=0.15.1",
 ]
 
-[project.optional-dependencies]
-langchain = ["langchain>=1.2.10"]
-crewai = ["crewai[tools]>=1.6.1"]
-examples = [
-    "langchain-examples @ {root:uri}/examples/langchain",
-    "minimal-examples @ {root:uri}/examples/minimal",
-]
-
 [project.scripts]
 agentdbg = "agentdbg.cli:main"
 
@@ -44,5 +36,25 @@ build-backend = "hatchling.build"
 path = "agentdbg/version.py"
 pattern = "^version = \"(?P<version>.*)\"$"
 
+[project.optional-dependencies]
+langchain = ["langchain>=1.2.10"]
+crewai = ["crewai[tools]>=1.9.3"]
+examples = [
+    "langchain-examples @ {root:uri}/examples/langchain",
+    "minimal-examples @ {root:uri}/examples/minimal",
+]
+
 [tool.hatch.metadata]
 allow-direct-references = true
+
+[tool.uv]
+conflicts = [
+    [  # Examples should be installed separately from the core
+        { extra = "examples" },
+        { extra = "crewai" },
+    ],
+    [  # Examples should be installed separately from the core
+        { extra = "examples" },
+        { extra = "langchain" },
+    ],
+]
