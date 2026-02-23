@@ -26,8 +26,7 @@ try:
     )
 except ImportError as e:
     raise MissingOptionalDependencyError(
-        "The CrewAI integration requires optional dependencies that are not installed. "
-        "Install with: pip install agentdbg[crewai]"
+        "CrewAI integration requires optional deps. Install with `pip install agentdbg[crewai]`."
     ) from e
 
 
