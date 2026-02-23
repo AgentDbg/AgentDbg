@@ -2,28 +2,78 @@
 
 ![Dashboard Brag](docs/assets/dashboard.png)
 
-**A debugger for AI agents. Not observability - just debugging.**
+**The step-through debugger for AI agents.**
 
-AgentDbg captures structured traces of your agent runs - LLM calls, tool calls, errors, state - and gives you a local timeline UI to see exactly what happened.
+AgentDbg captures a structured trace of every agent run - LLM calls, tool calls, errors, state updates, loop warnings - and gives you a clean local timeline to see exactly what happened.
 
-Everything stays on your machine. No cloud, no accounts, no telemetry.
+Add `@trace`, run your agent, then run:
 
----
+```
+agentdbg view
+```
+
+In under 10 minutes, you can inspect a full execution timeline with inputs, outputs, status, and failure evidence - all on your machine.
+
+**No cloud. No accounts. No telemetry.**
+
+## Why AgentDbg?
+
+Agents fail in ways logs don't explain:
+
+- Silent loops that burn tokens
+- Tool schema mismatches and malformed arguments
+- Prompt regressions ("it worked yesterday")
+- Flaky, non-deterministic runs
+- "Why did it do that?"
+
+AgentDbg makes agent executions **legible**.
+
+Instead of scattered logs, you get:
+
+- A chronological timeline of events
+- Expandable LLM calls (prompt, response, usage)
+- Tool calls with args, results, and error status
+- Highlighted loop warnings with evidence
+- A self-contained run artifact you can export
+
+
+## What you get (per run)
+
+Each run produces a local artifact:
+
+- `run.json` - metadata, status, counts
+- `events.jsonl` - full structured event stream
+
+In the UI, you see:
+
+- Run status (ok / error)
+- Duration
+- LLM call count
+- Tool call count
+- Error count
+- Loop warnings (if any)
+
+Everything is written to `~/.agentdbg/` as plain JSON files.
+Nothing leaves your machine.
+
 
 ## What AgentDbg is
 
-- A **debugger**: instrument your agent, run it, inspect a timeline of every LLM call, tool call, and error.
-- **Local-first**: traces are written to `~/.agentdbg/` as plain JSONL files. Nothing leaves your machine.
-- **Redacted by default**: API keys, tokens, and secrets are scrubbed before they hit disk. You never accidentally commit credentials to a trace.
-- **Framework-agnostic**: works with any Python code. Optional integrations (LangChain, etc.) are just convenience.
+- A **development-time debugger** for AI agents
+- **Local-first**: traces stored as JSONL on disk
+- **Framework-agnostic**: works with any Python code
+- **Redacted by default**: secrets scrubbed before writing to disk
+- Built for the "why did it do that?" moment
 
-## What AgentDbg is NOT
+## What AgentDbg is NOT (v0.1 scope)
 
-- Not an observability platform (no dashboards, no metrics, no alerting).
-- Not a hosted service (no cloud, no accounts, no SSO).
-- Not tied to any framework (no LangChain/OpenAI lock-in).
+- Not a hosted service
+- Not a production observability platform
+- Not dashboards or alerting
+- Not deterministic replay (planned v0.2+)
+- Not tied to a single framework
 
----
+If observability tells you how your system behaves in production, AgentDbg helps you understand why your agent behaved that way while you're building it.
 
 ## Get running in 5 minutes
 
@@ -71,7 +121,6 @@ A browser tab opens at `http://127.0.0.1:8712` showing the full run timeline - e
 
 That's it. You're debugging.
 
----
 
 ## Instrument your own agent
 
@@ -113,7 +162,6 @@ Then `agentdbg view` to see the timeline.
 | Errors | `@trace` (automatic) | Exception type, message, stack trace |
 | Loop warnings | Automatic detection | Repetitive pattern + evidence |
 
----
 
 ## CLI reference
 
@@ -139,7 +187,6 @@ agentdbg view --no-browser # just print the URL
 agentdbg export <RUN_ID> --out run.json
 ```
 
----
 
 ## Redaction & privacy
 
@@ -156,7 +203,6 @@ export AGENTDBG_MAX_FIELD_BYTES=20000       # truncation limit
 
 You can also configure redaction in `.agentdbg/config.yaml` (project root) or `~/.agentdbg/config.yaml`.
 
----
 
 ## Storage
 
@@ -176,7 +222,6 @@ Override the location:
 export AGENTDBG_DATA_DIR=/path/to/traces
 ```
 
----
 
 ## Integrations
 
@@ -211,7 +256,6 @@ See `examples/langchain/minimal.py` for a runnable example.
 
 Until an adapter exists for your framework, use the core SDK: `@trace` + `record_llm_call` / `record_tool_call`.
 
----
 
 ## Development
 
@@ -220,7 +264,6 @@ uv venv && uv sync && uv pip install -e ".[langchain]"
 uv run pytest
 ```
 
----
 
 ## Roadmap
 
@@ -237,7 +280,6 @@ uv run pytest
 - Eval + regression CI
 - Optional hosted trace store
 
----
 
 ## License
 
