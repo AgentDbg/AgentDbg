@@ -5,6 +5,7 @@ import importlib
 import pytest
 
 import agentdbg.integrations as integrations
+from agentdbg.integrations._error import MissingOptionalDependencyError
 
 
 def has_module(name):
@@ -73,9 +74,21 @@ def test_dir_includes_all_attributes():
         assert name in dir_
 
 
-# def test_missing_dependency_raises():
-#     if importlib.util.find_spec("langchain_core") is not None:
-#         pytest.skip("langchain installed")
+def test_missing_dependency_raises(monkeypatch):
+    integrations.__dict__.pop("AgentDbgLangChainCallbackHandler", None)
+    integrations.__dict__.pop("langchain", None)
+    sys.modules.pop("agentdbg.integrations.langchain", None)
 
-#     with pytest.raises(agentdbg.integrations.MissingOptionalDependencyError):
-#         integrations.AgentDbgLangChainCallbackHandler
+    real_import_module = importlib.import_module
+
+    def fake_import_module(name, package=None):
+        if name == "agentdbg.integrations.langchain":
+            raise MissingOptionalDependencyError("langchain_core not installed")
+        return real_import_module(name, package)
+
+    monkeypatch.setattr(importlib, "import_module", fake_import_module)
+
+    with pytest.raises(
+        MissingOptionalDependencyError, match="langchain_core not installed"
+    ):
+        _ = integrations.AgentDbgLangChainCallbackHandler

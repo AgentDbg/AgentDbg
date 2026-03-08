@@ -232,6 +232,42 @@ def test_normalize_usage_accepts_floats_and_mixed_types():
     assert out["total_tokens"] == 30
 
 
+@pytest.mark.parametrize("name", [None, "", "passed_name"])
+@pytest.mark.parametrize("as_kwarg", [False, True])
+def test_trace_sets_name(monkeypatch, name, as_kwarg):
+    """Tests if trace names are correctly set."""
+    captured = {}
+
+    class DummyContext:
+        def __enter__(self):
+            return None
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def fake_run_context(*, name, func):
+        captured["name"] = name
+        captured["func"] = func
+        return DummyContext()
+
+    monkeypatch.setattr("agentdbg._tracing._lifecycle._run_context", fake_run_context)
+
+    def dummy_func(*args, **kwargs):
+        pass
+
+    dummy_func.__name__ = "dummy_func_name"
+
+    if as_kwarg:
+        wrapped = trace(name=name)(dummy_func)
+    else:
+        wrapped = trace(name)(dummy_func)
+
+    wrapped()
+
+    assert captured["name"] == name
+    assert captured["func"] is dummy_func
+
+
 def test_traced_run_success_one_run_start_one_run_end(temp_data_dir):
     """traced_run(name=...) writes exactly one RUN_START and one RUN_END; run.json status == 'ok'."""
     with traced_run(name="my_agent_run"):
