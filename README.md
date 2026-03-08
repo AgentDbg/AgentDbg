@@ -301,6 +301,27 @@ def run_agent():
 
 See `examples/langchain/minimal.py` for a runnable example.
 
+### OpenAI Agents SDK (v0.1)
+
+Optional tracing adapter that auto-records generation, function, and handoff spans. Requires `openai-agents`:
+
+```bash
+pip install -e ".[openai-agents]"
+```
+
+```python
+from agentdbg import trace
+from agentdbg.integrations import openai_agents  # registers hooks
+
+
+@trace
+def run_agent():
+    # ... your OpenAI Agents SDK code ...
+    ...
+```
+
+See `examples/openai_agents/minimal.py` for a runnable fake-data example with no API key and no networked model calls.
+
 More framework adapters coming soon.
 
 
@@ -322,7 +343,7 @@ pip install -e .
 
 </details>
 
-For LangChain support: `pip install -e ".[langchain]"`. Run tests: `uv run pytest` (or `pytest`).
+For LangChain support: `pip install -e ".[langchain]"`. For OpenAI Agents support: `pip install -e ".[openai-agents]"`. Run tests: `uv run pytest` (or `pytest`).
 
 
 ## License

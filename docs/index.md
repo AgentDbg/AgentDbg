@@ -40,6 +40,7 @@ A browser tab opens showing every event in the run - tool calls, LLM calls, timi
 |--------|------|------------|
 | **Minimal agent** (pure Python) | `examples/minimal/` | `python examples/minimal/simple_agent.py` |
 | **LangChain minimal** | `examples/langchain/minimal.py` | `uv run --extra langchain python examples/langchain/minimal.py` |
+| **OpenAI Agents minimal** | `examples/openai_agents/minimal.py` | `uv run --extra openai-agents python examples/openai_agents/minimal.py` |
 | **LangChain customer support** (advanced) | `examples/langchain/` | Set API keys, then follow `_customer_support/README.md` |
 | **Demos** (short scripts) | `examples/demo/` | `python examples/demo/pure_python.py` or `python examples/demo/langchain.py` |
 
@@ -56,7 +57,7 @@ After any run, open the timeline with `agentdbg view`.
 | [CLI](cli.md) | `list`, `view`, `export` with options and exit codes |
 | [Viewer](viewer.md) | Timeline UI usage, URL params, live refresh, and development |
 | [SDK](sdk.md) | `@trace`, `traced_run`, `record_llm_call`, `record_tool_call`, `record_state` |
-| [Integrations](integrations.md) | LangChain handler (available) and planned adapters |
+| [Integrations](integrations.md) | LangChain handler, OpenAI Agents adapter, and planned adapters |
 | [Architecture](architecture.md) | Event schema, storage layout, viewer API, loop detection |
 | **Reference** | |
 | [Trace format](reference/trace-format.md) | Event envelope, event types, payload schemas, run.json (public contract) |

@@ -58,16 +58,57 @@ agentdbg view
 
 ---
 
+### OpenAI Agents SDK tracing adapter
+
+**Status: available.** An optional adapter lives at `agentdbg.integrations.openai_agents`. Importing it registers an OpenAI Agents tracing processor that forwards SDK generation, function, and handoff spans into the active AgentDbg run.
+
+**Requirements:** `openai-agents` must be installed. Install the optional dependency group:
+
+```bash
+pip install -e ".[openai-agents]"
+```
+
+If `openai-agents` is not installed, importing the integration raises a clear `ImportError` with install instructions. The integration is optional; the core package does not depend on it.
+
+**Usage:**
+
+```python
+from agentdbg import trace
+from agentdbg.integrations import openai_agents  # registers hooks
+
+
+@trace
+def run_agent():
+    # ... OpenAI Agents SDK code ...
+    pass
+```
+
+The adapter captures:
+
+- **LLM calls** (`GenerationSpanData`): records model, prompt, response, and usage via `record_llm_call`.
+- **Tool calls** (`FunctionSpanData`): records tool name, args, result, and error status via `record_tool_call`.
+- **Handoffs** (`HandoffSpanData`): records a `TOOL_CALL` named `handoff`, with framework-specific details stored in `meta`.
+
+See `examples/openai_agents/minimal.py` for a runnable fake-data example:
+
+```bash
+uv run --extra openai-agents python examples/openai_agents/minimal.py
+agentdbg view
+```
+
+**Notes:**
+
+- The adapter records events only while an explicit AgentDbg run is active; wrap your entrypoint with `@trace` or `traced_run(...)`.
+- Framework-specific span details stay in `meta.openai_agents.*`, not the event payload.
+- The example uses low-level SDK tracing spans with deterministic fake data, so it needs no API key and makes no model calls.
+
+---
+
 ## Planned
 
 Planned framework adapters (not yet implemented):
 
-1. **OpenAI Agents SDK** - instrument agent steps and tool use.
-2. **Agno** - optional adapter for Agno-based agents.
-3. Others as needed (e.g. AutoGen, CrewAI, custom loops).
-
-When an adapter is added, it will be documented here with usage and installation notes.
-
-Until then, use the core SDK: wrap your entrypoint with `@trace` and call `record_llm_call` / `record_tool_call` (and optionally `record_state`) from your own callbacks or run loop.
+1. **Agno** - optional adapter for Agno-based agents.
+2. Others as needed (e.g. AutoGen, CrewAI, custom loops).
 
 For guidance on adding new integrations (optional deps, mapping callbacks to `record_*`, tests), see [CONTRIBUTING.md](../CONTRIBUTING.md#adding-integrations--adapters) in the repo root.
