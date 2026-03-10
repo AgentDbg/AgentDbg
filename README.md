@@ -12,7 +12,7 @@ agentdbg view
 
 In under 10 minutes, you can inspect a full execution timeline with inputs, outputs, status, and failure evidence - all on your machine.
 
-**No cloud. No accounts. No telemetry.**
+**No cloud. No accounts. No telemetry. Everything stays on your machine.**
 
 **Built-in run guardrails:** stop runaway debug sessions when an agent starts looping or exceeds your limits for LLM calls, tool calls, total events, or duration.
 
@@ -47,7 +47,7 @@ This simulates a tiny agent that makes several tool and LLM calls and includes l
 agentdbg view
 ```
 
-A browser tab opens at `http://127.0.0.1:8712` showing the full run timeline - every event, with inputs, outputs, and timing.
+A browser tab opens at `http://127.0.0.1:8712` showing the full run timeline - every event, with inputs, outputs, and timing. The viewer stays running: run more agents and their timelines appear automatically.
 
 <!-- ![Pure Pythonic Agent Timeline UI](https://github.com/AgentDbg/AgentDbg/blob/main/docs/assets/timeline-pure-python.gif?raw=True) -->
 ![Pure Pythonic Agent Timeline UI](docs/assets/timeline-pure-python.gif)
@@ -153,33 +153,27 @@ See [docs/guardrails.md](docs/guardrails.md) for full examples, precedence, and 
 
 In the UI, you see:
 
-- Run status (ok / error)
-- Duration
-- LLM call count
-- Tool call count
-- Error count
-- Loop warnings (if any)
-- A chronological timeline of events
-- Expandable LLM calls (prompt, response, usage)
-- Tool calls with args, results, and error status
-- Highlighted loop warnings with evidence
+- **Run summary panel**: status (ok / error / running), duration, LLM call count, tool call count, error count, loop warnings, jump-to-first-error, jump-to-first-loop-warning
+- **Chronological timeline** of events
+- **Expandable events**: LLM calls (prompt, response, usage), tool calls (args, results, error status), loop warnings with evidence
+- **Live-refresh**: leave `agentdbg view` running — new runs appear in the sidebar, events stream in real-time for running agents
+- **Filter chips**: All, LLM, Tools, Errors, State, Loops
 
 Each run produces `run.json` (metadata, status, counts) and `events.jsonl` (full structured event stream) under `~/.agentdbg/`. Nothing leaves your machine.
 
 
 ## What AgentDbg is
 
-- **Local-first**: traces stored as JSONL on disk
+- **Local-first**: traces stored as JSONL on disk. No cloud, no accounts, no telemetry.
 - **Framework-agnostic**: works with any Python code
 - **Redacted by default**: secrets scrubbed before writing to disk
+- **Active prevention**: stop-on-loop guardrails kill runaway agents before they burn your budget
 - A development-time debugger for the "why did it do that?" moment
 
-## What AgentDbg is NOT (v0.1 scope)
+## What AgentDbg is NOT
 
-- Not a hosted service
-- Not a production observability platform
-- Not dashboards or alerting
-- Not deterministic replay (planned v0.2+)
+- Not a hosted service or cloud platform
+- Not a production observability tool (no dashboards, alerts, or monitoring)
 - Not tied to a single framework
 
 
@@ -196,7 +190,7 @@ agentdbg list --json       # machine-readable output
 ### View a run timeline
 
 ```bash
-agentdbg view              # opens latest run
+agentdbg view              # opens latest run, stays running
 agentdbg view <RUN_ID>     # specific run
 agentdbg view --no-browser # just print the URL
 ```
@@ -282,12 +276,12 @@ export AGENTDBG_DATA_DIR=/path/to/traces
 
 AgentDbg is framework-agnostic at its core. The SDK works with any Python code.
 
-### LangChain / LangGraph (v0.1)
+### LangChain / LangGraph
 
 Optional callback handler that auto-records LLM and tool events. Requires `langchain-core`:
 
 ```bash
-pip install -e ".[langchain]"
+pip install agentdbg[langchain]
 ```
 
 ```python
@@ -303,12 +297,12 @@ def run_agent():
 
 See `examples/langchain/minimal.py` for a runnable example.
 
-### OpenAI Agents SDK (v0.1)
+### OpenAI Agents SDK
 
 Optional tracing adapter that auto-records generation, function, and handoff spans. Requires `openai-agents`:
 
 ```bash
-pip install -e ".[openai]"
+pip install agentdbg[openai]
 ```
 
 ```python
