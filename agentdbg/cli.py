@@ -10,6 +10,7 @@ import threading
 import time
 import webbrowser
 from pathlib import Path
+from typing import Annotated
 
 import typer
 from typer import Exit
@@ -18,11 +19,35 @@ import agentdbg.storage as storage
 from agentdbg.config import load_config
 from agentdbg.constants import SPEC_VERSION
 from agentdbg.server import create_app
+from agentdbg import __version__
 
 EXIT_NOT_FOUND = 2
 EXIT_INTERNAL = 10
 
 app = typer.Typer(help="AgentDbg CLI: list runs, export, or view in browser.")
+
+
+def _version_callback(value: bool) -> None:
+    if value:
+        print(f"AgentDbg {__version__}")
+        raise typer.Exit()
+
+
+@app.callback()
+def version_callback(
+    version: Annotated[
+        bool | None,
+        typer.Option(
+            "--version",
+            "-v",
+            help="Show version and exit.",
+            callback=_version_callback,
+            is_eager=True,
+            show_default=False,
+        ),
+    ] = None,
+):
+    """Show AgentDbg version."""
 
 
 def _wait_for_port(host: str, port: int, timeout_s: float = 5.0) -> bool:
