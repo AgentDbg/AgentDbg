@@ -562,6 +562,33 @@ function renderEvents() {
   timelineEventsEl.appendChild(frag);
 }
 
+/** Indices in `currentEvents` whose detail rows are expanded (used to survive live poll re-renders). */
+function collectExpandedEventIndices() {
+  const open = new Set();
+  timelineEventsEl.querySelectorAll('.event[data-event-index]').forEach((el) => {
+    const raw = el.dataset.eventIndex;
+    const details = el.querySelector('.event-details');
+    if (raw == null || !details || details.style.display !== 'block') return;
+    const idx = parseInt(raw, 10);
+    if (!Number.isNaN(idx)) open.add(idx);
+  });
+  return open;
+}
+
+function restoreExpandedEventIndices(indices) {
+  if (!indices || indices.size === 0) return;
+  timelineEventsEl.querySelectorAll('.event[data-event-index]').forEach((el) => {
+    const raw = el.dataset.eventIndex;
+    if (raw == null) return;
+    const idx = parseInt(raw, 10);
+    if (Number.isNaN(idx) || !indices.has(idx)) return;
+    const details = el.querySelector('.event-details');
+    const toggle = el.querySelector('.toggle');
+    if (details) details.style.display = 'block';
+    if (toggle) toggle.textContent = '▼';
+  });
+}
+
 async function loadEvents(runId, signal) {
   hideTimelineError();
   timelineEmptyEl.style.display = 'none';
@@ -746,8 +773,10 @@ async function pollEventsForCurrentRun() {
       timelineToolbarEl.style.display = 'none';
     } else {
       timelineEmptyEl.style.display = 'none';
+      const expanded = collectExpandedEventIndices();
       renderToolbar(currentEvents);
       renderEvents();
+      restoreExpandedEventIndices(expanded);
     }
     if (currentRunMeta.status !== 'running') clearEventPollInterval();
   } catch (e) {
