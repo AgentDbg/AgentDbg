@@ -8,7 +8,7 @@ AgentDbg is **framework-agnostic** at the core. The SDK is a thin layer: you cal
 
 ---
 
-## Available in v0.1
+## Available
 
 ### LangChain / LangGraph callback handler
 
@@ -121,11 +121,50 @@ As a defensive fallback, the exception is also stored on `PROCESSOR.abort_except
 
 ---
 
+### CrewAI execution-hook adapter
+
+**Status: available.** An optional adapter lives at `agentdbg.integrations.crewai`. Importing it registers CrewAI execution hooks that automatically record LLM and tool calls into the active AgentDbg run.
+
+**Requirements:** `crewai[tools]` must be installed. Install the optional dependency group:
+
+```bash
+pip install -e ".[crewai]"
+```
+
+If `crewai` is not installed, importing the integration raises a clear `ImportError` with install instructions.
+
+**Usage:**
+
+```python
+import agentdbg
+from agentdbg.integrations import crewai as adbg_crewai  # registers hooks
+
+@agentdbg.trace
+def run_crew():
+    # ... your CrewAI crew.kickoff() or flow.kickoff() ...
+    pass
+```
+
+The adapter captures:
+
+- **LLM calls** (`before_llm_call` / `after_llm_call`): records model, prompt messages, and response via `record_llm_call`.
+- **Tool calls** (`before_tool_call` / `after_tool_call`): records tool name, args, result, and timing via `record_tool_call`.
+
+Framework-specific context (agent role, task description, executor ID) is stored in `meta.crewai.*`.
+
+**Notes:**
+
+- The adapter requires an active AgentDbg run — wrap your entrypoint with `@trace` or `traced_run(...)`.
+- Hook ordering caveat: if another before-hook returns `False` and blocks execution, that specific call may not be captured.
+- No runnable example script yet — see the [Known issues in CHANGELOG](../CHANGELOG.md) for status.
+
+---
+
 ## Planned
 
 Planned framework adapters (not yet implemented):
 
 1. **Agno** - optional adapter for Agno-based agents.
-2. Others as needed (e.g. AutoGen, CrewAI, custom loops).
+2. Others as needed (e.g. AutoGen, custom loops).
 
 For guidance on adding new integrations (optional deps, mapping callbacks to `record_*`, tests), see [CONTRIBUTING.md](../CONTRIBUTING.md#adding-integrations--adapters) in the repo root.

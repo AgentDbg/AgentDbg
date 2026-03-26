@@ -316,7 +316,25 @@ def run_agent():
 
 See `examples/openai_agents/minimal.py` for a runnable fake-data example with no API key and no networked model calls.
 
-More framework adapters coming soon.
+### CrewAI
+
+Optional execution-hook adapter that auto-records LLM and tool events from CrewAI crews and flows. Requires `crewai[tools]`:
+
+```bash
+pip install agentdbg[crewai]
+```
+
+```python
+import agentdbg
+from agentdbg.integrations import crewai as adbg_crewai  # registers hooks
+
+@agentdbg.trace
+def run_crew():
+    # ... your crew.kickoff() or flow.kickoff() ...
+    ...
+```
+
+More framework adapters coming soon (Agno, and others).
 
 
 ## Tutorials
