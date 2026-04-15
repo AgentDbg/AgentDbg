@@ -1,8 +1,7 @@
 """
 CLI tests using Typer CliRunner.
 Every test uses temp dir via AGENTDBG_DATA_DIR (fixture restores env).
-Covers: list (empty dir exit 0), export (missing run exit 2), list --json (valid JSON with spec_version, runs),
-        _wait_for_port readiness probe, and browser-open ordering for `view`.
+Covers: list, export, view, baseline, assert, diff commands.
 """
 
 import json
@@ -14,8 +13,31 @@ import pytest
 from typer.testing import CliRunner
 
 from agentdbg.cli import _wait_for_port, app
+from agentdbg.config import load_config
+from agentdbg.events import EventType, new_event
+from agentdbg.storage import append_event, create_run, finalize_run
 
 runner = CliRunner()
+
+
+def _make_run(config, *, name="test_run", events=None, status="ok"):
+    """Helper: create a run, append events, finalize, return run_id."""
+    run = create_run(name, config)
+    run_id = run["run_id"]
+    counts = {"llm_calls": 0, "tool_calls": 0, "errors": 0, "loop_warnings": 0}
+    for ev_type, ev_name, payload in events or []:
+        ev = new_event(ev_type, run_id, ev_name, payload)
+        append_event(run_id, ev, config)
+        if ev_type == EventType.TOOL_CALL:
+            counts["tool_calls"] += 1
+        elif ev_type == EventType.LLM_CALL:
+            counts["llm_calls"] += 1
+        elif ev_type == EventType.ERROR:
+            counts["errors"] += 1
+        elif ev_type == EventType.LOOP_WARNING:
+            counts["loop_warnings"] += 1
+    finalize_run(run_id, status, counts, config)
+    return run_id
 
 
 @pytest.fixture
@@ -233,3 +255,178 @@ def test_view_server_stays_running_until_interrupt(monkeypatch, empty_data_dir):
     view_thread.join(timeout=5)
     assert view_result["done"]
     assert view_result["exit_code"] == 0
+
+
+# ---------------------------------------------------------------------------
+# baseline command
+# ---------------------------------------------------------------------------
+
+
+def test_baseline_creates_file(empty_data_dir):
+    """agentdbg baseline RUN_ID --out <path> creates a valid baseline JSON."""
+    config = load_config()
+    run_id = _make_run(
+        config,
+        events=[(EventType.TOOL_CALL, "search", {})],
+    )
+    out = empty_data_dir / "bl.json"
+    result = runner.invoke(app, ["baseline", run_id, "--out", str(out)])
+    assert result.exit_code == 0
+    assert out.is_file()
+    data = json.loads(out.read_text())
+    assert data["source_run_id"] == run_id
+    assert "summary" in data
+    assert data["summary"]["tool_calls"] == 1
+
+
+def test_baseline_missing_run_exit_two(empty_data_dir):
+    result = runner.invoke(
+        app, ["baseline", "missing_run", "--out", str(empty_data_dir / "bl.json")]
+    )
+    assert result.exit_code == 2
+
+
+# ---------------------------------------------------------------------------
+# assert command
+# ---------------------------------------------------------------------------
+
+
+def test_assert_exit_zero_on_pass(empty_data_dir):
+    """assert exits 0 when all checks pass."""
+    config = load_config()
+    run_id = _make_run(config, events=[(EventType.TOOL_CALL, "t", {})])
+    result = runner.invoke(app, ["assert", run_id, "--max-steps", "10"])
+    assert result.exit_code == 0
+    assert "PASSED" in result.output
+
+
+def test_assert_exit_one_on_fail(empty_data_dir):
+    """assert exits 1 when a check fails."""
+    config = load_config()
+    events = [(EventType.TOOL_CALL, f"t{i}", {}) for i in range(5)]
+    run_id = _make_run(config, events=events)
+    result = runner.invoke(app, ["assert", run_id, "--max-steps", "3"])
+    assert result.exit_code == 1
+    assert "FAILED" in result.output
+
+
+def test_assert_exit_two_missing_baseline(empty_data_dir):
+    """assert exits 2 when --baseline points to nonexistent file."""
+    config = load_config()
+    run_id = _make_run(config, events=[])
+    result = runner.invoke(
+        app,
+        ["assert", run_id, "--baseline", str(empty_data_dir / "nope.json")],
+    )
+    assert result.exit_code == 2
+
+
+def test_assert_json_format(empty_data_dir):
+    """assert --format json outputs valid JSON."""
+    config = load_config()
+    run_id = _make_run(config, events=[])
+    result = runner.invoke(
+        app, ["assert", run_id, "--max-steps", "10", "--format", "json"]
+    )
+    assert result.exit_code == 0
+    data = json.loads(result.output)
+    assert data["passed"] is True
+
+
+def test_assert_markdown_format(empty_data_dir):
+    """assert --format markdown outputs markdown table."""
+    config = load_config()
+    run_id = _make_run(config, events=[])
+    result = runner.invoke(
+        app, ["assert", run_id, "--max-steps", "10", "--format", "markdown"]
+    )
+    assert result.exit_code == 0
+    assert "AgentDbg Regression Report" in result.output
+
+
+def test_assert_with_baseline(empty_data_dir):
+    """assert with --baseline compares against baseline correctly."""
+    config = load_config()
+    bl_run = _make_run(
+        config,
+        name="baseline_run",
+        events=[(EventType.TOOL_CALL, "t", {}) for _ in range(5)],
+    )
+    bl_path = empty_data_dir / "bl.json"
+    runner.invoke(app, ["baseline", bl_run, "--out", str(bl_path)])
+
+    check_run = _make_run(
+        config,
+        name="check_run",
+        events=[(EventType.TOOL_CALL, "t", {}) for _ in range(5)],
+    )
+    result = runner.invoke(
+        app, ["assert", check_run, "--baseline", str(bl_path), "--max-steps", "100"]
+    )
+    assert result.exit_code == 0
+
+
+def test_assert_no_loops_flag(empty_data_dir):
+    """assert --no-loops fails when loop warnings present."""
+    config = load_config()
+    run_id = _make_run(
+        config,
+        events=[(EventType.LOOP_WARNING, "loop", {"pattern": "A"})],
+    )
+    result = runner.invoke(app, ["assert", run_id, "--no-loops"])
+    assert result.exit_code == 1
+
+
+# ---------------------------------------------------------------------------
+# diff command
+# ---------------------------------------------------------------------------
+
+
+def test_diff_two_runs(empty_data_dir):
+    """diff RUN_A RUN_B produces output with run comparison header."""
+    config = load_config()
+    rid_a = _make_run(
+        config,
+        name="a",
+        events=[(EventType.TOOL_CALL, "search", {})],
+    )
+    rid_b = _make_run(
+        config,
+        name="b",
+        events=[(EventType.TOOL_CALL, "parse", {})],
+    )
+    result = runner.invoke(app, ["diff", rid_a, rid_b])
+    assert result.exit_code == 0
+    assert "Run comparison:" in result.output
+
+
+def test_diff_with_baseline(empty_data_dir):
+    """diff RUN_A --baseline <file> works."""
+    config = load_config()
+    bl_run = _make_run(
+        config,
+        name="bl",
+        events=[(EventType.TOOL_CALL, "t", {})],
+    )
+    bl_path = empty_data_dir / "bl.json"
+    runner.invoke(app, ["baseline", bl_run, "--out", str(bl_path)])
+
+    run_id = _make_run(
+        config,
+        name="current",
+        events=[
+            (EventType.TOOL_CALL, "t", {}),
+            (EventType.TOOL_CALL, "new_tool", {}),
+        ],
+    )
+    result = runner.invoke(app, ["diff", run_id, "--baseline", str(bl_path)])
+    assert result.exit_code == 0
+    assert "new_tool" in result.output
+
+
+def test_diff_missing_args(empty_data_dir):
+    """diff with only one run and no --baseline exits with error."""
+    config = load_config()
+    rid = _make_run(config, events=[])
+    result = runner.invoke(app, ["diff", rid])
+    assert result.exit_code == 2
