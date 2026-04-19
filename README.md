@@ -206,6 +206,43 @@ agentdbg view --no-browser # just print the URL
 agentdbg export <RUN_ID> --out run.json
 ```
 
+### Capture a baseline
+
+```bash
+agentdbg baseline <RUN_ID>                          # saves to .agentdbg/baselines/<run_name>.json
+agentdbg baseline <RUN_ID> --out baselines/v1.json  # custom path
+```
+
+### Assert against a baseline
+
+```bash
+agentdbg assert <RUN_ID> --baseline .agentdbg/baselines/my_agent.json
+agentdbg assert <RUN_ID> --max-steps 80 --no-loops  # standalone thresholds
+agentdbg assert <RUN_ID> --baseline baseline.json --format markdown  # for CI summaries
+```
+
+Exit code `0` = pass, `1` = fail. See [docs/regression-testing.md](docs/regression-testing.md) for the full workflow and [docs/reference/policy.md](docs/reference/policy.md) for policy YAML configuration.
+
+### Diff two runs
+
+```bash
+agentdbg diff <RUN_A> <RUN_B>
+agentdbg diff <RUN_A> --baseline .agentdbg/baselines/my_agent.json
+```
+
+
+## Regression testing
+
+Baselines, assertions, and diffs let you catch agent regressions — locally or in CI. The workflow:
+
+1. **Baseline** a known-good run (`agentdbg baseline`)
+2. **Assert** future runs against it (`agentdbg assert --baseline ...`)
+3. **Diff** failures to see what changed (`agentdbg diff`)
+
+Control assertion thresholds via a committed `.agentdbg/policy.yaml` file or CLI flags. Supports text, JSON, and markdown output formats.
+
+See [docs/regression-testing.md](docs/regression-testing.md) for the end-to-end guide and [docs/reference/policy.md](docs/reference/policy.md) for the policy file reference.
+
 
 ## Redaction & privacy
 

@@ -60,7 +60,8 @@ After any run, open the timeline with `agentdbg view`.
 |------|-------------|
 | [Getting started](getting-started.md) | Installation (uv/pip), quickstart, data dir, redaction |
 | [Guardrails](guardrails.md) | Stop runaway runs with loop, count, and duration limits |
-| [CLI](cli.md) | `list`, `view`, `export` with options and exit codes |
+| [Regression testing](regression-testing.md) | Baseline, assert, and diff workflow for catching agent regressions |
+| [CLI](cli.md) | `list`, `view`, `export`, `baseline`, `assert`, `diff` with options and exit codes |
 | [Viewer](viewer.md) | Timeline UI usage, URL params, live refresh, and development |
 | [SDK](sdk.md) | `@trace`, `traced_run`, `has_active_run`, `record_llm_call`, `record_tool_call`, `record_state` |
 | [Integrations](integrations.md) | LangChain handler, OpenAI Agents adapter, and planned adapters |
@@ -68,3 +69,4 @@ After any run, open the timeline with `agentdbg view`.
 | **Reference** | |
 | [Trace format](reference/trace-format.md) | Event envelope, event types, payload schemas, run.json (public contract) |
 | [Configuration](reference/config.md) | Env vars, YAML precedence, redaction, truncation, loop detection, guardrails |
+| [Policy YAML](reference/policy.md) | Assertion policy file format, fields, threshold semantics, CLI mapping |
