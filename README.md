@@ -1,20 +1,20 @@
-# AgentDbg
+# Maida
 
 **The step-through debugger for AI agents.**
 
 ![X (formerly Twitter) Follow](https://img.shields.io/twitter/follow/agent_dbg)
-[![PyPI version](https://img.shields.io/pypi/v/agentdbg.svg)](https://pypi.org/project/agentdbg/)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/agentdbg)
+[![PyPI version](https://img.shields.io/pypi/v/maida.svg)](https://pypi.org/project/maida/)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/maida)
 
 
 
 
-AgentDbg captures a structured trace of every agent run - LLM calls, tool calls, errors, state updates, loop warnings - and gives you a clean local timeline to see exactly what happened.
+Maida captures a structured trace of every agent run - LLM calls, tool calls, errors, state updates, loop warnings - and gives you a clean local timeline to see exactly what happened.
 
 Add `@trace`, run your agent, then run:
 
 ```
-agentdbg view
+maida view
 ```
 
 In under 10 minutes, you can inspect a full execution timeline with inputs, outputs, status, and failure evidence - all on your machine.
@@ -27,16 +27,16 @@ In under 10 minutes, you can inspect a full execution timeline with inputs, outp
 
 ## Get running in 5 minutes
 
-Three commands. No config files, no API keys, no sign-up. Install: `pip install agentdbg`. Then:
+Three commands. No config files, no API keys, no sign-up. Install: `pip install maida`. Then:
 
 1. [Install (one-time)](#step-1-install)
 2. [Run example](#step-2-run-the-example-agent)
-3. [`agentdbg view`](#step-3-open-the-timeline)
+3. [`maida view`](#step-3-open-the-timeline)
 
 ### Step 1: Install
 
 ```bash
-pip install agentdbg
+pip install maida
 ```
 
 ### Step 2: Run the example agent
@@ -45,12 +45,12 @@ pip install agentdbg
 python examples/demo/pure_python.py
 ```
 
-This simulates a tiny agent that makes several tool and LLM calls and includes loop warnings and errors. Trace data lands in `~/.agentdbg/runs/`.
+This simulates a tiny agent that makes several tool and LLM calls and includes loop warnings and errors. Trace data lands in `~/.maida/runs/`.
 
 ### Step 3: Open the timeline
 
 ```bash
-agentdbg view
+maida view
 ```
 
 A browser tab opens at `http://127.0.0.1:8712` showing the full run timeline - every event, with inputs, outputs, and timing. The viewer stays running: run more agents and their timelines appear automatically.
@@ -65,7 +65,7 @@ That's it. You're debugging.
 Add three lines to any Python agent:
 
 ```python
-from agentdbg import trace, record_llm_call, record_tool_call
+from maida import trace, record_llm_call, record_tool_call
 
 @trace
 def run_agent():
@@ -87,7 +87,7 @@ def run_agent():
 run_agent()
 ```
 
-Then `agentdbg view` to see the timeline.
+Then `maida view` to see the timeline.
 
 ### What gets captured
 
@@ -105,7 +105,7 @@ Then `agentdbg view` to see the timeline.
 Guardrails are opt-in and meant for development-time safety rails: they let you stop an agent when it starts looping or using more budget than intended, while still writing a normal trace you can inspect afterward.
 
 ```python
-from agentdbg import (
+from maida import (
     AgentDbgGuardrailExceeded,
     AgentDbgLoopAbort,
     record_llm_call,
@@ -128,12 +128,12 @@ def run_agent():
 try:
     run_agent()
 except AgentDbgLoopAbort:
-    print("AgentDbg stopped a repeated loop.")
+    print("Maida stopped a repeated loop.")
 except AgentDbgGuardrailExceeded as exc:
     print(exc.guardrail, exc.threshold, exc.actual)
 ```
 
-When a guardrail fires, AgentDbg uses the existing lifecycle:
+When a guardrail fires, Maida uses the existing lifecycle:
 
 - it records the event that triggered the issue
 - it records `ERROR`
@@ -149,7 +149,7 @@ Available guardrails:
 - `max_events`
 - `max_duration_s`
 
-You can set them in `@trace(...)`, `traced_run(...)`, `.agentdbg/config.yaml`, `~/.agentdbg/config.yaml`, or env vars like `AGENTDBG_MAX_LLM_CALLS=50`.
+You can set them in `@trace(...)`, `traced_run(...)`, `.maida/config.yaml`, `~/.maida/config.yaml`, or env vars like `MAIDA_MAX_LLM_CALLS=50`.
 
 See [docs/guardrails.md](docs/guardrails.md) for full examples, precedence, and trace behavior.
 
@@ -161,13 +161,13 @@ In the UI, you see:
 - **Run summary panel**: status (ok / error / running), duration, LLM call count, tool call count, error count, loop warnings, jump-to-first-error, jump-to-first-loop-warning
 - **Chronological timeline** of events
 - **Expandable events**: LLM calls (prompt, response, usage), tool calls (args, results, error status), loop warnings with evidence
-- **Live-refresh**: leave `agentdbg view` running — new runs appear in the sidebar, events stream in real-time for running agents
+- **Live-refresh**: leave `maida view` running — new runs appear in the sidebar, events stream in real-time for running agents
 - **Filter chips**: All, LLM, Tools, Errors, State, Loops
 
-Each run produces `run.json` (metadata, status, counts) and `events.jsonl` (full structured event stream) under `~/.agentdbg/`. Nothing leaves your machine.
+Each run produces `run.json` (metadata, status, counts) and `events.jsonl` (full structured event stream) under `~/.maida/`. Nothing leaves your machine.
 
 
-## What AgentDbg is
+## What Maida is
 
 - **Local-first**: traces stored as JSONL on disk. No cloud, no accounts, no telemetry.
 - **Framework-agnostic**: works with any Python code
@@ -175,7 +175,7 @@ Each run produces `run.json` (metadata, status, counts) and `events.jsonl` (full
 - **Active prevention**: stop-on-loop guardrails kill runaway agents before they burn your budget
 - A development-time debugger for the "why did it do that?" moment
 
-## What AgentDbg is NOT
+## What Maida is NOT
 
 - Not a hosted service or cloud platform
 - Not a production observability tool (no dashboards, alerts, or monitoring)
@@ -187,38 +187,38 @@ Each run produces `run.json` (metadata, status, counts) and `events.jsonl` (full
 ### List recent runs
 
 ```bash
-agentdbg list              # last 20 runs
-agentdbg list --limit 50   # more runs
-agentdbg list --json       # machine-readable output
+maida list              # last 20 runs
+maida list --limit 50   # more runs
+maida list --json       # machine-readable output
 ```
 
 ### View a run timeline
 
 ```bash
-agentdbg view              # opens latest run, stays running
-agentdbg view <RUN_ID>     # specific run
-agentdbg view --no-browser # just print the URL
+maida view              # opens latest run, stays running
+maida view <RUN_ID>     # specific run
+maida view --no-browser # just print the URL
 ```
 
 ### Export a run
 
 ```bash
-agentdbg export <RUN_ID> --out run.json
+maida export <RUN_ID> --out run.json
 ```
 
 ### Capture a baseline
 
 ```bash
-agentdbg baseline <RUN_ID>                          # saves to .agentdbg/baselines/<run_name>.json
-agentdbg baseline <RUN_ID> --out baselines/v1.json  # custom path
+maida baseline <RUN_ID>                          # saves to .maida/baselines/<run_name>.json
+maida baseline <RUN_ID> --out baselines/v1.json  # custom path
 ```
 
 ### Assert against a baseline
 
 ```bash
-agentdbg assert <RUN_ID> --baseline .agentdbg/baselines/my_agent.json
-agentdbg assert <RUN_ID> --max-steps 80 --no-loops  # standalone thresholds
-agentdbg assert <RUN_ID> --baseline baseline.json --format markdown  # for CI summaries
+maida assert <RUN_ID> --baseline .maida/baselines/my_agent.json
+maida assert <RUN_ID> --max-steps 80 --no-loops  # standalone thresholds
+maida assert <RUN_ID> --baseline baseline.json --format markdown  # for CI summaries
 ```
 
 Exit code `0` = pass, `1` = fail. See [docs/regression-testing.md](docs/regression-testing.md) for the full workflow and [docs/reference/policy.md](docs/reference/policy.md) for policy YAML configuration.
@@ -226,8 +226,8 @@ Exit code `0` = pass, `1` = fail. See [docs/regression-testing.md](docs/regressi
 ### Diff two runs
 
 ```bash
-agentdbg diff <RUN_A> <RUN_B>
-agentdbg diff <RUN_A> --baseline .agentdbg/baselines/my_agent.json
+maida diff <RUN_A> <RUN_B>
+maida diff <RUN_A> --baseline .maida/baselines/my_agent.json
 ```
 
 
@@ -235,41 +235,41 @@ agentdbg diff <RUN_A> --baseline .agentdbg/baselines/my_agent.json
 
 Baselines, assertions, and diffs let you catch agent regressions — locally or in CI. The workflow:
 
-1. **Baseline** a known-good run (`agentdbg baseline`)
-2. **Assert** future runs against it (`agentdbg assert --baseline ...`)
-3. **Diff** failures to see what changed (`agentdbg diff`)
+1. **Baseline** a known-good run (`maida baseline`)
+2. **Assert** future runs against it (`maida assert --baseline ...`)
+3. **Diff** failures to see what changed (`maida diff`)
 
-Control assertion thresholds via a committed `.agentdbg/policy.yaml` file or CLI flags. Supports text, JSON, and markdown output formats.
+Control assertion thresholds via a committed `.maida/policy.yaml` file or CLI flags. Supports text, JSON, and markdown output formats.
 
 See [docs/regression-testing.md](docs/regression-testing.md) for the end-to-end guide and [docs/reference/policy.md](docs/reference/policy.md) for the policy file reference.
 
 
 ## Redaction & privacy
 
-**Redaction is ON by default.** AgentDbg scrubs values for keys matching sensitive patterns (case-insensitive) before writing to disk. Large fields are truncated (marked with `__TRUNCATED__` marker).
+**Redaction is ON by default.** Maida scrubs values for keys matching sensitive patterns (case-insensitive) before writing to disk. Large fields are truncated (marked with `__TRUNCATED__` marker).
 
 Default redacted keys: `api_key`, `token`, `authorization`, `cookie`, `secret`, `password`.
 
 ```bash
 # Override defaults via environment variables
-export AGENTDBG_REDACT=1                    # on by default
-export AGENTDBG_REDACT_KEYS="api_key,token,authorization,cookie,secret,password"
-export AGENTDBG_MAX_FIELD_BYTES=20000       # truncation limit
+export MAIDA_REDACT=1                    # on by default
+export MAIDA_REDACT_KEYS="api_key,token,authorization,cookie,secret,password"
+export MAIDA_MAX_FIELD_BYTES=20000       # truncation limit
 ```
 
-You can also configure redaction in `.agentdbg/config.yaml` (project root) or `~/.agentdbg/config.yaml`.
+You can also configure redaction in `.maida/config.yaml` (project root) or `~/.maida/config.yaml`.
 
 ## Guardrails
 
-Guardrails are separate from redaction and are disabled by default. They are useful when you want AgentDbg to actively stop a run instead of only recording what happened.
+Guardrails are separate from redaction and are disabled by default. They are useful when you want Maida to actively stop a run instead of only recording what happened.
 
 ```bash
-export AGENTDBG_STOP_ON_LOOP=1
-export AGENTDBG_STOP_ON_LOOP_MIN_REPETITIONS=3
-export AGENTDBG_MAX_LLM_CALLS=50
-export AGENTDBG_MAX_TOOL_CALLS=50
-export AGENTDBG_MAX_EVENTS=200
-export AGENTDBG_MAX_DURATION_S=60
+export MAIDA_STOP_ON_LOOP=1
+export MAIDA_STOP_ON_LOOP_MIN_REPETITIONS=3
+export MAIDA_MAX_LLM_CALLS=50
+export MAIDA_MAX_TOOL_CALLS=50
+export MAIDA_MAX_EVENTS=200
+export MAIDA_MAX_DURATION_S=60
 ```
 
 YAML example:
@@ -288,8 +288,8 @@ Precedence:
 
 1. Function arguments passed to `@trace(...)` or `traced_run(...)`
 2. Environment variables
-3. Project YAML: `.agentdbg/config.yaml`
-4. User YAML: `~/.agentdbg/config.yaml`
+3. Project YAML: `.maida/config.yaml`
+4. User YAML: `~/.maida/config.yaml`
 5. Defaults
 
 See [docs/guardrails.md](docs/guardrails.md) and [docs/reference/config.md](docs/reference/config.md).
@@ -300,7 +300,7 @@ See [docs/guardrails.md](docs/guardrails.md) and [docs/reference/config.md](docs
 All data is local. Plain files, easy to inspect or delete.
 
 ```
-~/.agentdbg/
+~/.maida/
 └── runs/
     └── <run_id>/
         ├── run.json        # run metadata (status, counts, timing)
@@ -310,25 +310,25 @@ All data is local. Plain files, easy to inspect or delete.
 Override the location:
 
 ```bash
-export AGENTDBG_DATA_DIR=/path/to/traces
+export MAIDA_DATA_DIR=/path/to/traces
 ```
 
 
 ## Integrations
 
-AgentDbg is framework-agnostic at its core. The SDK works with any Python code.
+Maida is framework-agnostic at its core. The SDK works with any Python code.
 
 ### LangChain / LangGraph
 
 Optional callback handler that auto-records LLM and tool events. Requires `langchain-core`:
 
 ```bash
-pip install agentdbg[langchain]
+pip install maida[langchain]
 ```
 
 ```python
-from agentdbg import trace
-from agentdbg.integrations import AgentDbgLangChainCallbackHandler
+from maida import trace
+from maida.integrations import AgentDbgLangChainCallbackHandler
 
 @trace
 def run_agent():
@@ -344,12 +344,12 @@ See `examples/langchain/minimal.py` for a runnable example.
 Optional tracing adapter that auto-records generation, function, and handoff spans. Requires `openai-agents`:
 
 ```bash
-pip install agentdbg[openai]
+pip install maida[openai]
 ```
 
 ```python
-from agentdbg import trace
-from agentdbg.integrations import openai_agents  # registers hooks
+from maida import trace
+from maida.integrations import openai_agents  # registers hooks
 
 
 @trace
@@ -365,14 +365,14 @@ See `examples/openai_agents/minimal.py` for a runnable fake-data example with no
 Optional execution-hook adapter that auto-records LLM and tool events from CrewAI crews and flows. Requires `crewai[tools]`:
 
 ```bash
-pip install agentdbg[crewai]
+pip install maida[crewai]
 ```
 
 ```python
-import agentdbg
-from agentdbg.integrations import crewai as adbg_crewai  # registers hooks
+import maida
+from maida.integrations import crewai as mai_crewai  # registers hooks
 
-@agentdbg.trace
+@maida.trace
 def run_crew():
     # ... your crew.kickoff() or flow.kickoff() ...
     ...
@@ -383,14 +383,14 @@ More framework adapters coming soon (Agno, and others).
 
 ## Tutorials
 
-Step-by-step Jupyter notebooks live in a separate repository: [AgentDbg/tutorials](https://github.com/AgentDbg/tutorials). Covers LangChain, OpenAI Agents SDK, and guardrails — all runnable without API keys.
+Step-by-step Jupyter notebooks live in a separate repository: [Maida-AI/maida-tutorials](https://github.com/Maida-AI/maida-tutorials). Covers LangChain, OpenAI Agents SDK, and guardrails — all runnable without API keys.
 
 
 ## Development
 
 ```bash
-git clone https://github.com/AgentDbg/AgentDbg.git
-cd AgentDbg
+git clone https://github.com/Maida-AI/maida.git
+cd maida
 uv venv && uv sync && uv pip install -e .
 ```
 

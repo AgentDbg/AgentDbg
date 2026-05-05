@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
     paths:
-      - agentdbg/**
+      - maida/**
       - scripts/**
 
 env:
@@ -33,7 +33,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          uv run agentdbg view \
+          uv run maida view \
             --host "${APP_HOST}" \
             --port "${APP_PORT}" \
             --no-browser \

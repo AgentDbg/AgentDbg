@@ -2,7 +2,7 @@
 branch = true
 data_file = ".coverage/coverage.dat"
 source = [
-    "agentdbg",
+    "maida",
 ]
 
 [report]

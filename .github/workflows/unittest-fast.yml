@@ -6,13 +6,13 @@ on:
     branches: [main]
     paths:
       - pyproject.toml
-      - agentdbg/**
+      - maida/**
       - tests/**
   pull_request:
     branches: [main]
     paths:
       - pyproject.toml
-      - agentdbg/**
+      - maida/**
       - tests/**
 
 env:
