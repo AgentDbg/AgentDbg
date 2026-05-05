@@ -1,6 +1,7 @@
-# Contributing to AgentDbg
+# Contributing to Maida
 
-Thanks for your interest in AgentDbg. This document covers dev setup, tests, lint/format, and how to add integrations.
+Thanks for your interest in Maida.
+This document covers dev setup, tests, lint/format, and how to add integrations.
 
 ---
 
@@ -9,8 +10,8 @@ Thanks for your interest in AgentDbg. This document covers dev setup, tests, lin
 1. **Clone and install with uv (recommended):**
 
    ```bash
-   git clone https://github.com/AgentDbg/AgentDbg.git
-   cd AgentDbg
+   git clone https://github.com/Maida-AI/maida.git
+   cd maida
    uv venv && uv sync && uv pip install -e .
    ```
 
@@ -55,17 +56,17 @@ uv run pytest tests/test_tracing.py -k "test_trace_creates_run"
 
 ## Adding integrations / adapters
 
-AgentDbg is **framework-agnostic** at the core. Integrations are optional adapters that map framework callbacks to AgentDbg's recording API.
+Maida is **framework-agnostic** at the core. Integrations are optional adapters that map framework callbacks to Maida's recording API.
 
 If you want to add or extend an integration (e.g. another framework):
 
-1. **Optional dependencies only.** The integration must live under `agentdbg.integrations.*` and depend on the framework via optional extras (e.g. `[langchain]` in `pyproject.toml`). The core package must not depend on the framework.
+1. **Optional dependencies only.** The integration must live under `maida.integrations.*` and depend on the framework via optional extras (e.g. `[langchain]` in `pyproject.toml`). The core package must not depend on the framework.
 2. **Keep the core framework-agnostic.** All recording goes through the public API: `record_llm_call`, `record_tool_call`, `record_state`. The integration's job is to translate framework events into those calls.
 3. **Deterministic tests, no network.** Tests for the integration should be deterministic and not perform real LLM or network calls. Use mocks or in-memory stubs.
-4. **Map callbacks to record_*.** Implement the framework's callback/hook interface and call the appropriate `record_*` functions so that events attach to the current run (or an implicit run if `AGENTDBG_IMPLICIT_RUN=1`).
-5. **Use `_AgentDbgAbortSignal` for guardrail propagation.** Every framework catches `Exception` in its callback/hook dispatcher. To actually stop execution when a guardrail fires, your adapter must escalate to `_AgentDbgAbortSignal(BaseException)`. See [agentdbg/integrations/CONTRIBUTING.md](agentdbg/integrations/CONTRIBUTING.md) for the full pattern and pitfalls.
+4. **Map callbacks to record_*.** Implement the framework's callback/hook interface and call the appropriate `record_*` functions so that events attach to the current run (or an implicit run if `MAIDA_IMPLICIT_RUN=1`).
+5. **Use `_AgentDbgAbortSignal` for guardrail propagation.** Every framework catches `Exception` in its callback/hook dispatcher. To actually stop execution when a guardrail fires, your adapter must escalate to `_AgentDbgAbortSignal(BaseException)`. See [maida/integrations/CONTRIBUTING.md](maida/integrations/CONTRIBUTING.md) for the full pattern and pitfalls.
 
-New integrations should be documented in [docs/integrations.md](docs/integrations.md) with usage and install instructions. For the guardrail propagation patterns, error handling, and testing checklist, see the [integration adapter guide](agentdbg/integrations/CONTRIBUTING.md).
+New integrations should be documented in [docs/integrations.md](docs/integrations.md) with usage and install instructions. For the guardrail propagation patterns, error handling, and testing checklist, see the [integration adapter guide](maida/integrations/CONTRIBUTING.md).
 
 ---
 

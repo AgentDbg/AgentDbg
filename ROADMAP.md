@@ -6,7 +6,16 @@ Guiding principle: every feature must make the debugging workflow faster and cle
 
 ---
 
-## v0.2 (current)
+## v0.1 (released 2026-02-28)
+
+- `@trace` decorator + `record_llm_call` / `record_tool_call` / `record_state`
+- Local JSONL storage with automatic redaction
+- `agentdbg list`, `agentdbg view` (timeline UI), `agentdbg export`
+- Loop detection (`LOOP_WARNING` events)
+- LangChain / LangGraph callback handler
+
+
+## v0.2 (released 2026-03-24)
 
 **Theme: "The one that saves you money"**
 
@@ -21,7 +30,7 @@ Everything from v0.1 still applies: local storage, automatic redaction, zero acc
 
 ---
 
-## v0.3 (planned)
+## v0.3 (current)
 
 **Theme: "What changed?"**
 
@@ -38,24 +47,14 @@ Candidates (prioritized by user feedback):
 
 - **Deterministic replay** - re-run a traced agent with mocked tool outputs. Swap model, adjust temperature, override prompts.
 - **Eval CI primitives** - turn traces into regression tests. Assert on tool sequence, token budgets, and outcomes. CLI-first, GitHub Actions friendly.
-- **OpenTelemetry export** - optionally emit AgentDbg events as OTel spans for teams that want to feed data into existing infrastructure.
+- **OpenTelemetry export** - optionally emit Maida events as OTel spans for teams that want to feed data into existing infrastructure.
 
 ---
 
-## What AgentDbg will not become
+## What Maida will not become
 
 - Not a cloud platform. Local-first is the default, always.
 - Not an observability dashboard. No metrics aggregation, no alerts, no SLOs.
 - Not a prompt management tool. Debugging prompts, not versioning them.
 
 If a team collaboration layer ever ships, it will be opt-in and will never compromise the local experience.
-
----
-
-## v0.1 (released 2026-02-28)
-
-- `@trace` decorator + `record_llm_call` / `record_tool_call` / `record_state`
-- Local JSONL storage with automatic redaction
-- `agentdbg list`, `agentdbg view` (timeline UI), `agentdbg export`
-- Loop detection (`LOOP_WARNING` events)
-- LangChain / LangGraph callback handler

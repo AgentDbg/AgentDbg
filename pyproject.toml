@@ -1,12 +1,13 @@
 [project]
-name = "agentdbg"
+name = "maida"
 dynamic = ["version"]
-description = "Local-first debugger for AI agents (traces, timeline UI, loop warnings)."
+description = "Don't let broken changes merge."
 readme = { file = "README.md", content-type = "text/markdown" }
 license = "Apache-2.0"
 license-files = [ "LICENSE" ]
 authors = [
-    { name = "z-a-f", email = "z.tahirov@gmail.com" }
+    { name = "z-a-f", email = "zafar@maida.ai" },
+    { name = "crowell", email = "jeff@maida.ai" }
 ]
 requires-python = ">=3.10,<3.14"
 dependencies = [
@@ -29,10 +30,10 @@ classifiers = [
 ]
 
 [project.urls]
-Repository = "https://github.com/AgentDbg/AgentDbg"
+Repository = "https://github.com/Maida-AI/maida"
 
 [project.scripts]
-agentdbg = "agentdbg.cli:main"
+maida = "maida.cli:main"
 
 [dependency-groups]
 dev = [
@@ -55,7 +56,7 @@ openai = [
 ]
 
 [build-system]
-# Wheel/sdist include agentdbg/ (and thus agentdbg/ui_static/) by default.
+# Wheel/sdist include maida/ (and thus maida/ui_static/) by default.
 # Do not add only-include or only-packages that would exclude ui_static.
 requires = ["hatchling>=1.28.0,<1.29.0", "uv-dynamic-versioning"]
 build-backend = "hatchling.build"
@@ -67,7 +68,7 @@ source = "uv-dynamic-versioning"
 enable = true
 vcs = "git"
 pattern = "default-unprefixed"
-# from-file = { source = "agentdbg/_version.py", pattern = "version = \"(?P<base>\\d+\\.\\d+\\.\\d+)\"" }
+# from-file = { source = "maida/_version.py", pattern = "version = \"(?P<base>\\d+\\.\\d+\\.\\d+)\"" }
 # TODO: Condition the version on the branch (s.a. release=>stable, main=>dev)
 format-jinja = """
     {%- if distance == 0 -%}
@@ -80,7 +81,7 @@ format-jinja = """
 """
 
 [tool.hatch.build.hooks.version]
-path = "agentdbg/_version.py"
+path = "maida/_version.py"
 template = '''
 # This file is managed by dynamic versioning. Do not edit manually.
 version = "{version}"'''

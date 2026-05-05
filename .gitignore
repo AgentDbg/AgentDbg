@@ -1,11 +1,11 @@
 # Dynamic versioning
-agentdbg/_version.py
+maida/_version.py
 _README.md
 
 # Local traces
 # We ignore all JSON and JSONL files except under `schemas`
 # This behavior might change in the future.
-**/.agentdbg/
+**/.maida/
 *.json
 *.jsonl
 !schemas/*.json
