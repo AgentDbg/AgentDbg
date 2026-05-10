@@ -1,6 +1,6 @@
 # Policy YAML reference
 
-A **policy file** (`.agentdbg/policy.yaml`) lets teams check assertion thresholds into version control so that `agentdbg assert` applies consistent checks without long CLI flags.
+A **policy file** (`.maida/policy.yaml`) lets teams check assertion thresholds into version control so that `agentdbg assert` applies consistent checks without long CLI flags.
 
 ---
 
@@ -9,7 +9,7 @@ A **policy file** (`.agentdbg/policy.yaml`) lets teams check assertion threshold
 `agentdbg assert` resolves the policy in this order:
 
 1. **`--policy PATH`** flag on the CLI (explicit path)
-2. **`.agentdbg/policy.yaml`** in the current working directory (auto-detected)
+2. **`.maida/policy.yaml`** in the current working directory (auto-detected)
 3. **Empty policy** (all checks disabled)
 
 CLI flags (`--max-steps`, `--no-loops`, etc.) are then merged on top. CLI values always win over the file — see [Override rules](#override-rules) below.
@@ -21,7 +21,7 @@ CLI flags (`--max-steps`, `--no-loops`, etc.) are then merged on top. CLI values
 The file is standard YAML. The policy loader reads a single top-level `assert:` mapping; all other top-level keys are ignored. Unknown keys inside `assert:` are also ignored.
 
 ```yaml
-# .agentdbg/policy.yaml
+# .maida/policy.yaml
 assert:
   # ... assertion fields go here ...
 ```
@@ -110,7 +110,7 @@ agentdbg assert abc123 --max-steps 100
 ### Strict CI policy
 
 ```yaml
-# .agentdbg/policy.yaml — checked into the repo
+# .maida/policy.yaml — checked into the repo
 assert:
   max_steps: 80
   step_tolerance: 0.2
@@ -129,7 +129,7 @@ assert:
 ### Lenient local policy
 
 ```yaml
-# .agentdbg/policy.yaml — for local iteration
+# .maida/policy.yaml — for local iteration
 assert:
   step_tolerance: 0.5
   tool_call_tolerance: 0.5

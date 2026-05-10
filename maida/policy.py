@@ -1,6 +1,6 @@
 """YAML policy file loading and merging with CLI overrides.
 
-A policy file (``.agentdbg/policy.yaml``) lets teams check assertion
+A policy file (``.maida/policy.yaml``) lets teams check assertion
 thresholds into version control.  CLI flags always take precedence.
 """
 

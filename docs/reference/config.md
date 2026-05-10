@@ -9,8 +9,8 @@ AgentDbg is configured via **environment variables** and **YAML config files**. 
 Configuration is merged in this order (highest wins):
 
 1. **Environment variables**
-2. **Project config:** `.agentdbg/config.yaml` in project root (current working directory when config is loaded)
-3. **User config:** `~/.agentdbg/config.yaml`
+2. **Project config:** `.maida/config.yaml` in project root (current working directory when config is loaded)
+3. **User config:** `~/.maida/config.yaml`
 4. **Defaults** (see below)
 
 ---
@@ -21,7 +21,7 @@ Configuration is merged in this order (highest wins):
 
 | Env | YAML key | Default | Description |
 |-----|----------|---------|-------------|
-| `AGENTDBG_DATA_DIR` | `data_dir` | `~/.agentdbg` | Base directory for runs. Runs are stored under `<data_dir>/runs/<run_id>/`. |
+| `AGENTDBG_DATA_DIR` | `data_dir` | `~/.maida` | Base directory for runs. Runs are stored under `<data_dir>/runs/<run_id>/`. |
 
 **Example (env):**
 
@@ -32,7 +32,7 @@ export AGENTDBG_DATA_DIR=/path/to/my/agentdbg/data
 **Example (YAML):**
 
 ```yaml
-# ~/.agentdbg/config.yaml or .agentdbg/config.yaml
+# ~/.maida/config.yaml or .maida/config.yaml
 data_dir: /path/to/my/agentdbg/data
 ```
 
@@ -183,8 +183,8 @@ export AGENTDBG_IMPLICIT_RUN=1
 ## Full YAML example
 
 ```yaml
-# ~/.agentdbg/config.yaml or .agentdbg/config.yaml
-data_dir: ~/.agentdbg
+# ~/.maida/config.yaml or .maida/config.yaml
+data_dir: ~/.maida
 redact: true
 redact_keys:
   - api_key
@@ -210,5 +210,5 @@ guardrails:
 ## Safe-by-default local traces
 
 - **Redaction is on by default** so that common secret keys are not written to disk.
-- **Data directory** defaults to `~/.agentdbg` so traces stay on the machine.
+- **Data directory** defaults to `~/.maida` so traces stay on the machine.
 - No cloud or network is used for trace storage. Override only what you need (e.g. `AGENTDBG_DATA_DIR` for project-local storage, or `AGENTDBG_REDACT=0` for local debugging with full payloads).

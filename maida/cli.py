@@ -22,6 +22,8 @@ from agentdbg.constants import SPEC_VERSION
 from agentdbg.server import create_app
 from agentdbg import __version__
 
+from maida.constants import LOCAL_DIR_NAME
+
 EXIT_NOT_FOUND = 2
 EXIT_INTERNAL = 10
 
@@ -273,7 +275,7 @@ def baseline_cmd(
 
         if out is None:
             name_part = bl.get("source_run_name") or run_id
-            out = Path(".agentdbg") / "baselines" / f"{name_part}.json"
+            out = LOCAL_DIR_NAME / "baselines" / f"{name_part}.json"
 
         save_baseline(bl, out)
         typer.echo(f"Baseline saved to {out}")
@@ -356,7 +358,7 @@ def assert_cmd(
         if policy_path is not None:
             policy = load_policy(policy_path)
         else:
-            default_policy = Path(".agentdbg") / "policy.yaml"
+            default_policy = LOCAL_DIR_NAME / "policy.yaml"
             if default_policy.is_file():
                 policy = load_policy(default_policy)
 

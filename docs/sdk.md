@@ -105,8 +105,8 @@ Guardrails are resolved in this order:
 
 1. Arguments passed to `@trace(...)` or `traced_run(...)`
 2. Environment variables
-3. `.agentdbg/config.yaml` in the current project
-4. `~/.agentdbg/config.yaml`
+3. `.maida/config.yaml` in the current project
+4. `~/.maida/config.yaml`
 5. Defaults
 
 See [Guardrails](guardrails.md) and the [configuration reference](reference/config.md) for the full config surface.
@@ -304,7 +304,7 @@ then the first recorder call with no active run creates a single **implicit run*
 **Config precedence (highest first):**
 
 1. Environment variables (`AGENTDBG_REDACT`, `AGENTDBG_REDACT_KEYS`, `AGENTDBG_MAX_FIELD_BYTES`)
-2. `.agentdbg/config.yaml` in project root
-3. `~/.agentdbg/config.yaml`
+2. `.maida/config.yaml` in project root
+3. `~/.maida/config.yaml`
 
 See the [configuration reference](reference/config.md) for the full list of env vars, YAML keys, and defaults.

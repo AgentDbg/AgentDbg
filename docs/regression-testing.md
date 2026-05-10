@@ -16,8 +16,8 @@ Agent behavior is non-deterministic. A prompt tweak, model upgrade, or tool chan
 1. Run your agent              agentdbg view
 2. Capture a baseline          agentdbg baseline <run_id>
 3. Run the agent again         python your_agent.py
-4. Assert against baseline     agentdbg assert <new_run_id> --baseline .agentdbg/baselines/my_agent.json
-5. If it fails, diff           agentdbg diff <new_run_id> --baseline .agentdbg/baselines/my_agent.json
+4. Assert against baseline     agentdbg assert <new_run_id> --baseline .maida/baselines/my_agent.json
+5. If it fails, diff           agentdbg diff <new_run_id> --baseline .maida/baselines/my_agent.json
 ```
 
 ---
@@ -30,7 +30,7 @@ After a successful run that represents the expected behavior:
 agentdbg baseline <RUN_ID>
 ```
 
-This creates a JSON snapshot at `.agentdbg/baselines/<run_name>.json` (or the run ID if no name was set). Use `--out` to control the path:
+This creates a JSON snapshot at `.maida/baselines/<run_name>.json` (or the run ID if no name was set). Use `--out` to control the path:
 
 ```bash
 agentdbg baseline a1b2c3d4 --out baselines/support_agent_v1.json
@@ -58,7 +58,7 @@ Check the baseline file into version control so the team shares the same referen
 ## Step 2: Assert against a baseline
 
 ```bash
-agentdbg assert <RUN_ID> --baseline .agentdbg/baselines/my_agent.json
+agentdbg assert <RUN_ID> --baseline .maida/baselines/my_agent.json
 ```
 
 Exit codes: `0` = all checks pass, `1` = one or more checks failed, `2` = run or baseline not found, `10` = internal error.
@@ -89,7 +89,7 @@ See the [Policy YAML reference](reference/policy.md#how-thresholds-work) for the
 
 ## Step 3: Use a policy file
 
-Instead of passing many CLI flags, commit a `.agentdbg/policy.yaml` file:
+Instead of passing many CLI flags, commit a `.maida/policy.yaml` file:
 
 ```yaml
 assert:
@@ -101,7 +101,7 @@ assert:
   expect_status: ok
 ```
 
-`agentdbg assert` auto-detects `.agentdbg/policy.yaml` in the current directory. To use a different path:
+`agentdbg assert` auto-detects `.maida/policy.yaml` in the current directory. To use a different path:
 
 ```bash
 agentdbg assert <RUN_ID> --baseline baseline.json --policy ci-policy.yaml
@@ -188,7 +188,7 @@ When `agentdbg assert` fails, use `agentdbg diff` to see exactly what changed.
 ### Diff against a baseline
 
 ```bash
-agentdbg diff <RUN_ID> --baseline .agentdbg/baselines/my_agent.json
+agentdbg diff <RUN_ID> --baseline .maida/baselines/my_agent.json
 ```
 
 ### Diff two runs directly
@@ -232,7 +232,7 @@ Run your agent in CI, then assert against the checked-in baseline:
   run: |
     RUN_ID=$(agentdbg list --json | python -c "import sys,json; print(json.load(sys.stdin)['runs'][0]['run_id'])")
     agentdbg assert "$RUN_ID" \
-      --baseline .agentdbg/baselines/my_agent.json \
+      --baseline .maida/baselines/my_agent.json \
       --format markdown >> "$GITHUB_STEP_SUMMARY"
 ```
 

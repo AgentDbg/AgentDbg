@@ -35,8 +35,10 @@ def _clean_env(monkeypatch):
 
 
 def _write_yaml(directory: Path, content: str) -> Path:
-    """Write a config.yaml inside *directory*/.agentdbg/ and return the file path."""
-    cfg_dir = directory / ".agentdbg"
+    """Write a config.yaml inside *directory*/.maida/ and return the file path."""
+    from maida.constants import LOCAL_DIR_NAME
+
+    cfg_dir = directory / LOCAL_DIR_NAME
     cfg_dir.mkdir(parents=True, exist_ok=True)
     cfg_file = cfg_dir / "config.yaml"
     cfg_file.write_text(content, encoding="utf-8")

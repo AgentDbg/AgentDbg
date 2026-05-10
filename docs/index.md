@@ -36,7 +36,7 @@ python examples/minimal/simple_agent.py
 agentdbg view
 ```
 
-A browser tab opens showing every event in the run - tool calls, LLM calls, timing. Data is stored locally under `~/.agentdbg/runs/<run_id>/`.
+A browser tab opens showing every event in the run - tool calls, LLM calls, timing. Data is stored locally under `~/.maida/runs/<run_id>/`.
 
 ---
 

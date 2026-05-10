@@ -4,6 +4,7 @@ Run with: python examples/minimal/simple_agent.py (from repo root).
 """
 
 from agentdbg import record_llm_call, record_tool_call, trace
+from maida.constants import LOCAL_DIR_NAME
 
 
 @trace(name="minimal agent")
@@ -24,5 +25,4 @@ def run_agent():
 
 if __name__ == "__main__":
     run_agent()
-    # Run data is under ~/.agentdbg/runs/<run_id>/ (or AGENTDBG_DATA_DIR)
-    print("Run data is under ~/.agentdbg/runs/<run_id>/ (or AGENTDBG_DATA_DIR)")
+    print(f"Run data is under ~/{LOCAL_DIR_NAME}/runs/<run_id>/ (or AGENTDBG_DATA_DIR)")

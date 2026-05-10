@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from agentdbg.guardrails import GuardrailParams
+from maida.constants import LOCAL_DIR_NAME
 
 try:
     import yaml
@@ -225,10 +226,10 @@ def load_config(project_root: Path | None = None) -> AgentDbgConfig:
     """
     Load AgentDbgConfig with precedence (highest first):
     1. Environment variables
-    2. .agentdbg/config.yaml in project root (if present)
-    3. ~/.agentdbg/config.yaml
+    2. .maida/config.yaml in project root (if present)
+    3. ~/.maida/config.yaml
     """
-    base = Path.home() / ".agentdbg"
+    base = Path.home() / LOCAL_DIR_NAME
     redact = _DEFAULT_REDACT
     redact_keys = _DEFAULT_REDACT_KEYS.copy()
     max_field_bytes = _DEFAULT_MAX_FIELD_BYTES
@@ -257,7 +258,7 @@ def load_config(project_root: Path | None = None) -> AgentDbgConfig:
     #       will not set the root to the project, but the place
     #       where CLI was called from.
     root = project_root if project_root is not None else Path.cwd()
-    project_config_path = root / ".agentdbg" / "config.yaml"
+    project_config_path = root / LOCAL_DIR_NAME / "config.yaml"
     proj_cfg = _load_yaml(project_config_path)
     if proj_cfg:
         redact = _apply_yaml(proj_cfg, "redact", redact)
