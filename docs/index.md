@@ -1,4 +1,4 @@
-# AgentDbg
+# Maida
 
 **AgentDbg** is a local-first debugger for AI agents. It captures structured traces (LLM calls, tool calls, state, errors) and gives you a timeline UI to inspect what happened-inputs, outputs, latency, and loop warnings.
 

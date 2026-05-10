@@ -7,22 +7,22 @@ Requires Python 3.10+.
 **From PyPI (recommended):**
 
 ```bash
-pip install agentdbg
+pip install maida
 ```
 
 **From source with uv:**
 
 ```bash
-git clone https://github.com/AgentDbg/AgentDbg.git
-cd AgentDbg/agentdbg
+git clone https://github.com/maida-ai/maida.git
+cd maida/maida
 uv sync
 ```
 
 **From source with pip:**
 
 ```bash
-git clone https://github.com/AgentDbg/AgentDbg.git
-cd AgentDbg/agentdbg
+git clone https://github.com/maida-ai/maida.git
+cd maida/maida
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
 ```
@@ -36,7 +36,7 @@ pip install -e .
 **2. Call the recorders** inside that function so events attach to the current run:
 
 ```python
-from agentdbg import trace, record_llm_call, record_tool_call, record_state
+from maida import trace, record_llm_call, record_tool_call, record_state
 
 @trace
 def run_agent():
@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
 ```bash
 python your_script.py
-agentdbg view
+maida view
 ```
 
 The viewer starts a local server (default `127.0.0.1:8712`) and opens the latest run in your browser.
@@ -69,7 +69,7 @@ The viewer starts a local server (default `127.0.0.1:8712`) and opens the latest
 If you are iterating on an agent loop, add guardrails early so a bad prompt or tool policy does not spiral into dozens of repeated calls.
 
 ```python
-from agentdbg import trace
+from maida import trace
 
 
 @trace(
@@ -91,7 +91,7 @@ Useful defaults for local debugging:
 - `max_events` when you want a hard cap on trace size
 - `max_duration_s` when the run should finish quickly
 
-When a guardrail fires, AgentDbg still writes the relevant trace evidence, then records `ERROR` and `RUN_END(status="error")` and re-raises a dedicated exception.
+When a guardrail fires, Maida still writes the relevant trace evidence, then records `ERROR` and `RUN_END(status="error")` and re-raises a dedicated exception.
 
 See [Guardrails](guardrails.md) for examples and [Configuration reference](reference/config.md) for env/YAML setup.
 
@@ -99,7 +99,7 @@ See [Guardrails](guardrails.md) for examples and [Configuration reference](refer
 
 ## Where data is stored
 
-- **Default:** `~/.agentdbg/runs/<run_id>/`
+- **Default:** `~/.maida/runs/<run_id>/`
   - `run.json` - run metadata (status, counts, started_at, ended_at)
   - `events.jsonl` - one JSON object per line (append-only)
 
@@ -113,7 +113,7 @@ Set the data directory so runs are stored somewhere else (e.g. project-local):
 export AGENTDBG_DATA_DIR=/path/to/my/data
 ```
 
-Config can also be set in `~/.agentdbg/config.yaml` or `.agentdbg/config.yaml` in the project root; environment variables take precedence. See the [configuration reference](reference/config.md) for the full list of options and precedence.
+Config can also be set in `~/.maida/config.yaml` or `.maida/config.yaml` in the project root; environment variables take precedence. See the [configuration reference](reference/config.md) for the full list of options and precedence.
 
 ---
 

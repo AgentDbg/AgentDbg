@@ -1,6 +1,6 @@
 # Guardrails
 
-Guardrails are AgentDbg's opt-in way to stop a run before it burns more time, tokens, or tool calls than you intended.
+Guardrails are Maida's opt-in way to stop a run before it burns more time, tokens, or tool calls than you intended.
 
 They are designed for local debugging loops, not policy enforcement:
 
@@ -13,7 +13,7 @@ They are designed for local debugging loops, not policy enforcement:
 
 ## What guardrails do
 
-When a configured threshold is crossed, AgentDbg:
+When a configured threshold is crossed, Maida:
 
 1. Records the relevant warning or event using the existing trace format
 2. Raises `AgentDbgLoopAbort` or `AgentDbgGuardrailExceeded`
@@ -56,8 +56,8 @@ Notes:
 Guardrails work with LangChain/LangGraph via `AgentDbgLangChainCallbackHandler`. When a guardrail fires, the handler raises `_AgentDbgAbortSignal` (a `BaseException`) which bypasses both LangChain's callback error handling and LangGraph's graph executor — stopping the run immediately and preventing further token-wasting LLM calls.
 
 ```python
-from agentdbg import AgentDbgLoopAbort, trace
-from agentdbg.integrations import AgentDbgLangChainCallbackHandler
+from maida import AgentDbgLoopAbort, trace
+from maida.integrations import AgentDbgLangChainCallbackHandler
 
 
 @trace(stop_on_loop=True, stop_on_loop_min_repetitions=3)
@@ -79,8 +79,8 @@ The handler also stores the exception on `handler.abort_exception` as a defensiv
 Guardrails work with the OpenAI Agents SDK via the tracing processor. When a guardrail fires, the processor raises `_AgentDbgAbortSignal` (a `BaseException`) which bypasses the SDK's `except Exception` error handling — stopping the run immediately.
 
 ```python
-from agentdbg import trace, AgentDbgLoopAbort
-from agentdbg.integrations import openai_agents
+from maida import trace, AgentDbgLoopAbort
+from maida.integrations import openai_agents
 
 
 @trace(stop_on_loop=True)
@@ -104,7 +104,7 @@ As a defensive fallback, the exception is also stored on `PROCESSOR.abort_except
 ### Stop a looping agent immediately
 
 ```python
-from agentdbg import AgentDbgLoopAbort, record_llm_call, record_tool_call, trace
+from maida import AgentDbgLoopAbort, record_llm_call, record_tool_call, trace
 
 
 @trace(stop_on_loop=True)
@@ -123,7 +123,7 @@ except AgentDbgLoopAbort as exc:
 ### Cap LLM and tool usage during development
 
 ```python
-from agentdbg import AgentDbgGuardrailExceeded, record_llm_call, record_tool_call, traced_run
+from maida import AgentDbgGuardrailExceeded, record_llm_call, record_tool_call, traced_run
 
 
 try:
@@ -158,14 +158,14 @@ Highest wins:
 
 1. Function arguments passed to `@trace(...)` or `traced_run(...)`
 2. Environment variables
-3. Project YAML: `.agentdbg/config.yaml`
-4. User YAML: `~/.agentdbg/config.yaml`
+3. Project YAML: `.maida/config.yaml`
+4. User YAML: `~/.maida/config.yaml`
 5. Defaults
 
 ### Decorator and context manager
 
 ```python
-from agentdbg import trace, traced_run
+from maida import trace, traced_run
 
 
 @trace(stop_on_loop=True, max_llm_calls=50)
@@ -191,7 +191,7 @@ export AGENTDBG_MAX_DURATION_S=60
 ### YAML config
 
 ```yaml
-# .agentdbg/config.yaml or ~/.agentdbg/config.yaml
+# .maida/config.yaml or ~/.maida/config.yaml
 guardrails:
   stop_on_loop: true
   stop_on_loop_min_repetitions: 3
@@ -209,7 +209,7 @@ guardrails:
 
 If loop detection fires and `stop_on_loop=True`:
 
-- AgentDbg first writes `LOOP_WARNING`
+- Maida first writes `LOOP_WARNING`
 - Then raises `AgentDbgLoopAbort`
 - Then writes `ERROR`
 - Then writes `RUN_END(status="error")`
@@ -218,7 +218,7 @@ If loop detection fires and `stop_on_loop=True`:
 
 For `max_llm_calls`, `max_tool_calls`, `max_events`, and `max_duration_s`:
 
-- AgentDbg writes the event that crossed the limit
+- Maida writes the event that crossed the limit
 - Then raises `AgentDbgGuardrailExceeded`
 - Then writes `ERROR`
 - Then writes `RUN_END(status="error")`
