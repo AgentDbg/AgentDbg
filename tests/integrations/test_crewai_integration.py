@@ -12,8 +12,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from agentdbg._integration_utils import _clear_test_run_lifecycle_registry
-from agentdbg.integrations._error import MissingOptionalDependencyError
+from maida._integration_utils import _clear_test_run_lifecycle_registry
+from maida.integrations._error import MissingOptionalDependencyError
 
 
 # --- Minimal fake context classes (CrewAI-shaped, no crewai import) ---
@@ -91,15 +91,15 @@ def _make_fake_crewai_hooks_import_error():
     return crewai_fake
 
 
-CREWAI_MISSING_MSG = "CrewAI integration requires optional deps. Install with `pip install agentdbg[crewai]`."
+CREWAI_MISSING_MSG = "CrewAI integration requires optional deps. Install with `pip install maida[crewai]`."
 
 
 def test_import_crewai_without_extra_raises_clear_error():
-    """If CrewAI is not installed, importing agentdbg.integrations.crewai raises that friendly error string."""
+    """If CrewAI is not installed, importing maida.integrations.crewai raises that friendly error string."""
     to_restore_mods = []
     for mod in list(sys.modules.keys()):
-        if mod == "agentdbg.integrations.crewai" or mod.startswith(
-            "agentdbg.integrations.crewai."
+        if mod == "maida.integrations.crewai" or mod.startswith(
+            "maida.integrations.crewai."
         ):
             to_restore_mods.append((mod, sys.modules.pop(mod)))
     old_crewai = sys.modules.get("crewai")
@@ -107,7 +107,7 @@ def test_import_crewai_without_extra_raises_clear_error():
     try:
         sys.modules["crewai"] = fake
         with pytest.raises(MissingOptionalDependencyError) as exc_info:
-            __import__("agentdbg.integrations.crewai")
+            __import__("maida.integrations.crewai")
         assert str(exc_info.value) == CREWAI_MISSING_MSG
     finally:
         if old_crewai is not None:
@@ -116,26 +116,26 @@ def test_import_crewai_without_extra_raises_clear_error():
             del sys.modules["crewai"]
         for mod, val in to_restore_mods:
             sys.modules[mod] = val
-        if "agentdbg.integrations.crewai" not in sys.modules:
+        if "maida.integrations.crewai" not in sys.modules:
             try:
-                __import__("agentdbg.integrations.crewai")
+                __import__("maida.integrations.crewai")
             except MissingOptionalDependencyError:
                 pass
 
 
 @pytest.fixture
 def crewai_module_with_mocked_hooks():
-    """Load agentdbg.integrations.crewai with crewai.hooks mocked so no real CrewAI is required."""
+    """Load maida.integrations.crewai with crewai.hooks mocked so no real CrewAI is required."""
     # Provide a minimal hooks module that has the four register functions (no-ops)
     hooks = MagicMock()
     with patch.dict("sys.modules", {"crewai": MagicMock(), "crewai.hooks": hooks}):
         # Force reimport so our patch is used
         for mod in list(sys.modules.keys()):
-            if mod == "agentdbg.integrations.crewai":
+            if mod == "maida.integrations.crewai":
                 del sys.modules[mod]
                 break
         try:
-            import agentdbg.integrations.crewai as crewai_mod
+            import maida.integrations.crewai as crewai_mod
 
             yield crewai_mod
         finally:

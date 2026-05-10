@@ -10,13 +10,13 @@ import pytest
 
 from pathlib import Path
 
-from agentdbg.constants import REDACTED_MARKER, TRUNCATED_MARKER
-from agentdbg.config import load_config, AgentDbgConfig
-from agentdbg.guardrails import GuardrailParams
-from agentdbg.events import EventType
-from agentdbg._tracing._redact import _redact_and_truncate
-from agentdbg.tracing import record_tool_call, trace, traced_run
-from agentdbg.storage import load_events, list_runs
+from maida.constants import REDACTED_MARKER, TRUNCATED_MARKER
+from maida.config import load_config, AgentDbgConfig
+from maida.guardrails import GuardrailParams
+from maida.events import EventType
+from maida._tracing._redact import _redact_and_truncate
+from maida.tracing import record_tool_call, trace, traced_run
+from maida.storage import load_events, list_runs
 
 
 def test_redaction_constants_unchanged():

@@ -5,11 +5,11 @@ Run from the repo root:
   uv run --extra openai python examples/openai_agents/minimal.py
 
 Then:
-  agentdbg view
+  maida view
 """
 
-from agentdbg import trace
-from agentdbg.integrations import openai_agents
+from maida import trace
+from maida.integrations import openai_agents
 from agents.tracing import (
     function_span,
     generation_span,
@@ -53,4 +53,4 @@ def run_agent():
 
 if __name__ == "__main__":
     run_agent()
-    print("Run complete. View with: agentdbg view")
+    print("Run complete. View with: maida view")

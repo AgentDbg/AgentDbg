@@ -1,9 +1,9 @@
-"""Tests for agentdbg.policy: YAML loading and CLI merge."""
+"""Tests for maida.policy: YAML loading and CLI merge."""
 
 import pytest
 
-from agentdbg.assertions import AssertionPolicy
-from agentdbg.policy import load_policy, merge_policy
+from maida.assertions import AssertionPolicy
+from maida.policy import load_policy, merge_policy
 
 
 # ---------------------------------------------------------------------------

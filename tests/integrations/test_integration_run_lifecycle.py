@@ -7,15 +7,15 @@ nested @trace or traced_run do not invoke them again. Exit receives exception in
 
 import pytest
 
-from agentdbg import record_tool_call, trace, traced_run
-from agentdbg._integration_utils import (
+from maida import record_tool_call, trace, traced_run
+from maida._integration_utils import (
     _clear_test_run_lifecycle_registry,
     register_run_enter,
     register_run_exit,
 )
-from agentdbg.config import load_config
-from agentdbg.events import EventType
-from agentdbg.storage import load_events
+from maida.config import load_config
+from maida.events import EventType
+from maida.storage import load_events
 from tests.conftest import get_latest_run_id
 
 

@@ -1,10 +1,10 @@
 """
 Tracing context, @trace decorator, and manual recorders for AgentDbg.
 
-Re-export shim: public API lives in agentdbg._tracing.
+Re-export shim: public API lives in maida._tracing.
 """
 
-from agentdbg._tracing import (
+from ._tracing import (
     has_active_run,
     record_llm_call,
     record_tool_call,

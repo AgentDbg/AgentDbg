@@ -12,9 +12,9 @@ from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-import agentdbg.storage as storage
-from agentdbg.config import AgentDbgConfig, load_config
-from agentdbg.constants import SPEC_VERSION
+import maida.storage as storage
+from maida.config import AgentDbgConfig, load_config
+from maida.constants import SPEC_VERSION
 
 UI_STATIC_DIR = Path(__file__).resolve().parent / "ui_static"
 UI_INDEX_PATH = UI_STATIC_DIR / "index.html"
@@ -165,7 +165,7 @@ def create_app() -> FastAPI:
         if not UI_INDEX_PATH.is_file():
             raise HTTPException(
                 status_code=404,
-                detail="UI not found: agentdbg/ui_static/index.html is missing",
+                detail="UI not found: maida/ui_static/index.html is missing",
             )
         response = FileResponse(UI_INDEX_PATH, media_type="text/html")
         response.headers["Cache-Control"] = "no-cache"

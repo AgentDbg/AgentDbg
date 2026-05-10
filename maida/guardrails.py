@@ -8,8 +8,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
-from agentdbg.events import utc_now_iso_ms_z
-from agentdbg.exceptions import AgentDbgGuardrailExceeded, AgentDbgLoopAbort
+from maida.events import utc_now_iso_ms_z
+from maida.exceptions import AgentDbgGuardrailExceeded, AgentDbgLoopAbort
 
 
 @dataclass

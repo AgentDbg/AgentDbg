@@ -1,18 +1,18 @@
-"""Tests for agentdbg.assertions: policy checks, exit codes, report formatting."""
+"""Tests for maida.assertions: policy checks, exit codes, report formatting."""
 
 import json
 
-from agentdbg.assertions import (
+from maida.assertions import (
     AssertionPolicy,
     format_report_json,
     format_report_markdown,
     format_report_text,
     run_assertions,
 )
-from agentdbg.baseline import create_baseline
-from agentdbg.config import load_config
-from agentdbg.events import EventType, new_event
-from agentdbg.storage import append_event, create_run, finalize_run
+from maida.baseline import create_baseline
+from maida.config import load_config
+from maida.events import EventType, new_event
+from maida.storage import append_event, create_run, finalize_run
 
 
 def _make_run(config, *, name="test_run", events=None, status="ok"):

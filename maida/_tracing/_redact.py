@@ -1,14 +1,14 @@
 """
 Pure redaction and truncation utilities.
-Only depends on agentdbg.constants and agentdbg.config (for AgentDbgConfig type).
+Only depends on maida.constants and maida.config (for AgentDbgConfig type).
 """
 
 import re
 import traceback
 from typing import Any
 
-from agentdbg.config import AgentDbgConfig
-from agentdbg.constants import DEPTH_LIMIT, REDACTED_MARKER, TRUNCATED_MARKER
+from maida.config import AgentDbgConfig
+from maida.constants import DEPTH_LIMIT, REDACTED_MARKER, TRUNCATED_MARKER
 
 # TODO: Remove the _RECURSION_LIMIT and use DEPTH_LIMIT instead
 _RECURSION_LIMIT = DEPTH_LIMIT

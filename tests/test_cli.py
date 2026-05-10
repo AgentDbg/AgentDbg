@@ -12,10 +12,10 @@ import time
 import pytest
 from typer.testing import CliRunner
 
-from agentdbg.cli import _wait_for_port, app
-from agentdbg.config import load_config
-from agentdbg.events import EventType, new_event
-from agentdbg.storage import append_event, create_run, finalize_run
+from maida.cli import _wait_for_port, app
+from maida.config import load_config
+from maida.events import EventType, new_event
+from maida.storage import append_event, create_run, finalize_run
 
 runner = CliRunner()
 
@@ -47,21 +47,21 @@ def empty_data_dir(temp_data_dir):
 
 
 def test_list_empty_dir_exit_zero(empty_data_dir):
-    """agentdbg list on empty dir exits code 0."""
+    """maida list on empty dir exits code 0."""
     result = runner.invoke(app, ["list"])
     assert result.exit_code == 0
 
 
 def test_export_missing_run_exit_two(empty_data_dir):
-    """agentdbg export missing_run --out <tmpfile> exits code 2."""
+    """maida export missing_run --out <tmpfile> exits code 2."""
     tmpfile = empty_data_dir / "out.json"
     result = runner.invoke(app, ["export", "missing_run", "--out", str(tmpfile)])
     assert result.exit_code == 2
 
 
 def test_export_accepts_run_id_prefix(empty_data_dir):
-    """agentdbg export with run_id prefix resolves to full run and writes correct JSON."""
-    from agentdbg.config import load_config
+    """maida export with run_id prefix resolves to full run and writes correct JSON."""
+    from maida.config import load_config
 
     config = load_config()
     run_id = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
@@ -100,10 +100,10 @@ def test_export_accepts_run_id_prefix(empty_data_dir):
 
 
 def test_export_success_path_writes_run_and_events(empty_data_dir):
-    """agentdbg export with real run (create_run + append_event) exits 0 and writes run + events."""
-    from agentdbg.config import load_config
-    from agentdbg.events import EventType, new_event
-    from agentdbg.storage import append_event, create_run
+    """maida export with real run (create_run + append_event) exits 0 and writes run + events."""
+    from maida.config import load_config
+    from maida.events import EventType, new_event
+    from maida.storage import append_event, create_run
     from tests.conftest import get_latest_run_id
 
     config = load_config()
@@ -126,7 +126,7 @@ def test_export_success_path_writes_run_and_events(empty_data_dir):
 
 
 def test_list_json_outputs_valid_json_spec_version_and_runs(empty_data_dir):
-    """agentdbg list --json outputs valid JSON with keys spec_version and runs."""
+    """maida list --json outputs valid JSON with keys spec_version and runs."""
     result = runner.invoke(app, ["list", "--json"])
     assert result.exit_code == 0
     data = json.loads(result.output)
@@ -137,9 +137,9 @@ def test_list_json_outputs_valid_json_spec_version_and_runs(empty_data_dir):
 
 
 def test_list_with_actual_runs_shows_runs(empty_data_dir):
-    """agentdbg list with real runs shows run_id/run_name in text output and in --json runs."""
-    from agentdbg.config import load_config
-    from agentdbg.storage import create_run
+    """maida list with real runs shows run_id/run_name in text output and in --json runs."""
+    from maida.config import load_config
+    from maida.storage import create_run
     from tests.conftest import get_latest_run_id
 
     config = load_config()
@@ -212,8 +212,8 @@ def test_view_opens_browser_only_after_wait_succeeds(monkeypatch, empty_data_dir
         call_log.append("browser")
 
     # Patch _wait_for_port at the module level so view_cmd picks it up.
-    monkeypatch.setattr("agentdbg.cli._wait_for_port", fake_wait_for_port)
-    monkeypatch.setattr("agentdbg.cli.webbrowser.open", fake_webbrowser_open)
+    monkeypatch.setattr("maida.cli._wait_for_port", fake_wait_for_port)
+    monkeypatch.setattr("maida.cli.webbrowser.open", fake_webbrowser_open)
 
     # Patch uvicorn.run so no real server starts; make it block briefly.
     def fake_uvicorn_run(**kwargs) -> None:
@@ -234,8 +234,8 @@ def test_view_server_stays_running_until_interrupt(monkeypatch, empty_data_dir):
     def fake_uvicorn_run(**kwargs):
         block_event.wait(timeout=3)
 
-    monkeypatch.setattr("agentdbg.cli._wait_for_port", lambda *a, **kw: True)
-    monkeypatch.setattr("agentdbg.cli.webbrowser.open", lambda *a, **kw: None)
+    monkeypatch.setattr("maida.cli._wait_for_port", lambda *a, **kw: True)
+    monkeypatch.setattr("maida.cli.webbrowser.open", lambda *a, **kw: None)
     monkeypatch.setattr("uvicorn.run", fake_uvicorn_run)
 
     view_result = {"done": False, "exit_code": None}
@@ -263,7 +263,7 @@ def test_view_server_stays_running_until_interrupt(monkeypatch, empty_data_dir):
 
 
 def test_baseline_creates_file(empty_data_dir):
-    """agentdbg baseline RUN_ID --out <path> creates a valid baseline JSON."""
+    """maida baseline RUN_ID --out <path> creates a valid baseline JSON."""
     config = load_config()
     run_id = _make_run(
         config,

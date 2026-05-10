@@ -2,11 +2,11 @@
 Minimal LangChain example: @trace plus a chain that triggers one LLM and one tool callback.
 Uses fake LLM (no network). Run from repo root:
   uv run --extra langchain python examples/langchain/minimal.py
-Then: agentdbg view
+Then: maida view
 """
 
-from agentdbg import trace
-from agentdbg.integrations import AgentDbgLangChainCallbackHandler
+from maida import trace
+from maida.integrations import AgentDbgLangChainCallbackHandler
 
 # Optional: only import LangChain when running this example
 from langchain_core.language_models.fake import FakeListLLM
@@ -33,4 +33,4 @@ def run_agent():
 
 if __name__ == "__main__":
     run_agent()
-    print("Run complete. View with: agentdbg view")
+    print("Run complete. View with: maida view")

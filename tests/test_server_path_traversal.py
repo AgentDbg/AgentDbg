@@ -3,7 +3,7 @@ import urllib.parse
 import pytest
 from fastapi.testclient import TestClient
 
-import agentdbg.server as server
+import maida.server as server
 
 
 def _get_app():
@@ -11,7 +11,7 @@ def _get_app():
         return server.app
     if hasattr(server, "create_app"):
         return server.create_app()
-    raise AssertionError("agentdbg.server must expose app or create_app().")
+    raise AssertionError("maida.server must expose app or create_app().")
 
 
 # Payloads that still fit in ONE path segment (so they definitely hit /api/runs/{run_id})

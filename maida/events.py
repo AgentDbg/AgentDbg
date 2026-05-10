@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
-from agentdbg.constants import DEPTH_LIMIT, SPEC_VERSION, TRUNCATED_MARKER
+from maida.constants import DEPTH_LIMIT, SPEC_VERSION, TRUNCATED_MARKER
 
 # TODO: This is a serialization guardrail, not a security feature
 # We should decide what to do:

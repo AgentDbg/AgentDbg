@@ -7,7 +7,7 @@ thresholds into version control.  CLI flags always take precedence.
 from dataclasses import fields
 from pathlib import Path
 
-from agentdbg.assertions import AssertionPolicy
+from maida.assertions import AssertionPolicy
 
 try:
     import yaml

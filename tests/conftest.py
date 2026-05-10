@@ -8,8 +8,6 @@ from pathlib import Path
 
 import pytest
 
-from agentdbg.storage import list_runs
-
 
 @pytest.fixture
 def temp_data_dir():
@@ -35,6 +33,8 @@ def get_latest_run_id(config):
     writing multiple runs, prefer selecting by run_name or another stable
     attribute instead.
     """
+    from maida.storage import list_runs
+
     runs = list_runs(limit=1, config=config)
     assert runs, "expected at least one run"
     return runs[0]["run_id"]

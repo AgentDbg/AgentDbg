@@ -3,7 +3,7 @@ Loop detection tests: synthetic events with repeated tail pattern, detect_loop p
 No I/O; uses in-memory events. pattern_key stability and calling detect_loop again yields same payload.
 """
 
-from agentdbg.loopdetect import detect_loop, pattern_key
+from maida.loopdetect import detect_loop, pattern_key
 
 
 def _make_event(event_id: str, event_type: str, payload: dict) -> dict:

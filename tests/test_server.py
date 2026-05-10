@@ -7,9 +7,9 @@ Uses tmp dir via AGENTDBG_DATA_DIR; no real home directory touched.
 import pytest
 from fastapi.testclient import TestClient
 
-from agentdbg.config import load_config
-from agentdbg.server import create_app
-from agentdbg import storage
+from maida.config import load_config
+from maida.server import create_app
+from maida import storage
 
 
 # ---------------------------------------------------------------------------

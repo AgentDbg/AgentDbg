@@ -1,6 +1,6 @@
 """
 Run lifecycle: _run_context context manager, trace decorator, traced_run.
-Depends: agentdbg.config, agentdbg.events, agentdbg.exceptions, agentdbg.guardrails, agentdbg.storage, _redact, _context.
+Depends: maida.config, maida.events, maida.exceptions, maida.guardrails, maida.storage, _redact, _context.
 """
 
 import asyncio
@@ -11,14 +11,14 @@ from contextlib import contextmanager
 from functools import wraps
 from typing import Any, Callable, Generator, ParamSpec, TypeVar
 
-from agentdbg.config import load_config
-from agentdbg.constants import default_counts
-from agentdbg.events import EventType, new_event
-from agentdbg.exceptions import AgentDbgGuardrailExceeded, _AgentDbgAbortSignal
-from agentdbg.guardrails import GuardrailParams, merge_guardrail_params
-from agentdbg.storage import append_event, create_run, finalize_run
+from maida.config import load_config
+from maida.constants import default_counts
+from maida.events import EventType, new_event
+from maida.exceptions import AgentDbgGuardrailExceeded, _AgentDbgAbortSignal
+from maida.guardrails import GuardrailParams, merge_guardrail_params
+from maida.storage import append_event, create_run, finalize_run
 
-from agentdbg._tracing._context import (
+from maida._tracing._context import (
     _append_event_and_check_guardrails,
     _config_var,
     _counts_var,
@@ -32,8 +32,8 @@ from agentdbg._tracing._context import (
     _run_start_payload_for_event,
     _started_at_var,
 )
-from agentdbg._tracing._redact import _redact_and_truncate
-from agentdbg._integration_utils import _invoke_run_enter, _invoke_run_exit
+from maida._tracing._redact import _redact_and_truncate
+from maida._integration_utils import _invoke_run_enter, _invoke_run_exit
 
 
 P = ParamSpec("P")

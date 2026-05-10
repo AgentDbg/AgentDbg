@@ -13,12 +13,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from agentdbg.integrations._error import MissingOptionalDependencyError
+from maida.integrations._error import MissingOptionalDependencyError
 
 
 def _drop_openai_agents_integration_modules() -> None:
-    sys.modules.pop("agentdbg.integrations.openai_agents", None)
-    sys.modules.pop("agentdbg.integrations", None)
+    sys.modules.pop("maida.integrations.openai_agents", None)
+    sys.modules.pop("maida.integrations", None)
 
 
 def _make_fake_agents_modules() -> dict[str, ModuleType]:
@@ -127,7 +127,7 @@ def clear_openai_integration_imports():
 def openai_agents_module():
     fake_modules = _make_fake_agents_modules()
     with patch.dict(sys.modules, fake_modules):
-        import agentdbg.integrations.openai_agents as openai_agents
+        import maida.integrations.openai_agents as openai_agents
 
         yield (
             openai_agents,
@@ -147,7 +147,7 @@ def test_import_without_optional_dependency_raises_clear_error():
     try:
         with patch.dict(sys.modules, {"agents": fake_agents}, clear=False):
             with pytest.raises(MissingOptionalDependencyError) as exc_info:
-                import agentdbg.integrations.openai_agents  # noqa: F401
+                import maida.integrations.openai_agents  # noqa: F401
     finally:
         sys.modules.pop("agents", None)
         for key, value in to_restore.items():
@@ -155,17 +155,17 @@ def test_import_without_optional_dependency_raises_clear_error():
                 sys.modules[key] = value
 
     assert "OpenAI Agents" in str(exc_info.value)
-    assert "agentdbg[openai]" in str(exc_info.value)
+    assert "maida[openai]" in str(exc_info.value)
 
 
 def test_openai_integration_does_not_break_core_import():
-    """Core agentdbg import must not crash when OpenAI Agents deps are missing."""
+    """Core maida import must not crash when OpenAI Agents deps are missing."""
     agents_module = ModuleType("agents")
 
     with patch.dict(sys.modules, {"agents": agents_module}, clear=False):
-        import agentdbg
+        import maida
 
-    assert agentdbg.__version__
+    assert maida.__version__
 
 
 def test_import_registers_processor_once(openai_agents_module):
@@ -240,7 +240,7 @@ def test_function_and_handoff_spans_record_tool_call_events(openai_agents_module
     function_span = _fake_span(
         span_data.FunctionSpanData(
             name="search_docs",
-            input={"query": "agentdbg"},
+            input={"query": "maida"},
             output={"hits": 2},
             mcp_data={"server": "docs"},
         ),
@@ -261,7 +261,7 @@ def test_function_and_handoff_spans_record_tool_call_events(openai_agents_module
 
     function_kw = record_tool.call_args_list[0].kwargs
     assert function_kw["name"] == "search_docs"
-    assert function_kw["args"] == {"query": "agentdbg"}
+    assert function_kw["args"] == {"query": "maida"}
     assert function_kw["result"] == {"hits": 2}
     assert function_kw["status"] == "ok"
     function_meta = function_kw["meta"]
@@ -314,7 +314,7 @@ def test_no_run_created_when_only_sdk_span_is_emitted(openai_agents_module):
     function_span = _fake_span(
         span_data.FunctionSpanData(
             name="search_docs",
-            input={"query": "agentdbg"},
+            input={"query": "maida"},
             output={"hits": 2},
         )
     )
@@ -332,7 +332,7 @@ def test_guardrail_exception_captured_on_abort_exception(openai_agents_module):
     """When a guardrail fires in on_span_end, the exception is stored and
     _AgentDbgAbortSignal (BaseException) is raised to bypass framework error handling."""
     openai_agents, tracing_module, span_data = openai_agents_module
-    from agentdbg.exceptions import AgentDbgLoopAbort, _AgentDbgAbortSignal
+    from maida.exceptions import AgentDbgLoopAbort, _AgentDbgAbortSignal
 
     processor = openai_agents.PROCESSOR
     assert processor.abort_exception is None
@@ -362,7 +362,7 @@ def test_guardrail_exception_captured_on_abort_exception(openai_agents_module):
 def test_abort_exception_resets_on_new_trace(openai_agents_module):
     """on_trace_start resets abort_exception so a reused processor is clean."""
     openai_agents, _, _ = openai_agents_module
-    from agentdbg.exceptions import AgentDbgLoopAbort
+    from maida.exceptions import AgentDbgLoopAbort
 
     processor = openai_agents.PROCESSOR
     processor._abort_exception = AgentDbgLoopAbort(threshold=3, actual=3, message="old")
@@ -384,11 +384,11 @@ def test_loop_warning_dedup_with_openai_agents_adapter(
     and propagates to _run_context, which records ERROR + RUN_END and
     re-raises AgentDbgLoopAbort.  The loop stops immediately."""
     openai_agents, tracing_module, span_data = openai_agents_module
-    from agentdbg import trace
-    from agentdbg.config import load_config
-    from agentdbg.events import EventType
-    from agentdbg.exceptions import AgentDbgLoopAbort
-    from agentdbg.storage import load_events, load_run_meta
+    from maida import trace
+    from maida.config import load_config
+    from maida.events import EventType
+    from maida.exceptions import AgentDbgLoopAbort
+    from maida.storage import load_events, load_run_meta
     from tests.conftest import get_latest_run_id
 
     processor = openai_agents.PROCESSOR

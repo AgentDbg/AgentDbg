@@ -6,7 +6,7 @@ Uses temp dir via AGENTDBG_DATA_DIR; env restored by fixture.
 
 import pytest
 
-from agentdbg import (
+from maida import (
     has_active_run,
     record_llm_call,
     record_state,
@@ -14,9 +14,9 @@ from agentdbg import (
     trace,
     traced_run,
 )
-from agentdbg.config import load_config
-from agentdbg.events import EventType
-from agentdbg.storage import load_events, load_run_meta
+from maida.config import load_config
+from maida.events import EventType
+from maida.storage import load_events, load_run_meta
 from tests.conftest import get_latest_run_id
 
 
@@ -224,7 +224,7 @@ def test_record_llm_call_accepts_float_token_counts(temp_data_dir, monkeypatch):
 
 def test_normalize_usage_accepts_floats_and_mixed_types():
     """_normalize_usage accepts float token counts and casts to int; mixed int/float and None allowed."""
-    from agentdbg._tracing._redact import _normalize_usage
+    from maida._tracing._redact import _normalize_usage
 
     # All floats (common from some LLM APIs)
     out = _normalize_usage(
@@ -273,7 +273,7 @@ def test_trace_sets_name(monkeypatch, name, as_kwarg):
         captured["func"] = func
         return DummyContext()
 
-    monkeypatch.setattr("agentdbg._tracing._lifecycle._run_context", fake_run_context)
+    monkeypatch.setattr("maida._tracing._lifecycle._run_context", fake_run_context)
 
     def dummy_func(*args, **kwargs):
         pass
@@ -532,7 +532,7 @@ def test_trace_async_with_guardrails(temp_data_dir):
     """Guardrails work correctly on @trace-decorated async functions."""
     import asyncio
 
-    from agentdbg.exceptions import AgentDbgLoopAbort
+    from maida.exceptions import AgentDbgLoopAbort
 
     @trace(name="async-guardrail", stop_on_loop=True, stop_on_loop_min_repetitions=3)
     async def async_loop():

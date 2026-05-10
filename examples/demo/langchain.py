@@ -9,13 +9,13 @@ Run from repo root after installing extras:
   uv pip install -e ".[langchain]"
   uv run python --extra langchain -m examples.demo.langchain
 Then:
-  agentdbg view
+  maida view
 """
 
 import os
 import sys
 
-from agentdbg import trace
+from maida import trace
 
 
 def _ensure_demo_defaults() -> None:
@@ -35,7 +35,7 @@ def _require_langchain() -> None:
 
 @trace(name="langchain demo")
 def run_demo() -> None:
-    from agentdbg.integrations import AgentDbgLangChainCallbackHandler
+    from maida.integrations import AgentDbgLangChainCallbackHandler
 
     handler = AgentDbgLangChainCallbackHandler()
     config = {"callbacks": [handler]}
@@ -85,4 +85,4 @@ if __name__ == "__main__":
     _require_langchain()
     _ensure_demo_defaults()
     run_demo()
-    print("[demo] run complete. View with: agentdbg view")
+    print("[demo] run complete. View with: maida view")

@@ -4,8 +4,8 @@ import sys
 import importlib
 import pytest
 
-import agentdbg.integrations as integrations
-from agentdbg.integrations._error import MissingOptionalDependencyError
+import maida.integrations as integrations
+from maida.integrations._error import MissingOptionalDependencyError
 
 
 def has_module(name):
@@ -21,8 +21,8 @@ INTEGRATIONS = [  # name, dependency
 
 @pytest.fixture
 def reload_integrations():
-    sys.modules.pop("agentdbg.integrations.crewai", None)
-    sys.modules.pop("agentdbg.integrations.langchain", None)
+    sys.modules.pop("maida.integrations.crewai", None)
+    sys.modules.pop("maida.integrations.langchain", None)
 
     integrations.__dict__.pop("crewai", None)
     integrations.__dict__.pop("langchain", None)
@@ -32,8 +32,8 @@ def reload_integrations():
 
 
 def test_no_eager_imports(reload_integrations):
-    assert "agentdbg.integrations.crewai" not in sys.modules
-    assert "agentdbg.integrations.langchain" not in sys.modules
+    assert "maida.integrations.crewai" not in sys.modules
+    assert "maida.integrations.langchain" not in sys.modules
     assert "AgentDbgLangChainCallbackHandler" not in sys.modules
 
 
@@ -44,8 +44,8 @@ def test_lazy_module_imports(reload_integrations, name, dependency):
 
     mod = getattr(integrations, name)
 
-    assert f"agentdbg.integrations.{name}" in sys.modules
-    assert mod is sys.modules[f"agentdbg.integrations.{name}"]
+    assert f"maida.integrations.{name}" in sys.modules
+    assert mod is sys.modules[f"maida.integrations.{name}"]
 
 
 @pytest.mark.skipif(
@@ -53,13 +53,11 @@ def test_lazy_module_imports(reload_integrations, name, dependency):
 )
 def test_lazy_attribute_imports(reload_integrations):
     cls = integrations.AgentDbgLangChainCallbackHandler
-    assert "agentdbg.integrations.langchain" in sys.modules
+    assert "maida.integrations.langchain" in sys.modules
     assert cls.__name__ == "AgentDbgLangChainCallbackHandler"
     assert (
         cls
-        is sys.modules[
-            "agentdbg.integrations.langchain"
-        ].AgentDbgLangChainCallbackHandler
+        is sys.modules["maida.integrations.langchain"].AgentDbgLangChainCallbackHandler
     )
 
 
@@ -77,12 +75,12 @@ def test_dir_includes_all_attributes():
 def test_missing_dependency_raises(monkeypatch):
     integrations.__dict__.pop("AgentDbgLangChainCallbackHandler", None)
     integrations.__dict__.pop("langchain", None)
-    sys.modules.pop("agentdbg.integrations.langchain", None)
+    sys.modules.pop("maida.integrations.langchain", None)
 
     real_import_module = importlib.import_module
 
     def fake_import_module(name, package=None):
-        if name == "agentdbg.integrations.langchain":
+        if name == "maida.integrations.langchain":
             raise MissingOptionalDependencyError("langchain_core not installed")
         return real_import_module(name, package)
 

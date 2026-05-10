@@ -1,12 +1,12 @@
-"""Tests for agentdbg.diff: structural run comparison."""
+"""Tests for maida.diff: structural run comparison."""
 
 import pytest
 
-from agentdbg.baseline import create_baseline
-from agentdbg.config import load_config
-from agentdbg.diff import compute_diff, format_diff_text
-from agentdbg.events import EventType, new_event
-from agentdbg.storage import append_event, create_run, finalize_run
+from maida.baseline import create_baseline
+from maida.config import load_config
+from maida.diff import compute_diff, format_diff_text
+from maida.events import EventType, new_event
+from maida.storage import append_event, create_run, finalize_run
 
 
 def _make_run(config, *, name="test_run", events=None, status="ok"):

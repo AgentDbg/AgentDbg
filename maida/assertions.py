@@ -9,9 +9,9 @@ import json
 from dataclasses import dataclass, field
 from typing import Any
 
-from agentdbg.baseline import extract_run_metrics
-from agentdbg.config import AgentDbgConfig
-from agentdbg.storage import load_events, load_run_meta
+from maida.baseline import extract_run_metrics
+from maida.config import AgentDbgConfig
+from maida.storage import load_events, load_run_meta
 
 
 kDefaultTolerance = 0.5  # 50% global default
@@ -146,7 +146,7 @@ def run_assertions(
         ``AssertionReport`` with all check results.
     """
     if config is None:
-        from agentdbg.config import load_config
+        from maida.config import load_config
 
         config = load_config()
 

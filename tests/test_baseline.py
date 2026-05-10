@@ -1,16 +1,16 @@
-"""Tests for agentdbg.baseline: create, save, load, and metric extraction."""
+"""Tests for maida.baseline: create, save, load, and metric extraction."""
 
 import pytest
 
-from agentdbg.baseline import (
+from maida.baseline import (
     _BASELINE_SCHEMA_VERSION,
     create_baseline,
     load_baseline,
     save_baseline,
 )
-from agentdbg.config import load_config
-from agentdbg.events import EventType, new_event
-from agentdbg.storage import append_event, create_run, finalize_run
+from maida.config import load_config
+from maida.events import EventType, new_event
+from maida.storage import append_event, create_run, finalize_run
 
 
 def _make_run(config, *, name="test_run", events=None, status="ok"):

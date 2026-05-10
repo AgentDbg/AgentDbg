@@ -9,12 +9,12 @@ so you can inspect exactly what pattern repeated.
 Run from repo root:
    uv run python -m examples.demo.guardrails
 Then:
-   agentdbg view
+   maida view
 """
 
 import os
 
-from agentdbg import (
+from maida import (
     AgentDbgLoopAbort,
     record_llm_call,
     record_state,
@@ -99,4 +99,4 @@ if __name__ == "__main__":
     except AgentDbgLoopAbort as e:
         print(f"[demo] AgentDbg stopped the agent: {e}")
         print("[demo] The full trace is saved with the LOOP_WARNING and ERROR events.")
-        print("[demo] Open the timeline with: agentdbg view")
+        print("[demo] Open the timeline with: maida view")

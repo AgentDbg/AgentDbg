@@ -7,11 +7,11 @@ use patched time.
 
 import pytest
 
-from agentdbg import record_llm_call, record_tool_call, record_state, trace, traced_run
-from agentdbg.config import load_config
-from agentdbg.events import EventType
-from agentdbg.exceptions import AgentDbgGuardrailExceeded, AgentDbgLoopAbort
-from agentdbg.storage import load_events, load_run_meta
+from maida import record_llm_call, record_tool_call, record_state, trace, traced_run
+from maida.config import load_config
+from maida.events import EventType
+from maida.exceptions import AgentDbgGuardrailExceeded, AgentDbgLoopAbort
+from maida.storage import load_events, load_run_meta
 from tests.conftest import get_latest_run_id
 
 
@@ -197,8 +197,8 @@ def test_max_events_triggers_at_threshold(temp_data_dir):
 
 def test_max_duration_s_triggers_after_timeout(temp_data_dir, monkeypatch):
     """max_duration_s triggers when elapsed time >= limit; use patched time for determinism."""
-    from agentdbg import guardrails as guardrails_mod
-    from agentdbg import storage as storage_mod
+    from maida import guardrails as guardrails_mod
+    from maida import storage as storage_mod
 
     start_ts = "2026-01-01T12:00:00.000Z"
     end_ts = "2026-01-01T12:01:40.000Z"  # 100s later
@@ -364,7 +364,7 @@ def test_loop_abort_caught_by_parent_class(temp_data_dir):
 
 def test_merge_guardrail_params_min_repetitions_clamped_to_2():
     """stop_on_loop_min_repetitions values below 2 are clamped to 2."""
-    from agentdbg.guardrails import GuardrailParams, merge_guardrail_params
+    from maida.guardrails import GuardrailParams, merge_guardrail_params
 
     base = GuardrailParams()
     out = merge_guardrail_params(base, stop_on_loop_min_repetitions=1)
@@ -376,7 +376,7 @@ def test_merge_guardrail_params_min_repetitions_clamped_to_2():
 
 def test_merge_guardrail_params_negative_max_llm_calls_ignored():
     """Negative max_llm_calls override is silently ignored; limit stays None."""
-    from agentdbg.guardrails import GuardrailParams, merge_guardrail_params
+    from maida.guardrails import GuardrailParams, merge_guardrail_params
 
     base = GuardrailParams()
     out = merge_guardrail_params(base, max_llm_calls=-1)
@@ -385,7 +385,7 @@ def test_merge_guardrail_params_negative_max_llm_calls_ignored():
 
 def test_merge_guardrail_params_negative_max_duration_s_clamped_to_zero():
     """Negative max_duration_s is clamped to 0.0, not ignored."""
-    from agentdbg.guardrails import GuardrailParams, merge_guardrail_params
+    from maida.guardrails import GuardrailParams, merge_guardrail_params
 
     base = GuardrailParams()
     out = merge_guardrail_params(base, max_duration_s=-5.0)
@@ -394,8 +394,8 @@ def test_merge_guardrail_params_negative_max_duration_s_clamped_to_zero():
 
 def test_max_duration_s_zero_triggers_immediately(temp_data_dir, monkeypatch):
     """max_duration_s=0.0 triggers on the first event because elapsed >= 0.0 is always true."""
-    from agentdbg import guardrails as guardrails_mod
-    from agentdbg import storage as storage_mod
+    from maida import guardrails as guardrails_mod
+    from maida import storage as storage_mod
 
     ts = "2026-01-01T12:00:00.000Z"
     monkeypatch.setattr(storage_mod, "utc_now_iso_ms_z", lambda: ts)

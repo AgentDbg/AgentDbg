@@ -8,9 +8,9 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from agentdbg.config import AgentDbgConfig
-from agentdbg.events import EventType, utc_now_iso_ms_z
-from agentdbg.storage import load_events, load_run_meta
+from maida.config import AgentDbgConfig
+from maida.events import EventType, utc_now_iso_ms_z
+from maida.storage import load_events, load_run_meta
 
 _BASELINE_SCHEMA_VERSION = "0.1"
 

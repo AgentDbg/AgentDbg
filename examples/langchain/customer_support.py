@@ -4,8 +4,8 @@ import os
 from typing import Any
 import uuid
 
-from agentdbg import trace
-from agentdbg.integrations import AgentDbgLangChainCallbackHandler
+from maida import trace
+from maida.integrations import AgentDbgLangChainCallbackHandler
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "ERROR").upper())
 

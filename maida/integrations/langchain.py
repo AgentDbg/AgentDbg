@@ -6,9 +6,9 @@ Uses only AgentDbg SDK: record_llm_call, record_tool_call. No CLI or server impo
 
 from typing import Any
 
-from agentdbg.exceptions import AgentDbgGuardrailExceeded, _AgentDbgAbortSignal
-from agentdbg.tracing import record_llm_call, record_tool_call
-from agentdbg.integrations._error import MissingOptionalDependencyError
+from maida.exceptions import AgentDbgGuardrailExceeded, _AgentDbgAbortSignal
+from maida.tracing import record_llm_call, record_tool_call
+from maida.integrations._error import MissingOptionalDependencyError
 
 
 try:
@@ -17,8 +17,8 @@ except ImportError as e:
     raise MissingOptionalDependencyError(
         "The LangChain/LangGraph integration requires optional dependencies that are not installed. "
         "Missing: langchain (langchain_core). "
-        'Install with: pip install "agentdbg[langchain]" or pip install langchain. '
-        "This integration is optional; the core agentdbg package does not depend on it."
+        'Install with: pip install "maida[langchain]" or pip install langchain. '
+        "This integration is optional; the core maida package does not depend on it."
     ) from e
 
 

@@ -14,9 +14,9 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-from agentdbg.config import AgentDbgConfig
-from agentdbg.constants import SPEC_VERSION, default_counts
-from agentdbg.events import utc_now_iso_ms_z
+from maida.config import AgentDbgConfig
+from maida.constants import SPEC_VERSION, default_counts
+from maida.events import utc_now_iso_ms_z
 
 RUN_JSON = "run.json"
 EVENTS_JSONL = "events.jsonl"

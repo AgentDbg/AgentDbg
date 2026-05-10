@@ -1,8 +1,8 @@
 """
 CrewAI execution-hooks integration: records LLM and tool calls into the active AgentDbg run.
 
-Import to activate: `from agentdbg.integrations import crewai as adbg_crewai`
-Then use `with agentdbg.traced_run(...): crew.kickoff()` or `@agentdbg.trace` around flow.kickoff().
+Import to activate: `from maida.integrations import crewai as adbg_crewai`
+Then use `with maida.traced_run(...): crew.kickoff()` or `@maida.trace` around flow.kickoff().
 
 Hook ordering caveat: CrewAI runs hooks in registration order. If another before-hook returns False
 and blocks execution, our before-hook may never run for that call, so we cannot capture it.
@@ -13,10 +13,10 @@ import traceback
 from types import TracebackType
 from typing import Any
 
-from agentdbg._integration_utils import register_run_enter, register_run_exit
-from agentdbg._tracing._context import _ensure_run
-from agentdbg.integrations._error import MissingOptionalDependencyError
-from agentdbg.tracing import record_llm_call, record_tool_call
+from maida._integration_utils import register_run_enter, register_run_exit
+from maida._tracing._context import _ensure_run
+from maida.integrations._error import MissingOptionalDependencyError
+from maida.tracing import record_llm_call, record_tool_call
 
 try:
     from crewai.hooks import (
@@ -27,7 +27,7 @@ try:
     )
 except ImportError as e:
     raise MissingOptionalDependencyError(
-        "CrewAI integration requires optional deps. Install with `pip install agentdbg[crewai]`."
+        "CrewAI integration requires optional deps. Install with `pip install maida[crewai]`."
     ) from e
 
 

@@ -12,9 +12,9 @@ import sys
 import tempfile
 from pathlib import Path
 
-from agentdbg.config import load_config
-from agentdbg.events import EventType
-from agentdbg.storage import load_events, load_run_meta, list_runs
+from maida.config import load_config
+from maida.events import EventType
+from maida.storage import load_events, load_run_meta, list_runs
 
 
 def _run_implicit_tool_call(data_dir: str) -> None:
@@ -23,7 +23,7 @@ def _run_implicit_tool_call(data_dir: str) -> None:
     env["AGENTDBG_IMPLICIT_RUN"] = "1"
     env["AGENTDBG_DATA_DIR"] = data_dir
     code = """
-from agentdbg.tracing import record_tool_call
+from maida.tracing import record_tool_call
 record_tool_call("no_trace_tool", args={"x": 1})
 """
     result = subprocess.run(

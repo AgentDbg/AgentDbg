@@ -11,12 +11,12 @@ Pure python demo: produces a single run containing:
 Run from repo root:
    uv run python -m examples.demo.pure_python
 Then:
-  agentdbg view
+  maida view
 """
 
 import os
 
-from agentdbg import trace, record_llm_call, record_state, record_tool_call
+from maida import trace, record_llm_call, record_state, record_tool_call
 
 
 def _ensure_demo_defaults() -> None:
@@ -103,4 +103,4 @@ if __name__ == "__main__":
         # The trace has already been finalized with ERROR + RUN_END(status=error).
         # Keep terminal output clean for the demo recording.
         print(f"[demo] run completed with simulated error: {e}")
-        print("[demo] open the timeline with: agentdbg view")
+        print("[demo] open the timeline with: maida view")

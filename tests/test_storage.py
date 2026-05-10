@@ -8,9 +8,9 @@ from unittest.mock import patch
 
 import pytest
 
-from agentdbg.config import load_config
-from agentdbg.events import EventType, new_event
-from agentdbg.storage import (
+from maida.config import load_config
+from maida.events import EventType, new_event
+from maida.storage import (
     append_event,
     create_run,
     finalize_run,
@@ -215,7 +215,7 @@ def test_load_events_logs_warning_for_corrupt_jsonl_lines(temp_data_dir):
         '{"event_type": "RUN_START"}\nnot json\n{unclosed\n',
         encoding="utf-8",
     )
-    with patch("agentdbg.storage.logger") as mock_logger:
+    with patch("maida.storage.logger") as mock_logger:
         loaded = load_events(run_id, config)
     assert len(loaded) == 1
     assert loaded[0].get("event_type") == "RUN_START"

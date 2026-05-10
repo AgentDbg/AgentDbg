@@ -4,8 +4,8 @@ OpenAI Agents SDK tracing integration.
 Import to activate:
 
 ```python
-from agentdbg import trace
-from agentdbg.integrations import openai_agents  # registers hooks
+from maida import trace
+from maida.integrations import openai_agents  # registers hooks
 
 
 @trace
@@ -20,9 +20,9 @@ generation, function, and handoff spans into AgentDbg `record_*` calls.
 
 from typing import Any
 
-from agentdbg import has_active_run, record_llm_call, record_tool_call
-from agentdbg.exceptions import AgentDbgGuardrailExceeded, _AgentDbgAbortSignal
-from agentdbg.integrations._error import MissingOptionalDependencyError
+from maida import has_active_run, record_llm_call, record_tool_call
+from maida.exceptions import AgentDbgGuardrailExceeded, _AgentDbgAbortSignal
+from maida.integrations._error import MissingOptionalDependencyError
 
 try:
     import agents.tracing as agents_tracing
@@ -36,7 +36,7 @@ try:
 except ImportError as e:
     raise MissingOptionalDependencyError(
         "OpenAI Agents integration requires optional deps. "
-        "Install with `pip install agentdbg[openai]`."
+        "Install with `pip install maida[openai]`."
     ) from e
 
 _PROCESSOR_ATTR = "_agentdbg_openai_agents_processor"

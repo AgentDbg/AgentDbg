@@ -9,18 +9,18 @@ import sys
 import pytest
 from tests.conftest import get_latest_run_id
 
-from agentdbg import trace
-from agentdbg.config import load_config
-from agentdbg.events import EventType
-from agentdbg.exceptions import (
+from maida import trace
+from maida.config import load_config
+from maida.events import EventType
+from maida.exceptions import (
     AgentDbgGuardrailExceeded,
     AgentDbgLoopAbort,
     _AgentDbgAbortSignal,
 )
-from agentdbg.storage import load_events
+from maida.storage import load_events
 
 try:
-    from agentdbg.integrations.langchain import AgentDbgLangChainCallbackHandler
+    from maida.integrations.langchain import AgentDbgLangChainCallbackHandler
 
     LANGCHAIN_MISSING = False
 except ImportError:
@@ -39,14 +39,14 @@ def test_langchain_integration_raises_clear_error_when_deps_missing():
     for key in list(sys.modules.keys()):
         if key == "langchain_core" or key.startswith("langchain_core."):
             to_restore[key] = sys.modules.pop(key, None)
-    for key in ("agentdbg.integrations.langchain", "agentdbg.integrations"):
+    for key in ("maida.integrations.langchain", "maida.integrations"):
         if key in sys.modules:
             to_restore[key] = sys.modules.pop(key)
 
     try:
         sys.modules["langchain_core"] = FakeLangChainCore()
         with pytest.raises(ImportError) as exc_info:
-            from agentdbg.integrations import AgentDbgLangChainCallbackHandler  # noqa: F401
+            from maida.integrations import AgentDbgLangChainCallbackHandler  # noqa: F401
         msg = str(exc_info.value)
         assert "langchain" in msg.lower(), f"message should mention langchain: {msg!r}"
         assert "pip install" in msg.lower(), (
@@ -58,15 +58,15 @@ def test_langchain_integration_raises_clear_error_when_deps_missing():
     finally:
         for key in (
             "langchain_core",
-            "agentdbg.integrations.langchain",
-            "agentdbg.integrations",
+            "maida.integrations.langchain",
+            "maida.integrations",
         ):
             sys.modules.pop(key, None)
         sys.modules.update(to_restore)
 
 
 def test_langchain_integration_does_not_break_core_import():
-    """Core agentdbg import must not crash when LangChain optional deps are missing."""
+    """Core maida import must not crash when LangChain optional deps are missing."""
 
     class FakeLangChainCore:
         def __getattr__(self, name: str):
@@ -79,9 +79,9 @@ def test_langchain_integration_does_not_break_core_import():
 
     try:
         sys.modules["langchain_core"] = FakeLangChainCore()
-        import agentdbg  # noqa: F401
+        import maida  # noqa: F401
 
-        assert agentdbg.__version__
+        assert maida.__version__
     finally:
         sys.modules.pop("langchain_core", None)
         for k, v in to_restore.items():

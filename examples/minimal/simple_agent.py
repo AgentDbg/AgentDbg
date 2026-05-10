@@ -3,7 +3,7 @@ Minimal runnable example: traced function with one record_tool_call and one reco
 Run with: python examples/minimal/simple_agent.py (from repo root).
 """
 
-from agentdbg import record_llm_call, record_tool_call, trace
+from maida import record_llm_call, record_tool_call, trace
 from maida.constants import LOCAL_DIR_NAME
 
 

@@ -1,14 +1,14 @@
 """Structural diff engine for comparing two runs or a run against a baseline.
 
-Used after ``agentdbg assert`` flags a regression to understand *what* changed.
+Used after ``maida assert`` flags a regression to understand *what* changed.
 """
 
 from collections import Counter
 from dataclasses import dataclass, field
 
-from agentdbg.baseline import extract_run_metrics
-from agentdbg.config import AgentDbgConfig
-from agentdbg.storage import load_events, load_run_meta
+from maida.baseline import extract_run_metrics
+from maida.config import AgentDbgConfig
+from maida.storage import load_events, load_run_meta
 
 
 @dataclass
@@ -49,7 +49,7 @@ def compute_diff(
     Exactly one of *run_b_id* or *baseline* must be provided.
     """
     if config is None:
-        from agentdbg.config import load_config
+        from maida.config import load_config
 
         config = load_config()
 

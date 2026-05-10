@@ -1,21 +1,21 @@
 """
 Recorders: record_llm_call, record_tool_call, record_state.
-Depends: agentdbg.events, agentdbg.storage, agentdbg.loopdetect, _redact, _context.
+Depends: maida.events, maida.storage, maida.loopdetect, _redact, _context.
 """
 
 from typing import Any
 
-from agentdbg.config import AgentDbgConfig
-from agentdbg.events import EventType, new_event
-from agentdbg.exceptions import AgentDbgLoopAbort
-from agentdbg.loopdetect import detect_loop, pattern_key as loop_pattern_key
+from maida.config import AgentDbgConfig
+from maida.events import EventType, new_event
+from maida.exceptions import AgentDbgLoopAbort
+from maida.loopdetect import detect_loop, pattern_key as loop_pattern_key
 
-from agentdbg._tracing._context import (
+from maida._tracing._context import (
     _append_event_and_check_guardrails,
     _ensure_run,
     _guardrail_params_var,
 )
-from agentdbg._tracing._redact import (
+from maida._tracing._redact import (
     _apply_redaction_truncation,
     _build_error_payload,
     _normalize_usage,

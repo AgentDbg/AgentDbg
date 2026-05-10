@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from agentdbg.guardrails import GuardrailParams
+from maida.guardrails import GuardrailParams
 from maida.constants import LOCAL_DIR_NAME
 
 try:

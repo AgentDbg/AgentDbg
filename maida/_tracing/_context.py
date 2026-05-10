@@ -1,6 +1,6 @@
 """
 Context vars, implicit-run state, _ensure_run, and atexit finalization.
-Depends: agentdbg.config, agentdbg.constants, agentdbg.events, agentdbg.guardrails, agentdbg.storage, _redact.
+Depends: maida.config, maida.constants, maida.events, maida.guardrails, maida.storage, _redact.
 """
 
 import atexit
@@ -10,13 +10,13 @@ from contextvars import ContextVar
 from datetime import datetime
 from typing import Any, Callable
 
-from agentdbg.config import AgentDbgConfig, load_config
-from agentdbg.constants import default_counts
-from agentdbg.events import EventType, new_event, utc_now_iso_ms_z
-from agentdbg.guardrails import GuardrailParams, check_after_event
-from agentdbg.storage import append_event, create_run, finalize_run
+from maida.config import AgentDbgConfig, load_config
+from maida.constants import default_counts
+from maida.events import EventType, new_event, utc_now_iso_ms_z
+from maida.guardrails import GuardrailParams, check_after_event
+from maida.storage import append_event, create_run, finalize_run
 
-from agentdbg._tracing._redact import _redact_and_truncate, _redact_argv
+from maida._tracing._redact import _redact_and_truncate, _redact_argv
 
 
 _run_id_var: ContextVar[str | None] = ContextVar("agentdbg_run_id", default=None)
