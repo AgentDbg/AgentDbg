@@ -20,7 +20,7 @@ from maida.exceptions import (
 from maida.storage import load_events
 
 try:
-    from maida.integrations.langchain import AgentDbgLangChainCallbackHandler
+    from maida.integrations.langchain import LangChainCallbackHandler
 
     LANGCHAIN_MISSING = False
 except ImportError:
@@ -46,7 +46,7 @@ def test_langchain_integration_raises_clear_error_when_deps_missing():
     try:
         sys.modules["langchain_core"] = FakeLangChainCore()
         with pytest.raises(ImportError) as exc_info:
-            from maida.integrations import AgentDbgLangChainCallbackHandler  # noqa: F401
+            from maida.integrations import LangChainCallbackHandler  # noqa: F401
         msg = str(exc_info.value)
         assert "langchain" in msg.lower(), f"message should mention langchain: {msg!r}"
         assert "pip install" in msg.lower(), (
@@ -92,7 +92,7 @@ def test_langchain_integration_does_not_break_core_import():
 @trace
 def _traced_with_handler():
     """Run one tool and one LLM via handler so events are recorded."""
-    handler = AgentDbgLangChainCallbackHandler()
+    handler = LangChainCallbackHandler()
     config = {"callbacks": [handler]}
 
     from langchain_core.language_models.fake import FakeListLLM
@@ -138,7 +138,7 @@ def test_langchain_handler_emits_tool_call_and_llm_call(temp_data_dir):
 @pytest.mark.skipif(LANGCHAIN_MISSING, reason="langchain_core not installed")
 def test_langchain_handler_tool_error_emits_error_status(temp_data_dir):
     """Simulate tool error callback; record_tool_call is called with status=error."""
-    handler = AgentDbgLangChainCallbackHandler()
+    handler = LangChainCallbackHandler()
 
     @trace
     def _run():
@@ -186,7 +186,7 @@ def _simulate_langchain_handle_event(handler, event_name: str, *args, **kwargs) 
 @pytest.mark.skipif(LANGCHAIN_MISSING, reason="langchain_core not installed")
 def test_langchain_handler_guardrail_propagates_via_raise_error(temp_data_dir):
     """stop_on_loop guardrail sets raise_error=True so LangChain propagates the abort."""
-    handler = AgentDbgLangChainCallbackHandler()
+    handler = LangChainCallbackHandler()
     assert handler.raise_error is False, "raise_error should default to False"
 
     iterations_completed = 0
@@ -255,7 +255,7 @@ def test_langchain_handler_guardrail_propagates_via_raise_error(temp_data_dir):
 @pytest.mark.skipif(LANGCHAIN_MISSING, reason="langchain_core not installed")
 def test_langchain_handler_resets_via_reset_method(temp_data_dir):
     """A reused handler resets raise_error and abort_exception via reset()."""
-    handler = AgentDbgLangChainCallbackHandler()
+    handler = LangChainCallbackHandler()
     handler.raise_error = True
     handler._abort_exception = LoopAbort(threshold=3, actual=3, message="old")
 
@@ -291,7 +291,7 @@ def test_langchain_handler_blocks_after_abort(temp_data_dir):
     """Once a guardrail fires, subsequent on_llm_start / on_tool_start
     raise _MaidaAbortSignal (BaseException) so it bypasses framework-level
     ``except Exception`` handlers and propagates out."""
-    handler = AgentDbgLangChainCallbackHandler()
+    handler = LangChainCallbackHandler()
     handler._abort_exception = LoopAbort(threshold=3, actual=3, message="loop")
 
     with pytest.raises(_MaidaAbortSignal) as exc_info:
@@ -315,7 +315,7 @@ def test_langchain_handler_on_llm_error_propagates_guardrail(temp_data_dir):
     """GuardrailExceeded raised inside on_llm_error wraps in
     _MaidaAbortSignal so it bypasses framework error handling and
     propagates to _run_context which unwraps it to LoopAbort."""
-    handler = AgentDbgLangChainCallbackHandler()
+    handler = LangChainCallbackHandler()
 
     @trace(stop_on_loop=True, stop_on_loop_min_repetitions=3)
     def _run():

@@ -106,8 +106,8 @@ Guardrails are opt-in and meant for development-time safety rails: they let you 
 
 ```python
 from maida import (
-    AgentDbgGuardrailExceeded,
-    AgentDbgLoopAbort,
+    GuardrailExceeded,
+    LoopAbort,
     record_llm_call,
     record_tool_call,
     trace,
@@ -127,9 +127,9 @@ def run_agent():
 
 try:
     run_agent()
-except AgentDbgLoopAbort:
+except LoopAbort:
     print("Maida stopped a repeated loop.")
-except AgentDbgGuardrailExceeded as exc:
+except GuardrailExceeded as exc:
     print(exc.guardrail, exc.threshold, exc.actual)
 ```
 
@@ -328,11 +328,11 @@ pip install maida[langchain]
 
 ```python
 from maida import trace
-from maida.integrations import AgentDbgLangChainCallbackHandler
+from maida.integrations import LangChainCallbackHandler
 
 @trace
 def run_agent():
-    handler = AgentDbgLangChainCallbackHandler()
+    handler = LangChainCallbackHandler()
     # pass to your chain: config={"callbacks": [handler]}
     ...
 ```
