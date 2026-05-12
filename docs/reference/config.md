@@ -1,6 +1,6 @@
 # Configuration reference
 
-AgentDbg is configured via **environment variables** and **YAML config files**. All settings are optional; defaults are tuned for safe, local-only tracing.
+Maida is configured via **environment variables** and **YAML config files**. All settings are optional; defaults are tuned for safe, local-only tracing.
 
 ---
 
@@ -104,7 +104,7 @@ loop_repetitions: 4
 
 ### Guardrails
 
-Guardrails are opt-in limits that stop a run after AgentDbg has enough evidence to show why it was aborted. They are applied after events are recorded, so the trace still contains the event that crossed the threshold.
+Guardrails are opt-in limits that stop a run after Maida has enough evidence to show why it was aborted. They are applied after events are recorded, so the trace still contains the event that crossed the threshold.
 
 | Env | YAML key | Default | Description |
 |-----|----------|---------|-------------|
@@ -118,9 +118,9 @@ Guardrails are opt-in limits that stop a run after AgentDbg has enough evidence 
 **Important behavior:**
 
 - **Existing event types only:** guardrails use normal `LOOP_WARNING`, `ERROR`, and `RUN_END` events.
-- **Loop aborts:** if `stop_on_loop=true`, AgentDbg writes `LOOP_WARNING` first, then aborts.
+- **Loop aborts:** if `stop_on_loop=true`, Maida writes `LOOP_WARNING` first, then aborts.
 - **Count-based limits:** `max_llm_calls=10` allows 10 calls and aborts after the 11th is recorded.
-- **Exception propagation:** guardrail aborts raise `AgentDbgLoopAbort` or `AgentDbgGuardrailExceeded`; they are not swallowed.
+- **Exception propagation:** guardrail aborts raise `LoopAbort` or `GuardrailExceeded`; they are not swallowed.
 - **Decorator/context-manager args win:** values passed to `@trace(...)` or `traced_run(...)` override env and YAML config.
 
 **Example (env):**

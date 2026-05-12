@@ -1,4 +1,4 @@
-# Writing AgentDbg Integration Adapters
+# Writing Maida Integration Adapters
 
 This guide captures the patterns and pitfalls discovered while building the LangChain, OpenAI Agents SDK, and CrewAI integrations. Follow these guidelines to avoid repeating the same issues.
 
@@ -14,40 +14,40 @@ Every agent framework has its own error handling around callbacks/hooks/processo
 | OpenAI Agents SDK | `TracingProcessor.on_span_end` | `except Exception` in `SynchronousMultiTracingProcessor` |
 | CrewAI | Execution hooks | `except Exception` in hook runner |
 
-Because `AgentDbgGuardrailExceeded` inherits from `Exception`, it gets caught and swallowed at **two levels**: once by the callback dispatcher and once by the framework's execution loop.
+Because `GuardrailExceeded` inherits from `Exception`, it gets caught and swallowed at **two levels**: once by the callback dispatcher and once by the framework's execution loop.
 
 ---
 
-## The `_AgentDbgAbortSignal` pattern
+## The `_MaidaAbortSignal` pattern
 
-The solution is `_AgentDbgAbortSignal`, an internal `BaseException` subclass defined in `maida.exceptions`. `BaseException` subclasses bypass `except Exception` blocks — the same mechanism Python uses for `KeyboardInterrupt`, `SystemExit`, and `asyncio.CancelledError`.
+The solution is `_MaidaAbortSignal`, an internal `BaseException` subclass defined in `maida.exceptions`. `BaseException` subclasses bypass `except Exception` blocks — the same mechanism Python uses for `KeyboardInterrupt`, `SystemExit`, and `asyncio.CancelledError`.
 
 ### How it works
 
 ```
 Framework calls adapter hook
   → adapter calls record_llm_call / record_tool_call
-    → guardrail fires → raises AgentDbgGuardrailExceeded (Exception)
+    → guardrail fires → raises GuardrailExceeded (Exception)
   → adapter catches it, stores on _abort_exception
-  → adapter raises _AgentDbgAbortSignal(cause) (BaseException)
+  → adapter raises _MaidaAbortSignal(cause) (BaseException)
 → framework's `except Exception` does NOT catch it
 → signal propagates through the framework's execution loop
 → signal reaches traced_run / @trace context manager
-→ _run_context catches _AgentDbgAbortSignal
+→ _run_context catches _MaidaAbortSignal
 → records ERROR + RUN_END
-→ re-raises the wrapped AgentDbgGuardrailExceeded (the public exception type)
-→ user sees AgentDbgLoopAbort or AgentDbgGuardrailExceeded
+→ re-raises the wrapped GuardrailExceeded (the public exception type)
+→ user sees LoopAbort or GuardrailExceeded
 ```
 
-### Rules for using `_AgentDbgAbortSignal`
+### Rules for using `_MaidaAbortSignal`
 
-1. **Always wrap the original exception.** `_AgentDbgAbortSignal(cause)` stores the original `AgentDbgGuardrailExceeded` on `.cause`. The lifecycle layer unwraps it so the user sees the public exception type.
+1. **Always wrap the original exception.** `_MaidaAbortSignal(cause)` stores the original `GuardrailExceeded` on `.cause`. The lifecycle layer unwraps it so the user sees the public exception type.
 
 2. **Always store the original on `_abort_exception` before raising the signal.** This is a defensive fallback — if the signal is caught by the framework despite being a `BaseException`, the user can still call `raise_if_aborted()`.
 
-3. **Use `raise _AgentDbgAbortSignal(e) from e`** to preserve the exception chain.
+3. **Use `raise _MaidaAbortSignal(e) from e`** to preserve the exception chain.
 
-4. **Never raise `_AgentDbgAbortSignal` from the core SDK** (`record_llm_call`, `record_tool_call`, etc.). The core raises `AgentDbgGuardrailExceeded` (an `Exception`). Only integration adapters escalate to `_AgentDbgAbortSignal` because they know the framework will catch `Exception`.
+4. **Never raise `_MaidaAbortSignal` from the core SDK** (`record_llm_call`, `record_tool_call`, etc.). The core raises `GuardrailExceeded` (an `Exception`). Only integration adapters escalate to `_MaidaAbortSignal` because they know the framework will catch `Exception`.
 
 ---
 
@@ -58,7 +58,7 @@ Once a guardrail fires, the framework may continue calling your adapter for subs
 ```python
 def _check_aborted(self) -> None:
     if self._abort_exception is not None:
-        raise _AgentDbgAbortSignal(self._abort_exception)
+        raise _MaidaAbortSignal(self._abort_exception)
 ```
 
 Call `_check_aborted()` at the **start** of every hook method that initiates a new operation (`on_llm_start`, `on_tool_start`, `on_chat_model_start`, `on_span_start`, etc.). This prevents:
@@ -92,26 +92,26 @@ The user calls `reset()` or creates a new handler instance between runs.
 
 ## Handle errors in error callbacks
 
-Frameworks call error hooks (`on_llm_error`, `on_tool_error`) when operations fail. If you call `record_llm_call(status="error")` inside these, loop detection may fire. You must catch `AgentDbgGuardrailExceeded` in error hooks too:
+Frameworks call error hooks (`on_llm_error`, `on_tool_error`) when operations fail. If you call `record_llm_call(status="error")` inside these, loop detection may fire. You must catch `GuardrailExceeded` in error hooks too:
 
 ```python
 def on_llm_error(self, error, **kwargs):
     try:
         record_llm_call(model=model, status="error", error=error, ...)
-    except AgentDbgGuardrailExceeded as e:
+    except GuardrailExceeded as e:
         self._abort_exception = e
-        raise _AgentDbgAbortSignal(e) from e
+        raise _MaidaAbortSignal(e) from e
 ```
 
 ---
 
 ## Loop detection deduplication
 
-The core loop detector emits one `LOOP_WARNING` per distinct pattern and deduplicates subsequent detections. When `stop_on_loop=True`, the core re-raises `AgentDbgLoopAbort` on every detection opportunity (even for already-emitted patterns) so that frameworks that swallow the first exception still get interrupted.
+The core loop detector emits one `LOOP_WARNING` per distinct pattern and deduplicates subsequent detections. When `stop_on_loop=True`, the core re-raises `LoopAbort` on every detection opportunity (even for already-emitted patterns) so that frameworks that swallow the first exception still get interrupted.
 
 Your adapter does not need to handle dedup — the core handles it in `_maybe_emit_loop_warning`. Your adapter only needs to:
-1. Catch `AgentDbgGuardrailExceeded` from `record_*` calls
-2. Escalate to `_AgentDbgAbortSignal`
+1. Catch `GuardrailExceeded` from `record_*` calls
+2. Escalate to `_MaidaAbortSignal`
 3. Guard subsequent hooks with `_check_aborted()`
 
 ---
@@ -120,7 +120,7 @@ Your adapter does not need to handle dedup — the core handles it in `_maybe_em
 
 The `@trace` decorator detects async functions via `asyncio.iscoroutinefunction()` and uses an `async def` wrapper that `await`s inside the `_run_context`. Without this, the context manager tears down before the coroutine body executes, and no events are recorded.
 
-If your integration involves async callbacks, ensure the adapter works in both sync and async contexts. The `_AgentDbgAbortSignal` pattern works identically in both — `BaseException` subclasses propagate through `await` chains.
+If your integration involves async callbacks, ensure the adapter works in both sync and async contexts. The `_MaidaAbortSignal` pattern works identically in both — `BaseException` subclasses propagate through `await` chains.
 
 ---
 
@@ -155,7 +155,7 @@ def _simulate_handle_event(handler, method_name, *args, **kwargs):
         pass
 ```
 
-This ensures your tests verify that `_AgentDbgAbortSignal` (BaseException) propagates while `AgentDbgGuardrailExceeded` (Exception) would be swallowed.
+This ensures your tests verify that `_MaidaAbortSignal` (BaseException) propagates while `GuardrailExceeded` (Exception) would be swallowed.
 
 ---
 
@@ -163,10 +163,10 @@ This ensures your tests verify that `_AgentDbgAbortSignal` (BaseException) propa
 
 | Concern | Pattern |
 |---|---|
-| Guardrail exception from core | `AgentDbgGuardrailExceeded(Exception)` — caught by frameworks |
-| Abort signal from adapter | `_AgentDbgAbortSignal(BaseException)` — bypasses frameworks |
+| Guardrail exception from core | `GuardrailExceeded(Exception)` — caught by frameworks |
+| Abort signal from adapter | `_MaidaAbortSignal(BaseException)` — bypasses frameworks |
 | Store abort for fallback | `self._abort_exception = e` before raising signal |
 | Guard subsequent hooks | `_check_aborted()` at start of every `on_*_start` / `on_span_start` |
 | Reset for reuse | Explicit `reset()` method, never auto-reset in hooks |
-| Error callbacks | Catch `AgentDbgGuardrailExceeded` in `on_*_error` too |
-| Lifecycle handling | `_run_context` catches `_AgentDbgAbortSignal`, records ERROR + RUN_END, unwraps to public exception |
+| Error callbacks | Catch `GuardrailExceeded` in `on_*_error` too |
+| Lifecycle handling | `_run_context` catches `_MaidaAbortSignal`, records ERROR + RUN_END, unwraps to public exception |

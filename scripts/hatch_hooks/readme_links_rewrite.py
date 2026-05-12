@@ -61,7 +61,7 @@ class ReadmeLinksRewriteBuildHook(BuildHookInterface):
     """Rewrite README links during build, then restore the original file."""
 
     PLUGIN_NAME = "custom"
-    BASE_URL = "https://github.com/AgentDbg/AgentDbg/blob/"
+    BASE_URL = "https://github.com/maida-ai/maida/blob/"
     README_FILE = Path("README.md")
     README_BACKUP_FILE = Path("_README.md")
 

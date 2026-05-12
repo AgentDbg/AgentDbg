@@ -1,5 +1,5 @@
 """
-Minimal OpenAI Agents tracing example with fake spans only.
+Minimal OpenAI Agents tracing example with fake spans only using Maida.
 
 Run from the repo root:
   uv run --extra openai python examples/openai_agents/minimal.py
@@ -25,13 +25,13 @@ def run_agent():
     # Keep the SDK tracing local-only for this example: no backend exporter, no API key.
     set_trace_processors([openai_agents.PROCESSOR])
 
-    with agents_trace("AgentDbg OpenAI Agents example"):
+    with agents_trace("Maida OpenAI Agents example"):
         with generation_span(
-            input=[{"role": "user", "content": "Summarize AgentDbg in one sentence."}],
+            input=[{"role": "user", "content": "Summarize Maida in one sentence."}],
             output=[
                 {
                     "role": "assistant",
-                    "content": "AgentDbg is a local-first timeline debugger for AI agents.",
+                    "content": "Maida is a local-first timeline debugger for AI agents.",
                 }
             ],
             model="gpt-4o-mini",
@@ -42,7 +42,7 @@ def run_agent():
 
         with function_span(
             name="lookup_docs",
-            input={"query": "AgentDbg integrations"},
+            input={"query": "Maida integrations"},
             output={"hits": 2},
         ):
             pass

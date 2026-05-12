@@ -1,4 +1,4 @@
-"""AgentDbg: local-first agent debugging (trace, record_llm_call, record_tool_call, record_state)."""
+"""Maida: pre-merge behavioral regression gate for AI agents."""
 
 from maida.exceptions import GuardrailExceeded, LoopAbort
 from maida.tracing import (

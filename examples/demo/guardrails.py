@@ -1,7 +1,7 @@
 """
 Guardrails demo: stop_on_loop saves a runaway agent.
 
-Shows how AgentDbg's stop_on_loop guardrail intercepts a stuck ReAct-style
+Shows how Maida's stop_on_loop guardrail intercepts a stuck ReAct-style
 agent loop before it burns more tokens. The trace captures the full evidence
 (all events up to and including the LOOP_WARNING that tripped the guardrail),
 so you can inspect exactly what pattern repeated.
@@ -44,7 +44,7 @@ def run_demo() -> None:
 
     A real agent would update its query based on the response, but this one
     keeps sending the same request because the LLM response tells it to
-    "try again" without changing anything. AgentDbg's stop_on_loop
+    "try again" without changing anything. Maida's stop_on_loop
     guardrail detects the repeated pattern and aborts the run cleanly.
     """
     record_state(
@@ -97,6 +97,6 @@ if __name__ == "__main__":
         run_demo()
         print("[demo] run completed without triggering guardrail (unexpected)")
     except LoopAbort as e:
-        print(f"[demo] AgentDbg stopped the agent: {e}")
+        print(f"[demo] Maida stopped the agent: {e}")
         print("[demo] The full trace is saved with the LOOP_WARNING and ERROR events.")
         print("[demo] Open the timeline with: maida view")

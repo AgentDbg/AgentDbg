@@ -30,7 +30,7 @@ def _get_config(request: Request) -> MaidaConfig:
 
 def create_app() -> FastAPI:
     """Create and return the FastAPI application for the local viewer."""
-    app = FastAPI(title="AgentDbg Viewer")
+    app = FastAPI(title="Maida Viewer")
     app.state.config = load_config()
 
     class RenameRunRequest(BaseModel):

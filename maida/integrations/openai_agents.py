@@ -15,7 +15,7 @@ def run():
 ```
 
 The adapter listens to OpenAI Agents tracing spans and translates completed
-generation, function, and handoff spans into AgentDbg `record_*` calls.
+generation, function, and handoff spans into Maida `record_*` calls.
 """
 
 from typing import Any
@@ -91,7 +91,7 @@ def _base_meta(span: Any, span_type: str) -> dict[str, Any]:
     return {"framework": "openai_agents", "openai_agents": openai_meta}
 
 
-class AgentDbgOpenAIAgentsTracingProcessor(TracingProcessor):
+class OpenAIAgentsTracingProcessor(TracingProcessor):
     """Translate completed OpenAI Agents spans into Maida recorders.
 
     When a guardrail fires, the processor raises ``_MaidaAbortSignal``
@@ -200,13 +200,13 @@ class AgentDbgOpenAIAgentsTracingProcessor(TracingProcessor):
         return None
 
 
-def _register_processor() -> AgentDbgOpenAIAgentsTracingProcessor:
+def _register_processor() -> OpenAIAgentsTracingProcessor:
     """Register the adapter once per process, even across module reloads."""
     existing = getattr(agents_tracing, _PROCESSOR_ATTR, None)
     if existing is not None:
         return existing
 
-    processor = AgentDbgOpenAIAgentsTracingProcessor()
+    processor = OpenAIAgentsTracingProcessor()
     add_trace_processor(processor)
     setattr(agents_tracing, _PROCESSOR_ATTR, processor)
     return processor
@@ -214,4 +214,4 @@ def _register_processor() -> AgentDbgOpenAIAgentsTracingProcessor:
 
 PROCESSOR = _register_processor()
 
-__all__ = ["AgentDbgOpenAIAgentsTracingProcessor", "PROCESSOR"]
+__all__ = ["OpenAIAgentsTracingProcessor", "PROCESSOR"]

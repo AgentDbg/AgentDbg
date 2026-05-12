@@ -1,7 +1,7 @@
 """
-LangChain/LangGraph callback handler that forwards LLM and tool events to AgentDbg.
+LangChain/LangGraph callback handler that forwards LLM and tool events to Maida.
 
-Uses only AgentDbg SDK: record_llm_call, record_tool_call. No CLI or server imports.
+Uses only Maida SDK: record_llm_call, record_tool_call. No CLI or server imports.
 """
 
 from typing import Any
@@ -104,7 +104,7 @@ def _response_from_llm_result(response: Any) -> tuple[Any, Any]:
 class LangChainCallbackHandler(BaseCallbackHandler):
     """
     LangChain callback handler that records LLM and tool calls to the active
-    AgentDbg run via record_llm_call and record_tool_call.
+    Maida run via record_llm_call and record_tool_call.
 
     When a guardrail fires (e.g. stop_on_loop), the handler sets raise_error=True
     and re-raises, which tells LangChain to propagate the exception instead of

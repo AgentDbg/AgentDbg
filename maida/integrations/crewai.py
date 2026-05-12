@@ -1,7 +1,7 @@
 """
-CrewAI execution-hooks integration: records LLM and tool calls into the active AgentDbg run.
+CrewAI execution-hooks integration: records LLM and tool calls into the active Maida run.
 
-Import to activate: `from maida.integrations import crewai as adbg_crewai`
+Import to activate: `from maida.integrations import crewai as maida_crewai`
 Then use `with maida.traced_run(...): crew.kickoff()` or `@maida.trace` around flow.kickoff().
 
 Hook ordering caveat: CrewAI runs hooks in registration order. If another before-hook returns False

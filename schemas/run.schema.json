@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/AgentDbg/AgentDbg/schemas/run.schema.json",
-  "title": "AgentDbg run.json",
-  "description": "Run metadata file (run.json) for AgentDbg v0.1. Best-effort schema for tooling; canonical reference is docs/reference/trace-format.md.",
+  "$id": "https://github.com/maida-ai/maida/schemas/run.schema.json",
+  "title": "Maida run.json",
+  "description": "Run metadata file (run.json) for Maida v0.1. Best-effort schema for tooling; canonical reference is docs/reference/trace-format.md.",
   "type": "object",
   "required": ["spec_version", "run_id", "run_name", "started_at", "ended_at", "duration_ms", "status", "counts", "last_event_ts"],
   "properties": {

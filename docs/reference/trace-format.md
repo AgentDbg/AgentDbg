@@ -1,8 +1,8 @@
 # Trace format (public contract)
 
-This page describes the **public trace format** for AgentDbg (`spec_version: "0.1"`). Traces are stored locally as **JSONL events** plus a **run metadata file** (`run.json`). The format is a public contract: consumers can rely on it for tooling and integrations.
+This page describes the **public trace format** for Maida (`spec_version: "0.1"`). Traces are stored locally as **JSONL events** plus a **run metadata file** (`run.json`). The format is a public contract: consumers can rely on it for tooling and integrations.
 
-**Versioning:** The trace format is versioned independently from the package version via `spec_version` (currently `"0.1"`). All AgentDbg releases (v0.1.x, v0.2.x, etc.) that use `spec_version "0.1"` share the same trace format. Additive changes (new optional fields, new event types) may be introduced without a spec version bump. Breaking changes will result in a new `spec_version`.
+**Versioning:** The trace format is versioned independently from the package version via `spec_version` (currently `"0.1"`). All Maida releases (v0.1.x, v0.2.x, etc.) that use `spec_version "0.1"` share the same trace format. Additive changes (new optional fields, new event types) may be introduced without a spec version bump. Breaking changes will result in a new `spec_version`.
 
 ---
 
@@ -206,4 +206,4 @@ Each run has a `run.json` file in its directory. It is created at run start and 
 
 ## Versioning note
 
-The trace format is a **public contract** versioned independently from the AgentDbg package version. All releases using `spec_version "0.1"` share this format. Additive changes (e.g. new optional fields, new event types) are allowed without a spec version bump. Breaking changes (removing fields, changing types or semantics) will be accompanied by a new `spec_version`. The markdown reference on this page is **canonical**; JSON schemas in the repo root `schemas/` folder (`run.schema.json`, `event.schema.json`) are best-effort for tooling.
+The trace format is a **public contract** versioned independently from the Maida package version. All releases using `spec_version "0.1"` share this format. Additive changes (e.g. new optional fields, new event types) are allowed without a spec version bump. Breaking changes (removing fields, changing types or semantics) will be accompanied by a new `spec_version`. The markdown reference on this page is **canonical**; JSON schemas in the repo root `schemas/` folder (`run.schema.json`, `event.schema.json`) are best-effort for tooling.
