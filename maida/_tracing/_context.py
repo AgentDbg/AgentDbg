@@ -82,9 +82,9 @@ def _resolve_run_name(
     func: Callable[..., Any] | None,
 ) -> str:
     """
-    Resolve run name by precedence: AGENTDBG_RUN_NAME env, explicit name, default (entrypoint + timestamp).
+    Resolve run name by precedence: MAIDA_RUN_NAME env, explicit name, default (entrypoint + timestamp).
     """
-    env_name = os.environ.get("AGENTDBG_RUN_NAME", "").strip()
+    env_name = os.environ.get("MAIDA_RUN_NAME", "").strip()
     if env_name:
         return env_name
     if explicit_name:
@@ -189,7 +189,7 @@ atexit.register(_finalize_implicit_run)
 def _ensure_run() -> tuple[str, dict, AgentDbgConfig, list[dict], set[str]] | None:
     """
     Return (run_id, counts, config, event_window, loop_emitted) for the current run, or None if no run.
-    If AGENTDBG_IMPLICIT_RUN=1 and no run is active, create an implicit run (once per process)
+    If MAIDA_IMPLICIT_RUN=1 and no run is active, create an implicit run (once per process)
     and return it. Implicit run never sets contextvars, so it does not hijack subsequent
     traced runs or leave a "current run" for the rest of the process.
     """
@@ -209,7 +209,7 @@ def _ensure_run() -> tuple[str, dict, AgentDbgConfig, list[dict], set[str]] | No
                 emitted = set()
                 _loop_emitted_var.set(emitted)
             return (run_id, counts, config, window, emitted)
-    if os.environ.get("AGENTDBG_IMPLICIT_RUN", "").strip() == "1":
+    if os.environ.get("MAIDA_IMPLICIT_RUN", "").strip() == "1":
         if (
             _implicit_run_id is not None
             and _implicit_counts is not None

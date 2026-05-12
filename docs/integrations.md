@@ -55,7 +55,7 @@ All guardrails work with the callback handler. When a guardrail fires, the handl
 
 **Notes:**
 
-- The handler requires an active Maida run - wrap your entrypoint with `@trace` or set `AGENTDBG_IMPLICIT_RUN=1`.
+- The handler requires an active Maida run - wrap your entrypoint with `@trace` or set `MAIDA_IMPLICIT_RUN=1`.
 - Tool errors are recorded as `TOOL_CALL` events with `status="error"` and include the error message.
 - LLM errors are recorded as `LLM_CALL` events with `status="error"` (not as separate `ERROR` events).
 

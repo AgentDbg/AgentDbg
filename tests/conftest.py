@@ -11,17 +11,17 @@ import pytest
 
 @pytest.fixture
 def temp_data_dir():
-    """Create a temporary directory and set AGENTDBG_DATA_DIR to it for the test."""
+    """Create a temporary directory and set MAIDA_DATA_DIR to it for the test."""
     with tempfile.TemporaryDirectory() as tmp:
-        old = os.environ.get("AGENTDBG_DATA_DIR")
+        old = os.environ.get("MAIDA_DATA_DIR")
         try:
-            os.environ["AGENTDBG_DATA_DIR"] = tmp
+            os.environ["MAIDA_DATA_DIR"] = tmp
             yield Path(tmp)
         finally:
             if old is not None:
-                os.environ["AGENTDBG_DATA_DIR"] = old
-            elif "AGENTDBG_DATA_DIR" in os.environ:
-                os.environ.pop("AGENTDBG_DATA_DIR")
+                os.environ["MAIDA_DATA_DIR"] = old
+            elif "MAIDA_DATA_DIR" in os.environ:
+                os.environ.pop("MAIDA_DATA_DIR")
 
 
 def get_latest_run_id(config):

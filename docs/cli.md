@@ -1,6 +1,6 @@
 # CLI
 
-The `maida` CLI lists runs, starts the local viewer, and exports runs to JSON. Storage is under `~/.maida/` by default (overridable with `AGENTDBG_DATA_DIR`). For all configuration options and precedence, see the [configuration reference](reference/config.md).
+The `maida` CLI lists runs, starts the local viewer, and exports runs to JSON. Storage is under `~/.maida/` by default (overridable with `MAIDA_DATA_DIR`). For all configuration options and precedence, see the [configuration reference](reference/config.md).
 
 ---
 

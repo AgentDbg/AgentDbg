@@ -22,10 +22,10 @@ from maida import trace, record_llm_call, record_state, record_tool_call
 def _ensure_demo_defaults() -> None:
     # Make loop detection predictable even if user has custom config.
     # If the user explicitly sets these env vars, we respect them.
-    os.environ.setdefault("AGENTDBG_LOOP_WINDOW", "12")
-    os.environ.setdefault("AGENTDBG_LOOP_REPETITIONS", "3")
+    os.environ.setdefault("MAIDA_LOOP_WINDOW", "12")
+    os.environ.setdefault("MAIDA_LOOP_REPETITIONS", "3")
     # Redaction is ON by default; leaving this alone keeps the demo honest.
-    # os.environ.setdefault("AGENTDBG_REDACT", "1")
+    # os.environ.setdefault("MAIDA_REDACT", "1")
 
 
 @trace(name="pure-python demo")

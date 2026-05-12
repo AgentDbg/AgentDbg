@@ -110,7 +110,7 @@ See [Guardrails](guardrails.md) for examples and [Configuration reference](refer
 Set the data directory so runs are stored somewhere else (e.g. project-local):
 
 ```bash
-export AGENTDBG_DATA_DIR=/path/to/my/data
+export MAIDA_DATA_DIR=/path/to/my/data
 ```
 
 Config can also be set in `~/.maida/config.yaml` or `.maida/config.yaml` in the project root; environment variables take precedence. See the [configuration reference](reference/config.md) for the full list of options and precedence.
@@ -126,14 +126,14 @@ Config can also be set in `~/.maida/config.yaml` or `.maida/config.yaml` in the 
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `AGENTDBG_REDACT` | `1` | `1`/`true`/`yes` to enable redaction |
-| `AGENTDBG_REDACT_KEYS` | `api_key,token,authorization,cookie,secret,password` | Comma-separated keys (case-insensitive substring match) |
-| `AGENTDBG_MAX_FIELD_BYTES` | `20000` | Max size for string/field before truncation |
+| `MAIDA_REDACT` | `1` | `1`/`true`/`yes` to enable redaction |
+| `MAIDA_REDACT_KEYS` | `api_key,token,authorization,cookie,secret,password` | Comma-separated keys (case-insensitive substring match) |
+| `MAIDA_MAX_FIELD_BYTES` | `20000` | Max size for string/field before truncation |
 
 Example: disable redaction (e.g. for local debugging):
 
 ```bash
-export AGENTDBG_REDACT=0
+export MAIDA_REDACT=0
 ```
 
 For full details (precedence, YAML keys, redaction/truncation behavior), see the [configuration reference](reference/config.md).

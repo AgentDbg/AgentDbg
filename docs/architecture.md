@@ -39,7 +39,7 @@ Events are written as one JSON object per line (JSONL) and flushed after each wr
 
 ## Storage layout
 
-- **Base directory:** `~/.maida/` (or `AGENTDBG_DATA_DIR`).
+- **Base directory:** `~/.maida/` (or `MAIDA_DATA_DIR`).
 - **Per run:** `runs/<run_id>/`
   - **run.json** - Run metadata: `run_id`, `run_name`, `started_at`, `ended_at`, `duration_ms`, `status`, `counts` (llm_calls, tool_calls, errors, loop_warnings), `last_event_ts`.
   - **events.jsonl** - Append-only; one event per line.
@@ -126,9 +126,9 @@ All integrations are optional dependencies; the core package does not depend on 
 
 ## Loop detection
 
-- **Input:** A sliding window of the last N events (default N=12; `AGENTDBG_LOOP_WINDOW`).
+- **Input:** A sliding window of the last N events (default N=12; `MAIDA_LOOP_WINDOW`).
 - **Signature:** Each event is reduced to a string: for `LLM_CALL` -> `"LLM_CALL:"+model`, for `TOOL_CALL` -> `"TOOL_CALL:"+tool_name`, else `event_type`.
-- **Rule:** Look for a contiguous block of signatures that repeats K times (default K=3; `AGENTDBG_LOOP_REPETITIONS`) at the end of the window. If found, emit one `LOOP_WARNING` per distinct pattern per run (deduplicated by pattern + repetitions).
+- **Rule:** Look for a contiguous block of signatures that repeats K times (default K=3; `MAIDA_LOOP_REPETITIONS`) at the end of the window. If found, emit one `LOOP_WARNING` per distinct pattern per run (deduplicated by pattern + repetitions).
 - **Payload:** `pattern` (e.g. "LLM_CALL:gpt-4 -> TOOL_CALL:search"), `repetitions`, `window_size`, `evidence_event_ids`.
 
 No ML; purely pattern-based on event type and name to give quick feedback on repetitive agent behavior.

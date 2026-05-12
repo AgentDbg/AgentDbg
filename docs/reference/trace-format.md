@@ -70,7 +70,7 @@ Every event is a single JSON object with these **required top-level fields**:
 }
 ```
 
-- **run_name** is set from: `AGENTDBG_RUN_NAME` (env), explicit `@trace("...")` / `@trace(name="...")` or `traced_run(name="...")`, or default `path:function - YYYY-MM-DD HH:MM`. See [configuration reference](config.md#run-name-env-only).
+- **run_name** is set from: `MAIDA_RUN_NAME` (env), explicit `@trace("...")` / `@trace(name="...")` or `traced_run(name="...")`, or default `path:function - YYYY-MM-DD HH:MM`. See [configuration reference](config.md#run-name-env-only).
 - **argv** may contain secrets; values for options matching redact keys are redacted before write.
 
 ### RUN_END

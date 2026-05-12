@@ -1,6 +1,6 @@
 """
 Storage tests: create_run, append_event/load_events, finalize_run.
-Uses temp dir via AGENTDBG_DATA_DIR; env restored by fixture.
+Uses temp dir via MAIDA_DATA_DIR; env restored by fixture.
 """
 
 import json

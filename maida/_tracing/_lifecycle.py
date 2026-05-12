@@ -182,7 +182,7 @@ def trace(
     creating a new run or emitting extra run events.
 
     Usage: @trace, @trace(), @trace("run name"), @trace(name="run name").
-    Run name precedence: AGENTDBG_RUN_NAME env, then explicit name, then default (entrypoint - timestamp).
+    Run name precedence: MAIDA_RUN_NAME env, then explicit name, then default (entrypoint - timestamp).
     Guardrail kwargs (stop_on_loop, max_llm_calls, etc.) override config; see SPEC §13.
     """
 
@@ -243,7 +243,7 @@ def traced_run(
     """
     Context manager that starts a new run (RUN_START / RUN_END / ERROR on exception)
     when no run is active; otherwise runs the block in the existing run without
-    creating a new run. Run name precedence: AGENTDBG_RUN_NAME env, then name, then default.
+    creating a new run. Run name precedence: MAIDA_RUN_NAME env, then name, then default.
     Guardrail kwargs override config; see SPEC §13.
     """
     config = load_config()

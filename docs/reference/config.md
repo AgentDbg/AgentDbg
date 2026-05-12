@@ -21,12 +21,12 @@ Configuration is merged in this order (highest wins):
 
 | Env | YAML key | Default | Description |
 |-----|----------|---------|-------------|
-| `AGENTDBG_DATA_DIR` | `data_dir` | `~/.maida` | Base directory for runs. Runs are stored under `<data_dir>/runs/<run_id>/`. |
+| `MAIDA_DATA_DIR` | `data_dir` | `~/.maida` | Base directory for runs. Runs are stored under `<data_dir>/runs/<run_id>/`. |
 
 **Example (env):**
 
 ```bash
-export AGENTDBG_DATA_DIR=/path/to/my/agentdbg/data
+export MAIDA_DATA_DIR=/path/to/my/agentdbg/data
 ```
 
 **Example (YAML):**
@@ -42,9 +42,9 @@ data_dir: /path/to/my/agentdbg/data
 
 | Env | YAML key | Default | Description |
 |-----|----------|---------|-------------|
-| `AGENTDBG_REDACT` | `redact` | `1` (on) | Enable redaction. Use `1`, `true`, or `yes` to enable; any other value disables. |
-| `AGENTDBG_REDACT_KEYS` | `redact_keys` | `api_key,token,authorization,cookie,secret,password` | Comma-separated list of key patterns (case-insensitive substring match). |
-| `AGENTDBG_MAX_FIELD_BYTES` | `max_field_bytes` | `20000` | Maximum size in bytes for a string/field before truncation. Minimum enforced: 100. |
+| `MAIDA_REDACT` | `redact` | `1` (on) | Enable redaction. Use `1`, `true`, or `yes` to enable; any other value disables. |
+| `MAIDA_REDACT_KEYS` | `redact_keys` | `api_key,token,authorization,cookie,secret,password` | Comma-separated list of key patterns (case-insensitive substring match). |
+| `MAIDA_MAX_FIELD_BYTES` | `max_field_bytes` | `20000` | Maximum size in bytes for a string/field before truncation. Minimum enforced: 100. |
 
 **Redaction behavior:**
 
@@ -54,15 +54,15 @@ data_dir: /path/to/my/agentdbg/data
 
 **Truncation behavior:**
 
-- Strings (and other values serialized to strings) longer than `AGENTDBG_MAX_FIELD_BYTES` bytes (UTF-8) are truncated and suffixed with `__TRUNCATED__`.
+- Strings (and other values serialized to strings) longer than `MAIDA_MAX_FIELD_BYTES` bytes (UTF-8) are truncated and suffixed with `__TRUNCATED__`.
 - At the recursion depth limit (10), the value is replaced with `__TRUNCATED__`.
 
 **Example (env):**
 
 ```bash
-export AGENTDBG_REDACT=1
-export AGENTDBG_REDACT_KEYS="api_key,token,password,secret"
-export AGENTDBG_MAX_FIELD_BYTES=10000
+export MAIDA_REDACT=1
+export MAIDA_REDACT_KEYS="api_key,token,password,secret"
+export MAIDA_MAX_FIELD_BYTES=10000
 ```
 
 **Example (YAML):**
@@ -83,14 +83,14 @@ max_field_bytes: 10000
 
 | Env | YAML key | Default | Description |
 |-----|----------|---------|-------------|
-| `AGENTDBG_LOOP_WINDOW` | `loop_window` | `12` | Number of recent events to consider for pattern detection. Minimum: 4. |
-| `AGENTDBG_LOOP_REPETITIONS` | `loop_repetitions` | `3` | Consecutive repetitions of a pattern required to emit `LOOP_WARNING`. Minimum: 2. |
+| `MAIDA_LOOP_WINDOW` | `loop_window` | `12` | Number of recent events to consider for pattern detection. Minimum: 4. |
+| `MAIDA_LOOP_REPETITIONS` | `loop_repetitions` | `3` | Consecutive repetitions of a pattern required to emit `LOOP_WARNING`. Minimum: 2. |
 
 **Example (env):**
 
 ```bash
-export AGENTDBG_LOOP_WINDOW=20
-export AGENTDBG_LOOP_REPETITIONS=4
+export MAIDA_LOOP_WINDOW=20
+export MAIDA_LOOP_REPETITIONS=4
 ```
 
 **Example (YAML):**
@@ -108,12 +108,12 @@ Guardrails are opt-in limits that stop a run after AgentDbg has enough evidence 
 
 | Env | YAML key | Default | Description |
 |-----|----------|---------|-------------|
-| `AGENTDBG_STOP_ON_LOOP` | `guardrails.stop_on_loop` | `false` | Abort when loop detection emits `LOOP_WARNING`. |
-| `AGENTDBG_STOP_ON_LOOP_MIN_REPETITIONS` | `guardrails.stop_on_loop_min_repetitions` | `3` | Minimum repeated pattern count required to abort when `stop_on_loop` is enabled. Minimum: 2. |
-| `AGENTDBG_MAX_LLM_CALLS` | `guardrails.max_llm_calls` | `null` | Abort after more than N LLM calls. Triggers at N+1. |
-| `AGENTDBG_MAX_TOOL_CALLS` | `guardrails.max_tool_calls` | `null` | Abort after more than N tool calls. Triggers at N+1. |
-| `AGENTDBG_MAX_EVENTS` | `guardrails.max_events` | `null` | Abort after more than N total events. |
-| `AGENTDBG_MAX_DURATION_S` | `guardrails.max_duration_s` | `null` | Abort when elapsed run time reaches the configured number of seconds. |
+| `MAIDA_STOP_ON_LOOP` | `guardrails.stop_on_loop` | `false` | Abort when loop detection emits `LOOP_WARNING`. |
+| `MAIDA_STOP_ON_LOOP_MIN_REPETITIONS` | `guardrails.stop_on_loop_min_repetitions` | `3` | Minimum repeated pattern count required to abort when `stop_on_loop` is enabled. Minimum: 2. |
+| `MAIDA_MAX_LLM_CALLS` | `guardrails.max_llm_calls` | `null` | Abort after more than N LLM calls. Triggers at N+1. |
+| `MAIDA_MAX_TOOL_CALLS` | `guardrails.max_tool_calls` | `null` | Abort after more than N tool calls. Triggers at N+1. |
+| `MAIDA_MAX_EVENTS` | `guardrails.max_events` | `null` | Abort after more than N total events. |
+| `MAIDA_MAX_DURATION_S` | `guardrails.max_duration_s` | `null` | Abort when elapsed run time reaches the configured number of seconds. |
 
 **Important behavior:**
 
@@ -126,12 +126,12 @@ Guardrails are opt-in limits that stop a run after AgentDbg has enough evidence 
 **Example (env):**
 
 ```bash
-export AGENTDBG_STOP_ON_LOOP=1
-export AGENTDBG_STOP_ON_LOOP_MIN_REPETITIONS=3
-export AGENTDBG_MAX_LLM_CALLS=50
-export AGENTDBG_MAX_TOOL_CALLS=50
-export AGENTDBG_MAX_EVENTS=200
-export AGENTDBG_MAX_DURATION_S=60
+export MAIDA_STOP_ON_LOOP=1
+export MAIDA_STOP_ON_LOOP_MIN_REPETITIONS=3
+export MAIDA_MAX_LLM_CALLS=50
+export MAIDA_MAX_TOOL_CALLS=50
+export MAIDA_MAX_EVENTS=200
+export MAIDA_MAX_DURATION_S=60
 ```
 
 **Example (YAML):**
@@ -154,12 +154,12 @@ See [Guardrails](../guardrails.md) for usage examples and lifecycle details.
 
 | Env | YAML | Default | Description |
 |-----|------|---------|-------------|
-| `AGENTDBG_RUN_NAME` | *(not in YAML)* | *(derived)* | Override the run name for the current process. Used when starting a run via `@trace`, `traced_run()`, or implicit run. If unset, run name is the explicit name argument, or a default like `path/to/script.py:main - 2026-02-18 14:12`. |
+| `MAIDA_RUN_NAME` | *(not in YAML)* | *(derived)* | Override the run name for the current process. Used when starting a run via `@trace`, `traced_run()`, or implicit run. If unset, run name is the explicit name argument, or a default like `path/to/script.py:main - 2026-02-18 14:12`. |
 
 **Example:**
 
 ```bash
-export AGENTDBG_RUN_NAME="my-experiment-v1"
+export MAIDA_RUN_NAME="my-experiment-v1"
 ```
 
 ---
@@ -168,14 +168,14 @@ export AGENTDBG_RUN_NAME="my-experiment-v1"
 
 | Env | YAML | Default | Description |
 |-----|------|---------|-------------|
-| `AGENTDBG_IMPLICIT_RUN` | *(not in YAML)* | unset (off) | If set to `1`, the first `record_*` call with no active run creates an implicit run; all subsequent recorder calls attach to it until process exit. |
+| `MAIDA_IMPLICIT_RUN` | *(not in YAML)* | unset (off) | If set to `1`, the first `record_*` call with no active run creates an implicit run; all subsequent recorder calls attach to it until process exit. |
 
 This is useful for scripts without a single `@trace` entrypoint. Only read from the environment; not configurable via YAML.
 
 **Example:**
 
 ```bash
-export AGENTDBG_IMPLICIT_RUN=1
+export MAIDA_IMPLICIT_RUN=1
 ```
 
 ---
@@ -211,4 +211,4 @@ guardrails:
 
 - **Redaction is on by default** so that common secret keys are not written to disk.
 - **Data directory** defaults to `~/.maida` so traces stay on the machine.
-- No cloud or network is used for trace storage. Override only what you need (e.g. `AGENTDBG_DATA_DIR` for project-local storage, or `AGENTDBG_REDACT=0` for local debugging with full payloads).
+- No cloud or network is used for trace storage. Override only what you need (e.g. `MAIDA_DATA_DIR` for project-local storage, or `MAIDA_REDACT=0` for local debugging with full payloads).

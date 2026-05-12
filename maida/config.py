@@ -144,9 +144,9 @@ def _guardrails_from_dict(data: dict[str, Any] | None) -> GuardrailParams:
 
 def _apply_env_to_guardrails(params: GuardrailParams) -> GuardrailParams:
     """Override guardrail params from environment variables."""
-    if "AGENTDBG_STOP_ON_LOOP" in os.environ:
+    if "MAIDA_STOP_ON_LOOP" in os.environ:
         params = GuardrailParams(
-            stop_on_loop=os.environ["AGENTDBG_STOP_ON_LOOP"].strip().lower()
+            stop_on_loop=os.environ["MAIDA_STOP_ON_LOOP"].strip().lower()
             in ("1", "true", "yes"),
             stop_on_loop_min_repetitions=params.stop_on_loop_min_repetitions,
             max_llm_calls=params.max_llm_calls,
@@ -154,9 +154,9 @@ def _apply_env_to_guardrails(params: GuardrailParams) -> GuardrailParams:
             max_events=params.max_events,
             max_duration_s=params.max_duration_s,
         )
-    if "AGENTDBG_STOP_ON_LOOP_MIN_REPETITIONS" in os.environ:
+    if "MAIDA_STOP_ON_LOOP_MIN_REPETITIONS" in os.environ:
         try:
-            n = max(2, int(os.environ["AGENTDBG_STOP_ON_LOOP_MIN_REPETITIONS"]))
+            n = max(2, int(os.environ["MAIDA_STOP_ON_LOOP_MIN_REPETITIONS"]))
             params = GuardrailParams(
                 stop_on_loop=params.stop_on_loop,
                 stop_on_loop_min_repetitions=n,
@@ -167,9 +167,9 @@ def _apply_env_to_guardrails(params: GuardrailParams) -> GuardrailParams:
             )
         except ValueError:
             pass
-    if "AGENTDBG_MAX_LLM_CALLS" in os.environ:
+    if "MAIDA_MAX_LLM_CALLS" in os.environ:
         try:
-            n = max(0, int(os.environ["AGENTDBG_MAX_LLM_CALLS"]))
+            n = max(0, int(os.environ["MAIDA_MAX_LLM_CALLS"]))
             params = GuardrailParams(
                 stop_on_loop=params.stop_on_loop,
                 stop_on_loop_min_repetitions=params.stop_on_loop_min_repetitions,
@@ -180,9 +180,9 @@ def _apply_env_to_guardrails(params: GuardrailParams) -> GuardrailParams:
             )
         except ValueError:
             pass
-    if "AGENTDBG_MAX_TOOL_CALLS" in os.environ:
+    if "MAIDA_MAX_TOOL_CALLS" in os.environ:
         try:
-            n = max(0, int(os.environ["AGENTDBG_MAX_TOOL_CALLS"]))
+            n = max(0, int(os.environ["MAIDA_MAX_TOOL_CALLS"]))
             params = GuardrailParams(
                 stop_on_loop=params.stop_on_loop,
                 stop_on_loop_min_repetitions=params.stop_on_loop_min_repetitions,
@@ -193,9 +193,9 @@ def _apply_env_to_guardrails(params: GuardrailParams) -> GuardrailParams:
             )
         except ValueError:
             pass
-    if "AGENTDBG_MAX_EVENTS" in os.environ:
+    if "MAIDA_MAX_EVENTS" in os.environ:
         try:
-            n = max(0, int(os.environ["AGENTDBG_MAX_EVENTS"]))
+            n = max(0, int(os.environ["MAIDA_MAX_EVENTS"]))
             params = GuardrailParams(
                 stop_on_loop=params.stop_on_loop,
                 stop_on_loop_min_repetitions=params.stop_on_loop_min_repetitions,
@@ -206,9 +206,9 @@ def _apply_env_to_guardrails(params: GuardrailParams) -> GuardrailParams:
             )
         except ValueError:
             pass
-    if "AGENTDBG_MAX_DURATION_S" in os.environ:
+    if "MAIDA_MAX_DURATION_S" in os.environ:
         try:
-            n = max(0.0, float(os.environ["AGENTDBG_MAX_DURATION_S"]))
+            n = max(0.0, float(os.environ["MAIDA_MAX_DURATION_S"]))
             params = GuardrailParams(
                 stop_on_loop=params.stop_on_loop,
                 stop_on_loop_min_repetitions=params.stop_on_loop_min_repetitions,
@@ -271,37 +271,37 @@ def load_config(project_root: Path | None = None) -> AgentDbgConfig:
             guardrails = _guardrails_from_dict(proj_cfg.get("guardrails"))
 
     # 1. Env overrides (only when the key is explicitly set in the environment)
-    if "AGENTDBG_REDACT" in os.environ:
-        redact = os.environ["AGENTDBG_REDACT"].strip().lower() in ("1", "true", "yes")
+    if "MAIDA_REDACT" in os.environ:
+        redact = os.environ["MAIDA_REDACT"].strip().lower() in ("1", "true", "yes")
 
-    if "AGENTDBG_REDACT_KEYS" in os.environ:
-        env_keys = os.environ["AGENTDBG_REDACT_KEYS"]
+    if "MAIDA_REDACT_KEYS" in os.environ:
+        env_keys = os.environ["MAIDA_REDACT_KEYS"]
         redact_keys = [k.strip() for k in env_keys.split(",") if k.strip()]
 
-    if "AGENTDBG_MAX_FIELD_BYTES" in os.environ:
+    if "MAIDA_MAX_FIELD_BYTES" in os.environ:
         try:
             max_field_bytes = max(
-                _MIN_MAX_FIELD_BYTES, int(os.environ["AGENTDBG_MAX_FIELD_BYTES"])
+                _MIN_MAX_FIELD_BYTES, int(os.environ["MAIDA_MAX_FIELD_BYTES"])
             )
         except ValueError:
             pass
 
-    if "AGENTDBG_LOOP_WINDOW" in os.environ:
+    if "MAIDA_LOOP_WINDOW" in os.environ:
         try:
-            loop_window = max(_MIN_LOOP_WINDOW, int(os.environ["AGENTDBG_LOOP_WINDOW"]))
+            loop_window = max(_MIN_LOOP_WINDOW, int(os.environ["MAIDA_LOOP_WINDOW"]))
         except ValueError:
             pass
 
-    if "AGENTDBG_LOOP_REPETITIONS" in os.environ:
+    if "MAIDA_LOOP_REPETITIONS" in os.environ:
         try:
             loop_repetitions = max(
-                _MIN_LOOP_REPETITIONS, int(os.environ["AGENTDBG_LOOP_REPETITIONS"])
+                _MIN_LOOP_REPETITIONS, int(os.environ["MAIDA_LOOP_REPETITIONS"])
             )
         except ValueError:
             pass
 
-    if "AGENTDBG_DATA_DIR" in os.environ:
-        env_data = os.environ["AGENTDBG_DATA_DIR"].strip()
+    if "MAIDA_DATA_DIR" in os.environ:
+        env_data = os.environ["MAIDA_DATA_DIR"].strip()
         if env_data:
             data_dir = Path(env_data).expanduser()
 

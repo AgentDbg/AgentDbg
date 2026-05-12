@@ -1,5 +1,5 @@
 """
-Tests for implicit run: when AGENTDBG_IMPLICIT_RUN=1, record_* without @trace
+Tests for implicit run: when MAIDA_IMPLICIT_RUN=1, record_* without @trace
 creates a run and writes RUN_START; atexit writes RUN_END.
 Runs the recorder in a subprocess so atexit finalization happens and test process stays clean.
 
@@ -20,8 +20,8 @@ from maida.storage import load_events, load_run_meta, list_runs
 def _run_implicit_tool_call(data_dir: str) -> None:
     """Subprocess: set env, call record_tool_call with no trace, exit (atexit finalizes)."""
     env = os.environ.copy()
-    env["AGENTDBG_IMPLICIT_RUN"] = "1"
-    env["AGENTDBG_DATA_DIR"] = data_dir
+    env["MAIDA_IMPLICIT_RUN"] = "1"
+    env["MAIDA_DATA_DIR"] = data_dir
     code = """
 from maida.tracing import record_tool_call
 record_tool_call("no_trace_tool", args={"x": 1})
@@ -38,12 +38,12 @@ record_tool_call("no_trace_tool", args={"x": 1})
 
 
 def test_implicit_run_creates_run_with_run_start_and_tool_call():
-    """With AGENTDBG_IMPLICIT_RUN=1, record_tool_call (no @trace) creates run with RUN_START and TOOL_CALL."""
+    """With MAIDA_IMPLICIT_RUN=1, record_tool_call (no @trace) creates run with RUN_START and TOOL_CALL."""
     with tempfile.TemporaryDirectory() as tmp:
         data_dir = str(Path(tmp).resolve())
         _run_implicit_tool_call(data_dir)
 
-        os.environ["AGENTDBG_DATA_DIR"] = data_dir
+        os.environ["MAIDA_DATA_DIR"] = data_dir
         try:
             config = load_config()
             runs = list_runs(limit=5, config=config)
@@ -64,4 +64,4 @@ def test_implicit_run_creates_run_with_run_start_and_tool_call():
             )
             assert run_json["counts"]["tool_calls"] == 1
         finally:
-            os.environ.pop("AGENTDBG_DATA_DIR", None)
+            os.environ.pop("MAIDA_DATA_DIR", None)

@@ -27,8 +27,8 @@ def _ensure_demo_defaults() -> None:
     # Lower the loop window so the repetition is detected quickly.
     # The default is 12; a window of 6 with repetitions=3 means the warning
     # fires after 3 identical (tool, llm) pairs -- exactly what this demo produces.
-    os.environ.setdefault("AGENTDBG_LOOP_WINDOW", "6")
-    os.environ.setdefault("AGENTDBG_LOOP_REPETITIONS", "3")
+    os.environ.setdefault("MAIDA_LOOP_WINDOW", "6")
+    os.environ.setdefault("MAIDA_LOOP_REPETITIONS", "3")
 
 
 @trace(

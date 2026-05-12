@@ -295,8 +295,8 @@ def test_default_behavior_unchanged(temp_data_dir):
 
 
 def test_precedence_function_arg_over_env(temp_data_dir, monkeypatch):
-    """@trace(max_llm_calls=2) overrides AGENTDBG_MAX_LLM_CALLS=10."""
-    monkeypatch.setenv("AGENTDBG_MAX_LLM_CALLS", "10")
+    """@trace(max_llm_calls=2) overrides MAIDA_MAX_LLM_CALLS=10."""
+    monkeypatch.setenv("MAIDA_MAX_LLM_CALLS", "10")
 
     @trace(max_llm_calls=2)
     def run_three():

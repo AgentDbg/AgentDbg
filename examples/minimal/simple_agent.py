@@ -25,4 +25,4 @@ def run_agent():
 
 if __name__ == "__main__":
     run_agent()
-    print(f"Run data is under ~/{LOCAL_DIR_NAME}/runs/<run_id>/ (or AGENTDBG_DATA_DIR)")
+    print(f"Run data is under ~/{LOCAL_DIR_NAME}/runs/<run_id>/ (or MAIDA_DATA_DIR)")

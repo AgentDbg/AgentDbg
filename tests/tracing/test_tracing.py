@@ -1,7 +1,7 @@
 """
 Tracing tests: @trace success path (RUN_START + RUN_END, status ok), error path (ERROR, status error),
 and loop detection integration (repeated pattern triggers LOOP_WARNING exactly once).
-Uses temp dir via AGENTDBG_DATA_DIR; env restored by fixture.
+Uses temp dir via MAIDA_DATA_DIR; env restored by fixture.
 """
 
 import pytest
@@ -191,9 +191,7 @@ def test_success_calls_have_status_ok_and_no_error(temp_data_dir):
 
 def test_record_llm_call_accepts_float_token_counts(temp_data_dir, monkeypatch):
     """record_llm_call with usage containing float token counts normalizes to integers (e.g. 100.0 -> 100)."""
-    monkeypatch.setenv(
-        "AGENTDBG_REDACT", "0"
-    )  # so usage.*_tokens keys are not redacted
+    monkeypatch.setenv("MAIDA_REDACT", "0")  # so usage.*_tokens keys are not redacted
 
     @trace
     def _run():

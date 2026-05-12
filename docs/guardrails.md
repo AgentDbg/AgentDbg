@@ -180,12 +180,12 @@ with traced_run(stop_on_loop=True, max_llm_calls=50):
 ### Environment variables
 
 ```bash
-export AGENTDBG_STOP_ON_LOOP=1
-export AGENTDBG_STOP_ON_LOOP_MIN_REPETITIONS=3
-export AGENTDBG_MAX_LLM_CALLS=50
-export AGENTDBG_MAX_TOOL_CALLS=50
-export AGENTDBG_MAX_EVENTS=200
-export AGENTDBG_MAX_DURATION_S=60
+export MAIDA_STOP_ON_LOOP=1
+export MAIDA_STOP_ON_LOOP_MIN_REPETITIONS=3
+export MAIDA_MAX_LLM_CALLS=50
+export MAIDA_MAX_TOOL_CALLS=50
+export MAIDA_MAX_EVENTS=200
+export MAIDA_MAX_DURATION_S=60
 ```
 
 ### YAML config

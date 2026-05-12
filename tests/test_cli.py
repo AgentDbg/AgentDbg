@@ -1,6 +1,6 @@
 """
 CLI tests using Typer CliRunner.
-Every test uses temp dir via AGENTDBG_DATA_DIR (fixture restores env).
+Every test uses temp dir via MAIDA_DATA_DIR (fixture restores env).
 Covers: list, export, view, baseline, assert, diff commands.
 """
 
@@ -42,7 +42,7 @@ def _make_run(config, *, name="test_run", events=None, status="ok"):
 
 @pytest.fixture
 def empty_data_dir(temp_data_dir):
-    """Empty data dir with AGENTDBG_DATA_DIR set (env restored after test)."""
+    """Empty data dir with MAIDA_DATA_DIR set (env restored after test)."""
     return temp_data_dir
 
 

@@ -48,7 +48,7 @@ ENDPOINTS = [
 def test_traversal_like_run_ids_rejected_with_400(
     monkeypatch, tmp_path, rid_raw, endpoint
 ):
-    monkeypatch.setenv("AGENTDBG_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("MAIDA_DATA_DIR", str(tmp_path))
 
     app = _get_app()
     client = TestClient(app)
@@ -63,7 +63,7 @@ def test_traversal_like_run_ids_rejected_with_400(
 @pytest.mark.parametrize("rid_raw", MAY_BREAK_ROUTING)
 @pytest.mark.parametrize("endpoint", ENDPOINTS)
 def test_traversal_payloads_never_succeed(monkeypatch, tmp_path, rid_raw, endpoint):
-    monkeypatch.setenv("AGENTDBG_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("MAIDA_DATA_DIR", str(tmp_path))
 
     app = _get_app()
     client = TestClient(app)

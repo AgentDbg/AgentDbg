@@ -2,7 +2,7 @@
 Tracing context, @trace decorator, and manual recorders for AgentDbg.
 
 Uses contextvars for run_id, counts, and config. Recorders no-op when no active run,
-or create an implicit run when AGENTDBG_IMPLICIT_RUN=1.
+or create an implicit run when MAIDA_IMPLICIT_RUN=1.
 Dependencies: stdlib + maida.config + maida.constants + maida.events + maida.storage.
 
 TODO(concurrency): Safe for single-threaded agent loops. If tools run concurrently

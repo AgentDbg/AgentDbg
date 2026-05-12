@@ -282,14 +282,14 @@ After running, `agentdbg view` shows every LLM call, tool call, and state update
 
 ---
 
-## Implicit runs (`AGENTDBG_IMPLICIT_RUN=1`)
+## Implicit runs (`MAIDA_IMPLICIT_RUN=1`)
 
 By default, calling `record_llm_call` / `record_tool_call` / `record_state` **outside** a `@trace`-decorated function or `traced_run` block does nothing.
 
 If you set:
 
 ```bash
-export AGENTDBG_IMPLICIT_RUN=1
+export MAIDA_IMPLICIT_RUN=1
 ```
 
 then the first recorder call with no active run creates a single **implicit run**. All subsequent recorder calls attach to it until process exit, when the run is automatically finalized. Use this for scripts that don't have a single top-level entrypoint.
@@ -299,11 +299,11 @@ then the first recorder call with no active run creates a single **implicit run*
 ## Redaction and truncation
 
 - **Redaction:** Dict keys matching configured patterns (e.g. `api_key`, `token`, `password`) have their values replaced with `__REDACTED__`. Applied recursively (depth limit: 10).
-- **Truncation:** Strings exceeding `AGENTDBG_MAX_FIELD_BYTES` (default 20000) are truncated and suffixed with `__TRUNCATED__`.
+- **Truncation:** Strings exceeding `MAIDA_MAX_FIELD_BYTES` (default 20000) are truncated and suffixed with `__TRUNCATED__`.
 
 **Config precedence (highest first):**
 
-1. Environment variables (`AGENTDBG_REDACT`, `AGENTDBG_REDACT_KEYS`, `AGENTDBG_MAX_FIELD_BYTES`)
+1. Environment variables (`MAIDA_REDACT`, `MAIDA_REDACT_KEYS`, `MAIDA_MAX_FIELD_BYTES`)
 2. `.maida/config.yaml` in project root
 3. `~/.maida/config.yaml`
 

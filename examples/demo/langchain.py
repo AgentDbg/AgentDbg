@@ -19,8 +19,8 @@ from maida import trace
 
 
 def _ensure_demo_defaults() -> None:
-    os.environ.setdefault("AGENTDBG_LOOP_WINDOW", "12")
-    os.environ.setdefault("AGENTDBG_LOOP_REPETITIONS", "3")
+    os.environ.setdefault("MAIDA_LOOP_WINDOW", "12")
+    os.environ.setdefault("MAIDA_LOOP_REPETITIONS", "3")
 
 
 def _require_langchain() -> None:

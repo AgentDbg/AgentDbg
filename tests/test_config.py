@@ -12,24 +12,24 @@ import pytest
 
 # All env keys the config loader inspects (clean slate for every test).
 _ENV_KEYS = [
-    "AGENTDBG_REDACT",
-    "AGENTDBG_REDACT_KEYS",
-    "AGENTDBG_MAX_FIELD_BYTES",
-    "AGENTDBG_LOOP_WINDOW",
-    "AGENTDBG_LOOP_REPETITIONS",
-    "AGENTDBG_DATA_DIR",
-    "AGENTDBG_STOP_ON_LOOP",
-    "AGENTDBG_STOP_ON_LOOP_MIN_REPETITIONS",
-    "AGENTDBG_MAX_LLM_CALLS",
-    "AGENTDBG_MAX_TOOL_CALLS",
-    "AGENTDBG_MAX_EVENTS",
-    "AGENTDBG_MAX_DURATION_S",
+    "MAIDA_REDACT",
+    "MAIDA_REDACT_KEYS",
+    "MAIDA_MAX_FIELD_BYTES",
+    "MAIDA_LOOP_WINDOW",
+    "MAIDA_LOOP_REPETITIONS",
+    "MAIDA_DATA_DIR",
+    "MAIDA_STOP_ON_LOOP",
+    "MAIDA_STOP_ON_LOOP_MIN_REPETITIONS",
+    "MAIDA_MAX_LLM_CALLS",
+    "MAIDA_MAX_TOOL_CALLS",
+    "MAIDA_MAX_EVENTS",
+    "MAIDA_MAX_DURATION_S",
 ]
 
 
 @pytest.fixture(autouse=True)
 def _clean_env(monkeypatch):
-    """Ensure none of the AGENTDBG_* env vars leak into tests."""
+    """Ensure none of the MAIDA_* env vars leak into tests."""
     for key in _ENV_KEYS:
         monkeypatch.delenv(key, raising=False)
 
@@ -82,7 +82,7 @@ def test_env_overrides_yaml_when_present(tmp_path, monkeypatch):
     fake_home = tmp_path / "fakehome"
     fake_home.mkdir()
     monkeypatch.setattr(Path, "home", staticmethod(lambda: fake_home))
-    monkeypatch.setenv("AGENTDBG_MAX_FIELD_BYTES", "456")
+    monkeypatch.setenv("MAIDA_MAX_FIELD_BYTES", "456")
 
     from maida.config import load_config
 
