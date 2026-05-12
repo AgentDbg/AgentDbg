@@ -8,9 +8,9 @@ __lazy_imports__ = {
     "crewai": ("maida.integrations.crewai", None),
     "langchain": ("maida.integrations.langchain", None),
     "openai_agents": ("maida.integrations.openai_agents", None),
-    "AgentDbgLangChainCallbackHandler": (
+    "LangChainCallbackHandler": (
         "maida.integrations.langchain",
-        "AgentDbgLangChainCallbackHandler",
+        "LangChainCallbackHandler",
     ),
 }
 

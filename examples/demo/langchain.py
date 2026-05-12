@@ -1,6 +1,6 @@
 """
 LangChain demo: produces a single run containing:
-- TOOL_CALL / LLM_CALL captured automatically via AgentDbgLangChainCallbackHandler
+- TOOL_CALL / LLM_CALL captured automatically via LangChainCallbackHandler
 - LOOP_WARNING from repeated tool calls
 - TOOL_CALL error recorded via on_tool_error callback (no network)
 - optional final LLM_CALL after the tool error
@@ -35,9 +35,9 @@ def _require_langchain() -> None:
 
 @trace(name="langchain demo")
 def run_demo() -> None:
-    from maida.integrations import AgentDbgLangChainCallbackHandler
+    from maida.integrations import LangChainCallbackHandler
 
-    handler = AgentDbgLangChainCallbackHandler()
+    handler = LangChainCallbackHandler()
     config = {"callbacks": [handler]}
 
     # Local-only fake LLM (no network)

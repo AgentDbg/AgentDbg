@@ -2,9 +2,9 @@
 
 ## Philosophy
 
-AgentDbg is **framework-agnostic** at the core. The SDK is a thin layer: you call `@trace` and `record_llm_call` / `record_tool_call` / `record_state` from any Python code. No required dependency on LangChain, OpenAI Agents SDK, or others.
+Maida is **framework-agnostic** at the core. The SDK is a thin layer: you call `@trace` and `record_llm_call` / `record_tool_call` / `record_state` from any Python code. No required dependency on LangChain, OpenAI Agents SDK, or others.
 
-**Adapters** are thin translation layers: they hook into a framework's callbacks and emit AgentDbg events. They do not lock you into that framework for the rest of your app.
+**Adapters** are thin translation layers: they hook into a framework's callbacks and emit Maida events. They do not lock you into that framework for the rest of your app.
 
 ---
 
@@ -12,7 +12,7 @@ AgentDbg is **framework-agnostic** at the core. The SDK is a thin layer: you cal
 
 ### LangChain / LangGraph callback handler
 
-**Status: available.** An optional callback handler lives at `agentdbg.integrations.langchain`. It records LLM calls and tool calls to the active AgentDbg run automatically.
+**Status: available.** An optional callback handler lives at `agentdbg.integrations.langchain`. It records LLM calls and tool calls to the active Maida run automatically.
 
 **Requirements:** `langchain-core` must be installed. Install the optional dependency group:
 
@@ -26,11 +26,11 @@ If `langchain-core` is not installed, importing the integration raises a clear `
 
 ```python
 from agentdbg import trace
-from agentdbg.integrations import AgentDbgLangChainCallbackHandler
+from agentdbg.integrations import LangChainCallbackHandler
 
 @trace
 def run_agent():
-    handler = AgentDbgLangChainCallbackHandler()
+    handler = LangChainCallbackHandler()
     config = {"callbacks": [handler]}
 
     # Use config with any LangChain chain, LLM, or tool:
@@ -51,11 +51,11 @@ agentdbg view
 ```
 
 **Guardrails (e.g. `stop_on_loop`) with LangChain / LangGraph:**
-All guardrails work with the callback handler. When a guardrail fires, the handler raises `_AgentDbgAbortSignal` (a `BaseException`) which bypasses both LangChain's callback error handling and LangGraph's graph executor — stopping the run immediately and preventing further token-wasting LLM calls. See [Guardrails](guardrails.md) for details. To reuse a handler across runs, call `handler.reset()` between runs.
+All guardrails work with the callback handler. When a guardrail fires, the handler raises `_MaidaAbortSignal` (a `BaseException`) which bypasses both LangChain's callback error handling and LangGraph's graph executor — stopping the run immediately and preventing further token-wasting LLM calls. See [Guardrails](guardrails.md) for details. To reuse a handler across runs, call `handler.reset()` between runs.
 
 **Notes:**
 
-- The handler requires an active AgentDbg run - wrap your entrypoint with `@trace` or set `AGENTDBG_IMPLICIT_RUN=1`.
+- The handler requires an active Maida run - wrap your entrypoint with `@trace` or set `AGENTDBG_IMPLICIT_RUN=1`.
 - Tool errors are recorded as `TOOL_CALL` events with `status="error"` and include the error message.
 - LLM errors are recorded as `LLM_CALL` events with `status="error"` (not as separate `ERROR` events).
 
@@ -63,7 +63,7 @@ All guardrails work with the callback handler. When a guardrail fires, the handl
 
 ### OpenAI Agents SDK tracing adapter
 
-**Status: available.** An optional adapter lives at `agentdbg.integrations.openai_agents`. Importing it registers an OpenAI Agents tracing processor that forwards SDK generation, function, and handoff spans into the active AgentDbg run.
+**Status: available.** An optional adapter lives at `maida.integrations.openai_agents`. Importing it registers an OpenAI Agents tracing processor that forwards SDK generation, function, and handoff spans into the active Maida run.
 
 **Requirements:** `openai-agents` must be installed. Install the optional OpenAI dependency group (the `openai` group contains `openai-agents`):
 
@@ -100,10 +100,10 @@ agentdbg view
 ```
 
 **Guardrails with OpenAI Agents SDK:**
-All guardrails work with the tracing processor. When a guardrail fires, the processor raises `_AgentDbgAbortSignal` (a `BaseException`) which bypasses the SDK's `except Exception` error handling — stopping the run immediately:
+All guardrails work with the tracing processor. When a guardrail fires, the processor raises `_MaidaAbortSignal` (a `BaseException`) which bypasses the SDK's `except Exception` error handling — stopping the run immediately:
 
 ```python
-from agentdbg import trace, AgentDbgLoopAbort
+from agentdbg import trace, LoopAbort
 
 @trace(stop_on_loop=True)
 def run_agent():
@@ -115,7 +115,7 @@ As a defensive fallback, the exception is also stored on `PROCESSOR.abort_except
 
 **Notes:**
 
-- The adapter records events only while an explicit AgentDbg run is active; wrap your entrypoint with `@trace` or `traced_run(...)`.
+- The adapter records events only while an explicit Maida run is active; wrap your entrypoint with `@trace` or `traced_run(...)`.
 - Framework-specific span details stay in `meta.openai_agents.*`, not the event payload.
 - The example uses low-level SDK tracing spans with deterministic fake data, so it needs no API key and makes no model calls.
 
@@ -123,7 +123,7 @@ As a defensive fallback, the exception is also stored on `PROCESSOR.abort_except
 
 ### CrewAI execution-hook adapter
 
-**Status: available.** An optional adapter lives at `agentdbg.integrations.crewai`. Importing it registers CrewAI execution hooks that automatically record LLM and tool calls into the active AgentDbg run.
+**Status: available.** An optional adapter lives at `maida.integrations.crewai`. Importing it registers CrewAI execution hooks that automatically record LLM and tool calls into the active Maida run.
 
 **Requirements:** `crewai[tools]` must be installed. Install the optional dependency group:
 
@@ -154,7 +154,7 @@ Framework-specific context (agent role, task description, executor ID) is stored
 
 **Notes:**
 
-- The adapter requires an active AgentDbg run — wrap your entrypoint with `@trace` or `traced_run(...)`.
+- The adapter requires an active Maida run — wrap your entrypoint with `@trace` or `traced_run(...)`.
 - Hook ordering caveat: if another before-hook returns `False` and blocks execution, that specific call may not be captured.
 - No runnable example script yet — see the [Known issues in CHANGELOG](../CHANGELOG.md) for status.
 

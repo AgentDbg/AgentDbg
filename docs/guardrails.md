@@ -16,7 +16,7 @@ They are designed for local debugging loops, not policy enforcement:
 When a configured threshold is crossed, Maida:
 
 1. Records the relevant warning or event using the existing trace format
-2. Raises `AgentDbgLoopAbort` or `AgentDbgGuardrailExceeded`
+2. Raises `LoopAbort` or `GuardrailExceeded`
 3. Records `ERROR`
 4. Finalizes the run with `RUN_END` and `status="error"`
 
@@ -53,22 +53,22 @@ Notes:
 
 ## LangChain / LangGraph
 
-Guardrails work with LangChain/LangGraph via `AgentDbgLangChainCallbackHandler`. When a guardrail fires, the handler raises `_AgentDbgAbortSignal` (a `BaseException`) which bypasses both LangChain's callback error handling and LangGraph's graph executor — stopping the run immediately and preventing further token-wasting LLM calls.
+Guardrails work with LangChain/LangGraph via `LangChainCallbackHandler`. When a guardrail fires, the handler raises `_AbortSignal` (a `BaseException`) which bypasses both LangChain's callback error handling and LangGraph's graph executor — stopping the run immediately and preventing further token-wasting LLM calls.
 
 ```python
-from maida import AgentDbgLoopAbort, trace
-from maida.integrations import AgentDbgLangChainCallbackHandler
+from maida import LoopAbort, trace
+from maida.integrations import LangChainCallbackHandler
 
 
 @trace(stop_on_loop=True, stop_on_loop_min_repetitions=3)
 def run_agent():
-    handler = AgentDbgLangChainCallbackHandler()
+    handler = LangChainCallbackHandler()
     return graph.invoke(state, config={"callbacks": [handler]})
 
 
 try:
     run_agent()
-except AgentDbgLoopAbort as exc:
+except LoopAbort as exc:
     print(f"Stopped the loop: {exc}")
 ```
 
@@ -76,10 +76,10 @@ The handler also stores the exception on `handler.abort_exception` as a defensiv
 
 ## OpenAI Agents SDK
 
-Guardrails work with the OpenAI Agents SDK via the tracing processor. When a guardrail fires, the processor raises `_AgentDbgAbortSignal` (a `BaseException`) which bypasses the SDK's `except Exception` error handling — stopping the run immediately.
+Guardrails work with the OpenAI Agents SDK via the tracing processor. When a guardrail fires, the processor raises `_MaidaAbortSignal` (a `BaseException`) which bypasses the SDK's `except Exception` error handling — stopping the run immediately.
 
 ```python
-from maida import trace, AgentDbgLoopAbort
+from maida import trace, LoopAbort
 from maida.integrations import openai_agents
 
 
@@ -91,7 +91,7 @@ def run_agent():
 
 try:
     run_agent()
-except AgentDbgLoopAbort as exc:
+except LoopAbort as exc:
     print(f"Loop detected: {exc}")
 ```
 
@@ -104,7 +104,7 @@ As a defensive fallback, the exception is also stored on `PROCESSOR.abort_except
 ### Stop a looping agent immediately
 
 ```python
-from maida import AgentDbgLoopAbort, record_llm_call, record_tool_call, trace
+from maida import LoopAbort, record_llm_call, record_tool_call, trace
 
 
 @trace(stop_on_loop=True)
@@ -116,14 +116,14 @@ def run_agent():
 
 try:
     run_agent()
-except AgentDbgLoopAbort as exc:
+except LoopAbort as exc:
     print(f"Stopped because of a loop: {exc}")
 ```
 
 ### Cap LLM and tool usage during development
 
 ```python
-from maida import AgentDbgGuardrailExceeded, record_llm_call, record_tool_call, traced_run
+from maida import GuardrailExceeded, record_llm_call, record_tool_call, traced_run
 
 
 try:
@@ -137,7 +137,7 @@ try:
         # ... your agent loop ...
         record_llm_call(model="gpt-4.1", prompt="...", response="...")
         record_tool_call(name="search", args={"q": "docs"}, result={"hits": 2})
-except AgentDbgGuardrailExceeded as exc:
+except GuardrailExceeded as exc:
     print(exc.guardrail, exc.threshold, exc.actual)
 ```
 
@@ -210,7 +210,7 @@ guardrails:
 If loop detection fires and `stop_on_loop=True`:
 
 - Maida first writes `LOOP_WARNING`
-- Then raises `AgentDbgLoopAbort`
+- Then raises `LoopAbort`
 - Then writes `ERROR`
 - Then writes `RUN_END(status="error")`
 
@@ -219,7 +219,7 @@ If loop detection fires and `stop_on_loop=True`:
 For `max_llm_calls`, `max_tool_calls`, `max_events`, and `max_duration_s`:
 
 - Maida writes the event that crossed the limit
-- Then raises `AgentDbgGuardrailExceeded`
+- Then raises `GuardrailExceeded`
 - Then writes `ERROR`
 - Then writes `RUN_END(status="error")`
 

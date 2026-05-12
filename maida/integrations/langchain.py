@@ -101,7 +101,7 @@ def _response_from_llm_result(response: Any) -> tuple[Any, Any]:
     return response_text, usage
 
 
-class AgentDbgLangChainCallbackHandler(BaseCallbackHandler):
+class LangChainCallbackHandler(BaseCallbackHandler):
     """
     LangChain callback handler that records LLM and tool calls to the active
     AgentDbg run via record_llm_call and record_tool_call.

@@ -26,7 +26,7 @@ def reload_integrations():
 
     integrations.__dict__.pop("crewai", None)
     integrations.__dict__.pop("langchain", None)
-    integrations.__dict__.pop("AgentDbgLangChainCallbackHandler", None)
+    integrations.__dict__.pop("LangChainCallbackHandler", None)
 
     importlib.reload(integrations)
 
@@ -34,7 +34,7 @@ def reload_integrations():
 def test_no_eager_imports(reload_integrations):
     assert "maida.integrations.crewai" not in sys.modules
     assert "maida.integrations.langchain" not in sys.modules
-    assert "AgentDbgLangChainCallbackHandler" not in sys.modules
+    assert "LangChainCallbackHandler" not in sys.modules
 
 
 @pytest.mark.parametrize("name, dependency", INTEGRATIONS)
@@ -52,13 +52,10 @@ def test_lazy_module_imports(reload_integrations, name, dependency):
     importlib.util.find_spec("langchain_core") is None, reason="langchain not installed"
 )
 def test_lazy_attribute_imports(reload_integrations):
-    cls = integrations.AgentDbgLangChainCallbackHandler
+    cls = integrations.LangChainCallbackHandler
     assert "maida.integrations.langchain" in sys.modules
-    assert cls.__name__ == "AgentDbgLangChainCallbackHandler"
-    assert (
-        cls
-        is sys.modules["maida.integrations.langchain"].AgentDbgLangChainCallbackHandler
-    )
+    assert cls.__name__ == "LangChainCallbackHandler"
+    assert cls is sys.modules["maida.integrations.langchain"].LangChainCallbackHandler
 
 
 def test_unknown_attribute_raises_attribute_error():
@@ -73,7 +70,7 @@ def test_dir_includes_all_attributes():
 
 
 def test_missing_dependency_raises(monkeypatch):
-    integrations.__dict__.pop("AgentDbgLangChainCallbackHandler", None)
+    integrations.__dict__.pop("LangChainCallbackHandler", None)
     integrations.__dict__.pop("langchain", None)
     sys.modules.pop("maida.integrations.langchain", None)
 
@@ -89,4 +86,4 @@ def test_missing_dependency_raises(monkeypatch):
     with pytest.raises(
         MissingOptionalDependencyError, match="langchain_core not installed"
     ):
-        _ = integrations.AgentDbgLangChainCallbackHandler
+        _ = integrations.LangChainCallbackHandler

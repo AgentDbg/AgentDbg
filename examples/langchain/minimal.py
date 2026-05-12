@@ -6,7 +6,7 @@ Then: maida view
 """
 
 from maida import trace
-from maida.integrations import AgentDbgLangChainCallbackHandler
+from maida.integrations import LangChainCallbackHandler
 
 # Optional: only import LangChain when running this example
 from langchain_core.language_models.fake import FakeListLLM
@@ -21,8 +21,8 @@ def lookup(query: str) -> str:
 
 @trace(name="langchain minimal example")
 def run_agent():
-    """Run a minimal chain: one tool call, one LLM call; both traced via AgentDbg handler."""
-    handler = AgentDbgLangChainCallbackHandler()
+    """Run a minimal chain: one tool call, one LLM call; both traced via Maida handler."""
+    handler = LangChainCallbackHandler()
     config = {"callbacks": [handler]}
 
     llm = FakeListLLM(responses=["Traced LLM response."])

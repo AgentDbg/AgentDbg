@@ -5,7 +5,7 @@ from typing import Any
 import uuid
 
 from maida import trace
-from maida.integrations import AgentDbgLangChainCallbackHandler
+from maida.integrations import LangChainCallbackHandler
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "ERROR").upper())
 
@@ -103,7 +103,7 @@ def main():
     questions = example_questions()
     thread_id = str(uuid.uuid4())
 
-    handler = AgentDbgLangChainCallbackHandler()
+    handler = LangChainCallbackHandler()
     config = get_config(thread_id, handler)
     run_graph(graph, questions, config)
 
