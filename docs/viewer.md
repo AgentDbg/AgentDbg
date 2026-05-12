@@ -1,6 +1,6 @@
 # Viewer (timeline UI)
 
-The AgentDbg viewer is a local web UI for inspecting runs and their event timelines. It is served by `maida view` and uses only static HTML, CSS, and JavaScript—no build step.
+The Maida viewer is a local web UI for inspecting runs and their event timelines. It is served by `maida view` and uses only static HTML, CSS, and JavaScript—no build step.
 
 ---
 

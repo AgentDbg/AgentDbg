@@ -145,7 +145,7 @@ def crewai_module_with_mocked_hooks():
 def test_gating_no_active_run_handlers_no_op_and_do_not_record(
     crewai_module_with_mocked_hooks, temp_data_dir
 ):
-    """When there is no active AgentDbg run id, hook handlers no-op and do not record events."""
+    """When there is no active Maida run id, hook handlers no-op and do not record events."""
     crewai = crewai_module_with_mocked_hooks
     llm_ctx = make_fake_llm_context(messages=[{"role": "user", "content": "hi"}])
     tool_ctx = make_fake_tool_context(tool_name="search", tool_input={"q": "x"})

@@ -332,7 +332,7 @@ def format_report_json(report: AssertionReport) -> str:
 def format_report_markdown(report: AssertionReport) -> str:
     """Format report as Markdown for GitHub PR comments."""
     lines: list[str] = [
-        "## AgentDbg Regression Report",
+        "## Maida Assertion Report",
         "",
         "| Check | Status | Details |",
         "|-------|--------|---------|",

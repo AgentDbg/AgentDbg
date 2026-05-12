@@ -62,7 +62,7 @@ def test_trace_error_one_error_run_json_error_counts(temp_data_dir):
 
 
 def test_has_active_run_false_outside_traced_run(temp_data_dir):
-    """Public helper reports False when no explicit AgentDbg run is active."""
+    """Public helper reports False when no explicit Maida run is active."""
     assert has_active_run() is False
 
 

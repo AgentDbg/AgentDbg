@@ -1,5 +1,5 @@
 """
-AgentDbg guardrail exceptions.
+Maida guardrail exceptions.
 
 Raised when a run guardrail threshold is exceeded; lifecycle records ERROR + RUN_END
 and re-raises so the caller can handle the abort.

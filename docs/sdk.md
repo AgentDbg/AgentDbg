@@ -1,6 +1,6 @@
 # SDK
 
-The AgentDbg Python SDK exposes a decorator, a context manager, and three recording functions. All recording attaches to the current active run (via contextvars). If there is no active run, recorders no-op unless implicit runs are enabled.
+The Maida Python SDK exposes a decorator, a context manager, and three recording functions. All recording attaches to the current active run (via contextvars). If there is no active run, recorders no-op unless implicit runs are enabled.
 
 For the exact shape of stored events and run metadata, see the [Trace format](reference/trace-format.md) reference.
 

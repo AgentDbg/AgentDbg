@@ -1,6 +1,6 @@
 # Regression testing
 
-AgentDbg ships three CLI commands that turn traced runs into lightweight regression tests: **baseline**, **assert**, and **diff**. Together they let you capture a known-good run, check future runs against it, and drill into what changed when something breaks.
+Maida ships three CLI commands that turn traced runs into lightweight regression tests: **baseline**, **assert**, and **diff**. Together they let you capture a known-good run, check future runs against it, and drill into what changed when something breaks.
 
 ---
 
@@ -169,7 +169,7 @@ maida assert <RUN_ID> --baseline baseline.json --format markdown
 ```
 
 ```markdown
-## AgentDbg Regression Report
+## Maida Regression Report
 
 | Check | Status | Details |
 |-------|--------|---------|

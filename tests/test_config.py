@@ -1,5 +1,5 @@
 """
-Config precedence tests for AgentDbg.
+Config precedence tests for Maida.
 
 Verifies: env > project YAML > user YAML > built-in defaults.
 Env vars override ONLY when explicitly set in os.environ.

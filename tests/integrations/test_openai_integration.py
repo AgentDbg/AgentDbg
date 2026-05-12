@@ -3,7 +3,7 @@ Deterministic tests for the OpenAI Agents SDK integration.
 
 The real `openai-agents` package is optional. These tests install a fake
 `agents.tracing` surface in `sys.modules`, then assert the adapter registers on
-import and translates spans into AgentDbg events.
+import and translates spans into Maida events.
 """
 
 import importlib

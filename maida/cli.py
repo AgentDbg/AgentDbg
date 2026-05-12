@@ -1,5 +1,5 @@
 """
-Typer CLI for AgentDbg.
+Typer CLI for Maida.
 
 Commands: list, export, view, baseline, assert, diff.
 Entrypoint: main() for console script maida.cli:main.
@@ -27,12 +27,12 @@ from maida.constants import LOCAL_DIR_NAME
 EXIT_NOT_FOUND = 2
 EXIT_INTERNAL = 10
 
-app = typer.Typer(help="AgentDbg CLI: list runs, export, or view in browser.")
+app = typer.Typer(help="Maida CLI: list runs, export, or view in browser.")
 
 
 def _version_callback(value: bool) -> None:
     if value:
-        print(f"AgentDbg {__version__}")
+        print(f"Maida {__version__}")
         raise typer.Exit()
 
 
@@ -50,7 +50,7 @@ def version_callback(
         ),
     ] = None,
 ):
-    """Show AgentDbg version."""
+    """Show Maida version."""
 
 
 def _wait_for_port(host: str, port: int, timeout_s: float = 5.0) -> bool:

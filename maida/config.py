@@ -1,4 +1,4 @@
-"""Configuration for AgentDbg: redaction, loop detection, guardrails, and data directory."""
+"""Configuration for Maida: redaction, loop detection, guardrails, and data directory."""
 
 import os
 from dataclasses import dataclass
