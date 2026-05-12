@@ -134,7 +134,7 @@ def test_no_new_tools_passes_when_subset(temp_data_dir):
 
     policy = AssertionPolicy(no_new_tools=True)
     report = run_assertions(run_id, policy, baseline=bl, config=config)
-    assert report.passed is True
+    assert report.passed is True, f"===> {report=}"
 
 
 def test_no_new_tools_fails_on_new_tool(temp_data_dir):

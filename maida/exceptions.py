@@ -113,6 +113,4 @@ AgentDbgGuardrailExceeded = _make_deprecated_exception(
 )
 
 
-# Multiple inheritance keeps legacy isinstance(exc, AgentDbgGuardrailExceeded) true
-# for loop aborts (lifecycle records guardrail fields on that branch only).
 AgentDbgLoopAbort = _make_deprecated_exception("AgentDbgLoopAbort", LoopAbort)

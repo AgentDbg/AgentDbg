@@ -147,7 +147,7 @@ class AgentDbgLangChainCallbackHandler(BaseCallbackHandler):
 
     def _check_aborted(self) -> None:
         """If a guardrail abort was already triggered, raise
-        _AgentDbgAbortSignal (BaseException) so it bypasses framework-level
+        _MaidaAbortSignal (BaseException) so it bypasses framework-level
         ``except Exception`` handlers (e.g. LangGraph's graph executor) and
         propagates all the way out to the traced_run context manager."""
         if self._abort_exception is not None:

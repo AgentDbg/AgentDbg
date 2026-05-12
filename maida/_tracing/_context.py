@@ -119,7 +119,7 @@ def _append_event_and_check_guardrails(
 ) -> None:
     """
     Append event to storage, then if in an explicit run with guardrails, increment
-    event count and run guardrail checks. Raises AgentDbgGuardrailExceeded when a limit is exceeded.
+    event count and run guardrail checks. Raises GuardrailExceeded when a limit is exceeded.
     """
     append_event(run_id, event, config)
     params = _guardrail_params_var.get()

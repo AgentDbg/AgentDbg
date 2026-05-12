@@ -94,7 +94,7 @@ def _base_meta(span: Any, span_type: str) -> dict[str, Any]:
 class AgentDbgOpenAIAgentsTracingProcessor(TracingProcessor):
     """Translate completed OpenAI Agents spans into AgentDbg recorders.
 
-    When a guardrail fires, the processor raises ``_AgentDbgAbortSignal``
+    When a guardrail fires, the processor raises ``_MaidaAbortSignal``
     (a ``BaseException``) so it bypasses the SDK's ``except Exception``
     handler and propagates to the ``traced_run`` / ``@trace`` context
     manager, which records ERROR + RUN_END and re-raises the wrapped

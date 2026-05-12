@@ -245,7 +245,7 @@ def test_guardrail_abort_records_error_and_run_end(temp_data_dir):
 
 
 def test_guardrail_exception_re_raised(temp_data_dir):
-    """Caller can catch AgentDbgGuardrailExceeded."""
+    """Caller can catch GuardrailExceeded."""
 
     @trace(max_llm_calls=0)
     def run_one():
