@@ -36,7 +36,7 @@ try:
 except ImportError as e:
     raise MissingOptionalDependencyError(
         "OpenAI Agents integration requires optional deps. "
-        "Install with `pip install maida[openai]`."
+        "Install with `pip install maida-ai[openai]`."
     ) from e
 
 _PROCESSOR_ATTR = "_maida_openai_agents_processor"

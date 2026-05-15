@@ -13,7 +13,7 @@
 **1. Install:**
 
 ```bash
-pip install maida
+pip install maida-ai
 ```
 
 Or from source:

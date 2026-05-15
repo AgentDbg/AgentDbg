@@ -27,7 +27,7 @@ try:
     )
 except ImportError as e:
     raise MissingOptionalDependencyError(
-        "CrewAI integration requires optional deps. Install with `pip install maida[crewai]`."
+        "CrewAI integration requires optional deps. Install with `pip install maida-ai[crewai]`."
     ) from e
 
 

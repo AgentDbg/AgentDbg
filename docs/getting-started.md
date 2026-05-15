@@ -7,7 +7,7 @@ Requires Python 3.10+.
 **From PyPI (recommended):**
 
 ```bash
-pip install maida
+pip install maida-ai
 ```
 
 **From source with uv:**

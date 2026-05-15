@@ -155,7 +155,7 @@ def test_import_without_optional_dependency_raises_clear_error():
                 sys.modules[key] = value
 
     assert "OpenAI Agents" in str(exc_info.value)
-    assert "maida[openai]" in str(exc_info.value)
+    assert "maida-ai[openai]" in str(exc_info.value)
 
 
 def test_openai_integration_does_not_break_core_import():

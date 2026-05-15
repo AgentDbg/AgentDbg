@@ -1639,7 +1639,7 @@ wheels = [
 ]
 
 [[package]]
-name = "maida"
+name = "maida-ai"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },

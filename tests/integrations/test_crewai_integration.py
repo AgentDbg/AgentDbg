@@ -91,7 +91,7 @@ def _make_fake_crewai_hooks_import_error():
     return crewai_fake
 
 
-CREWAI_MISSING_MSG = "CrewAI integration requires optional deps. Install with `pip install maida[crewai]`."
+CREWAI_MISSING_MSG = "CrewAI integration requires optional deps. Install with `pip install maida-ai[crewai]`."
 
 
 def test_import_crewai_without_extra_raises_clear_error():

@@ -27,7 +27,7 @@ In under 10 minutes, you can inspect a full execution timeline with inputs, outp
 
 ## Get running in 5 minutes
 
-Three commands. No config files, no API keys, no sign-up. Install: `pip install maida`. Then:
+Three commands. No config files, no API keys, no sign-up. Install: `pip install maida-ai`. Then:
 
 1. [Install (one-time)](#step-1-install)
 2. [Run example](#step-2-run-the-example-agent)
@@ -36,7 +36,7 @@ Three commands. No config files, no API keys, no sign-up. Install: `pip install 
 ### Step 1: Install
 
 ```bash
-pip install maida
+pip install maida-ai
 ```
 
 ### Step 2: Run the example agent
@@ -323,7 +323,7 @@ Maida is framework-agnostic at its core. The SDK works with any Python code.
 Optional callback handler that auto-records LLM and tool events. Requires `langchain-core`:
 
 ```bash
-pip install maida[langchain]
+pip install maida-ai[langchain]
 ```
 
 ```python
@@ -344,7 +344,7 @@ See `examples/langchain/minimal.py` for a runnable example.
 Optional tracing adapter that auto-records generation, function, and handoff spans. Requires `openai-agents`:
 
 ```bash
-pip install maida[openai]
+pip install maida-ai[openai]
 ```
 
 ```python
@@ -365,7 +365,7 @@ See `examples/openai_agents/minimal.py` for a runnable fake-data example with no
 Optional execution-hook adapter that auto-records LLM and tool events from CrewAI crews and flows. Requires `crewai[tools]`:
 
 ```bash
-pip install maida[crewai]
+pip install maida-ai[crewai]
 ```
 
 ```python
